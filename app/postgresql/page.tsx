@@ -233,14 +233,8 @@ export default function PostgreSQLPlayground() {
           <div
             className={`${layoutMode === "wide" ? "lg:w-2/5" : "w-full"} flex flex-col`}
           >
-            <SqlEditor
-              onExecute={handleExecute}
-              isLoading={isExecuting}
-              disabled={status === "initializing" || status === "error"}
-            />
-
             {/* Quick Tips */}
-            <div className="mt-4 p-4 border border-border/30 bg-muted/5 cyber-chamfer-sm font-mono text-[10px] text-muted-foreground leading-relaxed">
+            <div className="mt-2 p-2 border border-border/30 bg-muted/5 cyber-chamfer-sm font-mono text-[10px] text-muted-foreground leading-relaxed">
               <span className="text-accent-tertiary"># SYSTEM_TIP:</span> Try
               querying <code className="text-accent">system_control</code>,{" "}
               <code className="text-accent">net_nodes</code>,{" "}
@@ -252,6 +246,11 @@ export default function PostgreSQLPlayground() {
                 SELECT * FROM generate_series(1, 5000);
               </code>
             </div>
+            <SqlEditor
+              onExecute={handleExecute}
+              isLoading={isExecuting}
+              disabled={status === "initializing" || status === "error"}
+            />
           </div>
 
           <div
