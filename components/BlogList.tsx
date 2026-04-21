@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Tag, X, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Search, Tag, X, ChevronsLeft, ChevronsRight, ChevronDown } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGE_SIZE = 5;
 
@@ -21,7 +22,16 @@ export function BlogList({ blogs }: BlogListProps) {
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false);
+  const isMobile = useIsMobile();
   const listTopRef = useRef<HTMLDivElement>(null);
+
+  // Close tags when switching to mobile, but they'll be open on desktop via conditional rendering
+  useEffect(() => {
+    if (!isMobile) {
+      setIsTagsExpanded(false);
+    }
+  }, [isMobile]);
 
   // Extract unique tags
   const allTags = Array.from(
@@ -87,43 +97,86 @@ export function BlogList({ blogs }: BlogListProps) {
           />
         </div>
 
-        <div className="bg-card border border-border p-4 cyber-chamfer relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-2 opacity-5">
+        <div className="bg-card border border-border cyber-chamfer relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
             <Tag className="w-8 h-8" />
           </div>
 
-          <div className="flex justify-between items-center mb-4 border-b border-border pb-2">
-            <h3 className="text-sm font-sans font-bold text-foreground uppercase tracking-widest">
-              / TAGS
-            </h3>
-            {selectedTags.length > 0 && (
-              <button
-                onClick={clearTags}
-                className="text-[10px] font-mono text-destructive hover:text-white transition-colors flex items-center gap-1"
-              >
-                <X className="w-3 h-3" /> CLEAR
-              </button>
-            )}
-          </div>
+          <div className="flex flex-col">
+            {/* Header: Toggle on mobile, static on desktop */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isMobile) {
+                  setIsTagsExpanded(!isTagsExpanded);
+                }
+              }}
+              className={`flex justify-between items-center px-4 py-4 md:pt-4 md:pb-2 md:mb-2 md:border-b md:border-border w-full text-left ${
+                isMobile ? "cursor-pointer" : "cursor-default"
+              } group/header`}
+            >
+              <h3 className="text-sm font-sans font-bold text-foreground uppercase tracking-widest flex items-center gap-2 group-hover/header:text-accent md:group-hover/header:text-foreground transition-colors">
+                / TAGS
+                {selectedTags.length > 0 && (
+                  <span className="text-[10px] font-mono text-accent">
+                    ({selectedTags.length})
+                  </span>
+                )}
+              </h3>
 
-          <div className="flex flex-wrap gap-2">
-            {allTags.map((tag) => {
-              const isSelected = selectedTags.includes(tag);
-              return (
-                <button
-                  type="button"
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`text-xs font-mono uppercase px-2 py-1 cyber-chamfer-sm transition-all border ${
-                    isSelected
-                      ? "bg-accent text-black border-accent shadow-[0_0_10px_rgba(0,255,136,0.4)]"
-                      : "bg-transparent border-border text-muted-foreground hover:border-accent hover:text-accent"
+              <div className="flex items-center gap-3">
+                {selectedTags.length > 0 && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearTags();
+                    }}
+                    className="text-[10px] font-mono text-destructive hover:text-white transition-colors flex items-center gap-1 border border-destructive/30 px-2 py-0.5 cyber-chamfer-sm bg-destructive/5"
+                  >
+                    CLEAR
+                  </div>
+                )}
+                <ChevronDown
+                  className={`w-4 h-4 text-accent transition-transform md:hidden ${
+                    isTagsExpanded ? "rotate-180" : ""
                   }`}
+                />
+              </div>
+            </button>
+
+            {/* Tag Cloud: Collapsible on mobile, always visible on desktop */}
+            <AnimatePresence initial={false}>
+              {(isTagsExpanded || !isMobile) && (
+                <motion.div
+                  key="tags-content"
+                  initial={isMobile ? { height: 0, opacity: 0 } : false}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden md:!h-auto md:!opacity-100"
                 >
-                  {tag}
-                </button>
-              );
-            })}
+                  <div className="px-4 pb-4 md:px-4 md:pb-4 flex flex-wrap gap-2">
+                    {allTags.map((tag) => {
+                      const isSelected = selectedTags.includes(tag);
+                      return (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleTag(tag)}
+                          className={`text-xs font-mono uppercase px-2 py-1 cyber-chamfer-sm transition-all border ${
+                            isSelected
+                              ? "bg-accent text-black border-accent shadow-[0_0_10px_rgba(0,255,136,0.4)]"
+                              : "bg-transparent border-border text-muted-foreground hover:border-accent hover:text-accent"
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </aside>

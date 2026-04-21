@@ -23,32 +23,22 @@ const NAV_LINKS = [
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const [prevPathname, setPrevPathname] = useState(pathname);
 
-  // Close on route change
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
-    setOpen(false);
-  }
-
-  // Prevent body scroll when menu open
+  // Close menu when resizing to desktop
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-
-    // Close menu when resizing to desktop
     const handleResize = () => {
       if (window.innerWidth >= 768 && open) {
         setOpen(false);
       }
     };
-
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, [open]);
+
+  // Close menu on navigation (including same page)
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <div className="md:hidden">
@@ -59,7 +49,7 @@ export function MobileNav() {
         aria-label={open ? "Close navigation menu" : "Open navigation menu"}
         aria-expanded={open ? "true" : "false"}
         onClick={() => setOpen((v) => !v)}
-        className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 border border-border bg-card/60 cyber-chamfer-sm hover:border-accent transition-colors"
+        className="relative z-50 flex flex-col justify-center items-center w-10 h-10 gap-1.5 border border-border bg-card/60 cyber-chamfer-sm hover:border-accent transition-colors"
       >
         <span
           className={`block w-5 h-px bg-accent transition-all duration-300 origin-center ${
@@ -78,10 +68,10 @@ export function MobileNav() {
         />
       </button>
 
-      {/* Backdrop */}
+      {/* Backdrop - Full screen to catch clicks outside */}
       {open && (
         <div
-          className="fixed inset-0 top-16 bg-background/70 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-background/40 backdrop-blur-sm z-30"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />
@@ -96,7 +86,7 @@ export function MobileNav() {
             : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
       >
-        <div className="border-b border-border bg-background/95 backdrop-blur-md">
+        <div className="border-b border-border bg-background/95 backdrop-blur-md shadow-2xl">
           {/* Grid scanline decoration */}
           <div className="absolute inset-0 cyber-grid-bg opacity-20 pointer-events-none" />
 
@@ -106,6 +96,7 @@ export function MobileNav() {
                 <Link
                   href={link.href}
                   prefetch={link.href.endsWith(".xml") ? false : undefined}
+                  onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 px-6 py-4 font-sans text-sm uppercase tracking-widest transition-colors ${
                     link.highlight
                       ? "text-accent border-l-2 border-accent hover:bg-accent/10"
