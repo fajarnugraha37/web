@@ -13,11 +13,38 @@ A statically exported **Next.js 15** personal website, **Tailwind CSS v4**, and 
 |---|---|---|
 | Framework | Next.js 15 (static export) | Because you need a framework to render text. Allegedly. |
 | Runtime | Bun | Faster than npm. Faster than yarn. (at this time) |
+| Database | PGlite (WASM) | Serverless PostgreSQL that lives in your browser. |
 | Styling | Tailwind CSS | Utility-first, Decision-last. |
+| Editor | CodeMirror 6 | SQL editor. |
 | Fonts | Orbitron, JetBrains Mono, Share Tech Mono | N/A |
 | Animation | Motion | N/A |
 | Local Serving | Nginx + Docker | For when `bun dev` is too mainstream |
 | CI/CD | GitHub Actions → GitHub Pages | Free hosting. Use it before they paywAll it. |
+
+---
+
+## 🧪 SQL Laboratory (SQL_LAB.EXE)
+
+A high-performance, browser-native PostgreSQL playground designed for technical exploration and system telemetry analysis.
+
+- **PostgreSQL WASM Engine**: Powered by PGlite for true ACID-compliant SQL in the browser.
+- **Persistent Storage**: Uses IndexedDB to save your tables, data, and command history across sessions.
+- **IDE Features**:
+  - Command History (persistent across reloads).
+  - SQL file import.
+  - CSV export (Current page or Full result set).
+  - Interactive table browser helper.
+  - Virtualized results handling 100k+ rows with zero lag.
+- **Privacy First**: 100% local execution. No data ever leaves your device.
+
+## 🔐 Security Architecture
+
+The SQL Laboratory is designed to be **safe by default** without requiring authentication on static platforms like GitHub Pages:
+
+1. **Shared-Nothing Context**: Every visitor runs their own isolated instance of PostgreSQL. User A cannot see or modify User B's data.
+2. **Client-Side Execution**: All queries are processed by your browser's WebAssembly engine. There is no server-side database to "inject" or compromise.
+3. **Local Persistence**: Data is saved to your local `IndexedDB`. Clearing your browser cache or switching devices will start a fresh session.
+4. **No Backend API**: Since there is no central database or API handling the SQL, there is zero risk of server-side data leaks or cross-site scripting (XSS) via the database layer.
 
 ---
 

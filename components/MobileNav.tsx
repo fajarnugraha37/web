@@ -11,6 +11,11 @@ const NAV_LINKS = [
     label: "/About",
     accentClass: "hover:text-accent-secondary",
   },
+  {
+    href: "/postgresql",
+    label: "/SQL Lab",
+    accentClass: "hover:text-accent-tertiary",
+  },
   { href: "/feed.xml", label: "/RSS Feed", accentClass: "hover:text-accent" },
   {
     href: "/contacts",
