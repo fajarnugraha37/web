@@ -47,60 +47,68 @@ export default async function BlogPost({
   return (
     <PageTransition>
       <motion.div
-        initial={{ scale: 1.1, filter: "brightness(0)" }}
-        animate={{ scale: 1, filter: "brightness(1)" }}
+        initial={{ scale: 1.05, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative"
+        className="relative min-h-screen overflow-x-clip"
       >
-        <article className="max-w-4xl mx-auto relative z-10 px-4 md:px-0 pt-12 md:pt-20">
-          {/* Compact Sticky Navigation HUD */}
-          <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-md py-3 mb-8 border-b border-border/40 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <Link
-              href="/blogs"
-              className="inline-flex items-center text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-accent transition-colors group"
-            >
-              <div className="mr-2 p-1 border border-border group-hover:border-accent group-hover:bg-accent group-hover:text-black transition-all">
-                <ChevronLeft className="w-3 h-3" />
-              </div>
-              DISCONNECT_NODE
-            </Link>
+        <article className="max-w-4xl mx-auto relative z-10 px-4 pt-12 md:pt-20">
+          {/* Enhanced Sticky HUD - Wide span version */}
+          <div className="sticky top-16 z-30 mb-12 -mx-4 md:-mx-8 lg:-mx-16">
+            {/* Glassmorphism Background */}
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-b border-accent/20 shadow-[0_15px_35px_rgba(0,0,0,0.9)]" />
 
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex flex-wrap items-center gap-3"
-            >
-              <time className="text-accent-secondary font-mono text-[10px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5">
-                [ TS: {postData.date} ]
-              </time>
-              <div className="flex gap-2">
-                {postData.tags.map((t: string) => (
-                  <span
-                    key={t}
-                    className="text-[9px] uppercase tracking-widest text-muted-foreground border border-border/50 px-2 py-0.5 bg-card/50"
-                  >
-                    {t}
-                  </span>
-                ))}
+            <div className="relative max-w-4xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
+              <Link
+                href="/blogs"
+                className="inline-flex items-center text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-accent transition-all group"
+              >
+                <div className="mr-3 p-1 border border-border group-hover:border-accent group-hover:bg-accent group-hover:text-black transition-all cyber-chamfer-sm">
+                  <ChevronLeft className="w-3 h-3" />
+                </div>
+                <span className="sm:inline">DISCONNECT</span>
+              </Link>
+
+              <div className="flex items-center gap-3">
+                <time className="text-accent-secondary font-mono text-[9px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5 tracking-tighter shadow-[0_0_10px_rgba(var(--accent-secondary-rgb),0.1)]">
+                  [ TS: {postData.date} ]
+                </time>
               </div>
-            </motion.div>
+
+              {/* Visual HUD accent line */}
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+            </div>
           </div>
 
-          <div className="mb-12">
+          <div className="mb-16">
             <motion.h1
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-4xl md:text-6xl font-black font-sans text-foreground drop-shadow-[0_0_20px_rgba(255,255,255,0.05)] leading-tight"
+              className="text-4xl md:text-6xl font-black font-sans text-foreground drop-shadow-[0_0_20px_rgba(255,255,255,0.05)] leading-tight tracking-tighter mb-6"
             >
               {postData.title}
             </motion.h1>
+
+            <motion.div
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap gap-2"
+            >
+              {postData.tags.map((t: string) => (
+                <span
+                  key={t}
+                  className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors"
+                >
+                  #{t}
+                </span>
+              ))}
+            </motion.div>
           </div>
 
-          {/* Cyberpunk Content HUD */}
           <div className="relative group/content pb-20">
-            {/* HUD Corners */}
+            {/* HUD Corner Accents */}
             <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-accent opacity-20 group-hover/content:opacity-100 transition-opacity" />
             <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-accent opacity-20 group-hover/content:opacity-100 transition-opacity" />
             <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-accent opacity-20 group-hover/content:opacity-100 transition-opacity" />
@@ -112,7 +120,7 @@ export default async function BlogPost({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7, duration: 1 }}
-              className="markdown-body p-6 md:p-10 bg-card/10 backdrop-blur-[1px] cyber-chamfer border border-border/30 text-foreground/90 font-mono relative overflow-hidden"
+              className="markdown-body p-6 md:p-10 bg-card/5 backdrop-blur-[1px] cyber-chamfer border border-border/20 text-foreground/90 font-mono relative overflow-hidden"
             >
               <div
                 className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] pointer-events-none z-0"

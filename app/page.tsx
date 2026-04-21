@@ -42,9 +42,9 @@ export default function Home() {
             <ScrollReveal delay={0.2} direction="right">
               <div className="max-w-md">
                 <p className="text-lg text-foreground/80 leading-relaxed font-mono">
-                  A Software Engineer who builds and operates backend systems. My
-                  job is to keep production running, deliveries predictable, and
-                  scope honest.
+                  A Software Engineer who builds and operates backend systems.
+                  My job is to keep production running, deliveries predictable,
+                  and scope honest.
                   <span className="text-accent block mt-2">
                     Java / Nodejs / .NET / Go / AWS / k8s
                   </span>
@@ -96,7 +96,9 @@ export default function Home() {
                 <div className="p-6 space-y-4 text-sm font-mono text-foreground/80">
                   <div className="flex items-start gap-3">
                     <span className="text-accent">&gt;</span>
-                    <p className="text-accent/90">cat skills.json | grep core</p>
+                    <p className="text-accent/90">
+                      cat skills.json | grep core
+                    </p>
                   </div>
                   <div className="pl-6 space-y-2 text-foreground/70">
                     <div className="flex justify-between border-b border-border pb-1">
@@ -183,8 +185,8 @@ export default function Home() {
               <p className="text-sm font-mono text-muted-foreground leading-relaxed">
                 Building systems where outcomes are predictable under the same
                 inputs. Minimizing hidden randomness through controlled
-                concurrency, ordering guarantees, and reproducible execution paths
-                across distributed components.
+                concurrency, ordering guarantees, and reproducible execution
+                paths across distributed components.
               </p>
             </div>
           </ScrollReveal>
@@ -197,9 +199,9 @@ export default function Home() {
                 SYSTEMS LIE UNTIL PROVEN OTHERWISE
               </h3>
               <p className="text-sm font-mono text-muted-foreground leading-relaxed">
-                Assuming every system is incorrect by default. Validating behavior
-                through failure cases, edge conditions, and real execution paths
-                instead of trusting design assumptions.
+                Assuming every system is incorrect by default. Validating
+                behavior through failure cases, edge conditions, and real
+                execution paths instead of trusting design assumptions.
               </p>
             </div>
           </ScrollReveal>
@@ -210,13 +212,13 @@ export default function Home() {
             <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group h-full transition-all duration-300 hover:border-accent-tertiary/50 hover:shadow-[0_0_20px_rgba(0,212,255,0.15)]">
               {/* Animated scanning bar on hover */}
               <div className="absolute top-0 left-0 w-full h-1 bg-accent-tertiary opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
-              
+
               <div className="absolute top-0 right-0 p-4 opacity-10 font-bold text-4xl group-hover:opacity-30 group-hover:text-accent-tertiary transition-all duration-500">
                 &lt;/&gt;
               </div>
               <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3 group-hover:text-accent-tertiary transition-colors">
-                <span className="w-2 h-2 bg-yellow-500 group-hover:animate-pulse"></span> 02 // TECHNICAL
-                ARSENAL
+                <span className="w-2 h-2 bg-yellow-500 group-hover:animate-pulse"></span>{" "}
+                02 // TECHNICAL ARSENAL
               </h3>
               <div className="space-y-4 px-3">
                 <div className="group/item">
@@ -237,14 +239,14 @@ export default function Home() {
                 </div>
                 <div className="group/item">
                   <div className="text-xs text-muted-foreground mb-1 group-hover/item:text-accent/70 transition-colors">
-                    DATABASES & QUEUES
+                    DATABASES & MESSAGING
                   </div>
                   <div className="font-mono text-sm text-accent group-hover:brightness-125 transition-all">
-                    OracleSQL, PostgreSQL, Redis, Kafka, RabbitMQ
+                    OracleSQL, MySQL, Redis, Kafka, RabbitMQ
                   </div>
                 </div>
               </div>
-              
+
               {/* Corner accent that brightens on hover */}
               <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-accent-tertiary/10 group-hover:border-accent-tertiary/40 transition-all" />
             </div>
@@ -256,7 +258,8 @@ export default function Home() {
               <div className="absolute top-0 left-0 w-full h-1 bg-destructive opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
 
               <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3 group-hover:text-destructive transition-colors">
-                <span className="w-2 h-2 bg-destructive animate-pulse shadow-[0_0_5px_#ff3366]"></span> 03
+                <span className="w-2 h-2 bg-destructive animate-pulse shadow-[0_0_5px_#ff3366]"></span>{" "}
+                03
                 {"//"} OPERATIONAL AXIOMS
               </h3>
               <ul className="space-y-4 px-3 font-mono text-sm">
@@ -264,10 +267,12 @@ export default function Home() {
                   "Firefighting doesn't scale, build systems that are boring in production.",
                   "Documentation is infrastructure, If it's not documented, it's debt.",
                   "Capacity must meet commitment, optimism is not a strategy.",
-                  "Ship safely over ship quickly, delivery without safety is shipping problems."
+                  "Ship safely over ship quickly, delivery without safety is shipping problems.",
                 ].map((axiom, i) => (
                   <li key={i} className="flex gap-3 group/li">
-                    <span className="text-accent group-hover:text-destructive transition-colors">&gt;</span>
+                    <span className="text-accent group-hover:text-destructive transition-colors">
+                      &gt;
+                    </span>
                     <span className="text-foreground/80 group-hover:text-foreground transition-colors group-hover/li:translate-x-1 transition-transform">
                       {axiom}
                     </span>
