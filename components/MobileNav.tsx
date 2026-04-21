@@ -11,6 +11,7 @@ const NAV_LINKS = [
     label: "/About",
     accentClass: "hover:text-accent-secondary",
   },
+  { href: "/feed.xml", label: "/RSS", accentClass: "hover:text-accent" },
   {
     href: "/contacts",
     label: "Contact.exe",

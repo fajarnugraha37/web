@@ -19,6 +19,29 @@ export const metadata: Metadata = {
   title: "SYS//OP - Lead Backend Engineer",
   description:
     "High-performance backend engineering, cloud architecture, and AI-driven development.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io/web",
+  ),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "SYS//OP - Lead Backend Engineer",
+    description:
+      "High-performance backend engineering, cloud architecture, and AI-driven development.",
+    siteName: "SYS//OP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SYS//OP - Lead Backend Engineer",
+    description:
+      "High-performance backend engineering, cloud architecture, and AI-driven development.",
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -55,6 +78,13 @@ export default function RootLayout({
                 className="hover:text-accent-secondary transition-colors"
               >
                 /About
+              </Link>
+              <Link
+                href="/feed.xml"
+                className="hover:text-accent transition-colors"
+                prefetch={false}
+              >
+                /RSS
               </Link>
               <Link
                 href="/contacts"
