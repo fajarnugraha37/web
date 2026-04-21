@@ -8,8 +8,8 @@ type Props = {
 
 /**
  * Renders a list of career description bullet points.
- * Collapsed: shows only the first description truncated to 1 line.
- * Expanded: shows all descriptions with a smooth height transition.
+ * Collapsed: shows only the first description, truncated to 1 line.
+ * Expanded: smooth height transition via .expandable-panel + --expand-height CSS var.
  */
 export function ExpandableDescriptions({ descriptions }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -33,13 +33,11 @@ export function ExpandableDescriptions({ descriptions }: Props) {
         </p>
       )}
 
-      {/* Expanded: all descriptions */}
+      {/* Expanded panel — overflow/transition in CSS, height via custom prop */}
       <div
-        style={{
-          maxHeight: expanded ? fullHeight : 0,
-          overflow: "hidden",
-          transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-        }}
+        className="expandable-panel"
+        data-expanded={expanded ? "true" : "false"}
+        style={{ "--expand-height": `${fullHeight}px` } as React.CSSProperties}
       >
         <div ref={fullRef} className="pt-1">
           {descriptions.map((desc, i) => (
@@ -60,7 +58,7 @@ export function ExpandableDescriptions({ descriptions }: Props) {
         id={`expand-desc-${descriptions[0].slice(0, 20).replace(/\s+/g, "-")}`}
         onClick={() => setExpanded((v) => !v)}
         className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground hover:text-accent transition-colors"
-        aria-expanded={expanded}
+        aria-expanded={expanded ? "true" : "false"}
       >
         <span
           className={`inline-block border border-border px-1 text-[9px] transition-transform duration-300 ${

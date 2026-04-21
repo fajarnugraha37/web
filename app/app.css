@@ -290,3 +290,29 @@
   animation: glitch-anim-2 2s infinite linear alternate-reverse;
   clip-path: inset(60% 0 10% 0);
 }
+
+/* ── Accordion / expandable panels ─────────────────────────────────────── */
+
+/* Collapsible wrapper: overflow and transition in CSS, height via --expand-height custom prop */
+.expandable-panel {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+}
+
+.expandable-panel[data-expanded="true"] {
+  max-height: var(--expand-height, 9999px);
+}
+
+/* Summary panel collapsed to ~3 lines */
+.expandable-summary-panel {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 4.8rem;
+  position: relative;
+}
+
+.expandable-summary-panel[data-expanded="true"] {
+  max-height: var(--expand-height, 9999px);
+}
+

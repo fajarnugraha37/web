@@ -43,7 +43,7 @@ export function MobileNav() {
         id="mobile-nav-toggle"
         type="button"
         aria-label={open ? "Close navigation menu" : "Open navigation menu"}
-        aria-expanded={open}
+        aria-expanded={open ? "true" : "false"}
         onClick={() => setOpen((v) => !v)}
         className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 border border-border bg-card/60 cyber-chamfer-sm hover:border-accent transition-colors"
       >
