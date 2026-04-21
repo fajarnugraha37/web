@@ -20,15 +20,15 @@ export default function Home() {
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-none relative">
                 <span className="relative z-10">
                   Hey, <br />
-                  I'm Fajar!
+                  I&apos;m Fajar!
                 </span>
                 <span className="absolute top-0.5 left-0.5 text-[#ff00ff] opacity-40 z-0">
                   Hey, <br />
-                  I'm Fajar!
+                  I&apos;m Fajar!
                 </span>
                 <span className="absolute -top-0.5 -left-0.5 text-[#00d4ff] opacity-40 z-0">
                   Hey, <br />
-                  I'm Fajar!
+                  I&apos;m Fajar!
                 </span>
               </h1>
               <div className="h-1 w-24 bg-accent mt-4 shadow-[0_0_15px_#00ff88]"></div>
@@ -54,7 +54,7 @@ export default function Home() {
 
               <div className="mt-8 flex items-center gap-4 text-xs font-bold font-sans">
                 <span className="text-muted-foreground gap-2">LOAD:</span>
-                <span>{(Math.random() * 100).toFixed(2)}%</span>
+                <span>42.42%</span>
               </div>
             </div>
 
@@ -224,20 +224,20 @@ export default function Home() {
           <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group">
             <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3">
               <span className="w-2 h-2 bg-destructive animate-pulse"></span> 03
-              // OPERATIONAL AXIOMS
+              {"//"} OPERATIONAL AXIOMS
             </h3>
             <ul className="space-y-3 px-3 font-mono text-sm">
               <li className="flex gap-2">
                 <span className="text-accent">&gt;</span>
                 <span className="text-foreground/80">
-                  Firefighting doesn&apos;t scale, uild systems that are boring
+                  Firefighting doesn&apos;t scale, build systems that are boring
                   in production.
                 </span>
               </li>
               <li className="flex gap-2">
                 <span className="text-accent">&gt;</span>
                 <span className="text-foreground/80">
-                  Documentation is infrastructure, If it's not documented, it's
+                  Documentation is infrastructure, If it&apos;s not documented, it&apos;s
                   debt.
                 </span>
               </li>
