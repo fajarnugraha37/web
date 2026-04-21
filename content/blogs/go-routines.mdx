@@ -1,0 +1,43 @@
+---
+title: "Understanding Go Routines and Channels"
+date: "2024-02-10"
+tags: ["go", "concurrency", "backend"]
+description: "Why Go's concurrency model (CSP) is superior to thread-per-request systems and how to avoid channel deadlocks."
+---
+
+# Go Routines and Channels
+
+Go's concurrency model is based on Tony Hoare's Communicating Sequential Processes (CSP). Instead of sharing memory to communicate, you communicate to share memory.
+
+## 1. The Cost of a Goroutine
+
+A standard Java thread or POSIX thread reserves ~1MB-2MB of stack space right out the gate. A Goroutine? Starts at 2KB.
+
+```go
+func worker(id int, jobs <-chan int, results chan<- int) {
+    for j := range jobs {
+        fmt.Println("worker", id, "started  job", j)
+        time.Sleep(time.Second)
+        fmt.Println("worker", id, "finished job", j)
+        results <- j * 2
+    }
+}
+```
+
+This allows us to spawn 100,000 parallel workers without blowing up our memory footprint.
+
+## 2. Preventing Deadlocks
+
+The most common trap in Go is the unbuffered channel deadlock:
+
+```go
+ch := make(chan int)
+ch <- 1 // Blocks forever because there is no receiver
+fmt.Println(<-ch)
+```
+
+Always ensure there is a corresponding reader/writer, or use buffered channels `make(chan int, 1)` if asynchronous behavior is intended without immediate coupling.
+
+## Conclusion
+
+Go gives you a powerful knife to slice through concurrency problems, but without discipline, you will cut yourself on channel deadlocks. Use `sync.WaitGroup` and Contexts for elegant shutdown.

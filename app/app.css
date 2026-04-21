@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0f;
+  --color-foreground: #e0e0e0;
+  --color-card: #12121a;
+  --color-muted: #1c1c2e;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #00ff88;
+  --color-accent-secondary: #ff00ff;
+  --color-accent-tertiary: #00d4ff;
+  --color-border: #2a2a3a;
+  --color-input: #12121a;
+  --color-ring: #00ff88;
+  --color-destructive: #ff3366;
+
+  --font-sans: "Orbitron", "Share Tech Mono", monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+@layer base {
+  :root {
+    --box-shadow-neon: 0 0 5px #00ff88, 0 0 10px #00ff8840;
+    --box-shadow-neon-sm: 0 0 3px #00ff88, 0 0 6px #00ff8830;
+    --box-shadow-neon-lg: 0 0 10px #00ff88, 0 0 20px #00ff8860, 0 0 40px #00ff8830;
+    --box-shadow-neon-secondary: 0 0 5px #ff00ff, 0 0 20px #ff00ff60;
+    --box-shadow-neon-tertiary: 0 0 5px #00d4ff, 0 0 20px #00d4ff60;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-mono);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      #000 2px,
+      #000 4px
+    );
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    letter-spacing: -0.05em; /* tracking-tighter */
+    text-transform: uppercase;
+  }
+
+  /* Global focus states for interactive elements */
+  a:focus-visible, 
+  button:focus-visible, 
+  input:not(#terminal-input):focus-visible, 
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    box-shadow: var(--box-shadow-neon) !important;
+    border-color: var(--color-accent);
+  }
+}
+
+@layer utilities {
+  .cyber-chamfer {
+    clip-path: polygon(
+      0 5%, 5% 0,
+      100% 0, 100% 95%,
+      95% 100%, 0 100%
+    );
+  }
+  
+  .cyber-chamfer-reverse {
+    clip-path: polygon(
+      0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%
+    );
+  }
+
+  .cyber-chamfer-sm {
+    clip-path: polygon(
+      0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%
+    );
+  }
+
+  .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.1;
+  }
+
+  /* Glitch effect on hover or static */
+  .cyber-glitch-text {
+    position: relative;
+  }
+  
+  .cyber-glitch-text::before,
+  .cyber-glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .cyber-glitch-text::before {
+    text-shadow: -1px 0 #ff00ff;
+    animation: glitch-anim-1 2s infinite linear alternate-reverse;
+  }
+
+  .cyber-glitch-text::after {
+    text-shadow: -1px 0 #00d4ff;
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  }
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+  20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+  100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 60% 0); transform: translate(2px, -1px); }
+  20% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, 1px); }
+  40% { clip-path: inset(30% 0 20% 0); transform: translate(2px, -2px); }
+  60% { clip-path: inset(70% 0 10% 0); transform: translate(-2px, 2px); }
+  80% { clip-path: inset(20% 0 50% 0); transform: translate(1px, -1px); }
+  100% { clip-path: inset(50% 0 30% 0); transform: translate(-1px, 1px); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.glow-btn:hover {
+  box-shadow: var(--box-shadow-neon);
+  text-shadow: 0 0 5px #00ff88;
+}
+
+.glow-btn-secondary:hover {
+  box-shadow: var(--box-shadow-neon-secondary);
+  text-shadow: 0 0 5px #ff00ff;
+}
+
+.markdown-body {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--color-foreground);
+}
+.markdown-body h1 {
+  font-family: var(--font-sans);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  font-size: 2.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+.markdown-body h2 {
+  font-family: var(--font-sans);
+  color: var(--color-accent-tertiary);
+  text-transform: uppercase;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.markdown-body p {
+  margin-bottom: 1.5em;
+}
+.markdown-body a {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-accent);
+  transition: all 0.2s ease;
+}
+.markdown-body a:hover {
+  text-shadow: 0 0 5px var(--color-accent);
+  background-color: rgba(0, 255, 136, 0.1);
+}
+.markdown-body pre {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent-tertiary);
+  border-left: 3px solid var(--color-accent-tertiary);
+  padding: 1.25rem;
+  overflow-x: auto;
+  margin-bottom: 1.5em;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
+  background-image: 
+    linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.markdown-body blockquote {
+  border-left: 4px solid var(--color-accent-secondary);
+  background: rgba(255, 0, 255, 0.05);
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  font-style: italic;
+  color: var(--color-muted-foreground);
+}
+.markdown-body code {
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  background: rgba(0, 255, 136, 0.05);
+  padding: 0.15em 0.3em;
+  border-radius: 2px;
+  font-size: 0.85em;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.1);
+}
+.markdown-body pre code {
+  color: var(--color-accent-tertiary);
+  background: none;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  font-size: 0.85em;
+  text-shadow: 0 0 5px rgba(0, 212, 255, 0.4);
+}
+.markdown-body ul, .markdown-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.5em;
+}
+.markdown-body li {
+  margin-bottom: 0.5em;
+}
+
+/* ── 404 not-found page ─────────────────────────────────────── */
+
+/* Red scanline overlay unique to the 404 page */
+.not-found-scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 0, 0, 0.03) 3px,
+    rgba(255, 0, 0, 0.03) 6px
+  );
+}
+
+/* First 404 glitch layer — magenta/red channel */
+.not-found-glitch-1 {
+  text-shadow: 0 0 20px rgba(255, 51, 102, 0.8), -2px 0 #ff00ff;
+  animation: glitch-anim-1 1.5s infinite linear alternate-reverse;
+  clip-path: inset(30% 0 40% 0);
+}
+
+/* Second 404 glitch layer — cyan channel */
+.not-found-glitch-2 {
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 2px 0 #00d4ff;
+  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+  clip-path: inset(60% 0 10% 0);
+}

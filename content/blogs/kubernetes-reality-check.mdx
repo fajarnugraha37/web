@@ -1,0 +1,79 @@
+---
+title: "Kubernetes Is Not a Silver Bullet (It's More Like a Swiss Army Chainsaw)"
+date: "2024-04-02"
+tags: ["kubernetes", "devops", "infrastructure", "k8s"]
+description: "K8s solves real problems. It also introduces approximately 47 new ones. A guide to knowing what you're getting into before you commit the entire org."
+---
+
+# Kubernetes Is Not a Silver Bullet
+
+Before you migrate your three-microservice startup to Kubernetes because the conference talk made it look clean and simple: the speaker had a slide deck, a rehearsed demo, and a dedicated platform team. You have a YAML file and ambition.
+
+Let's be honest about what K8s actually is.
+
+## 1. What K8s Actually Solves
+
+Kubernetes solves the operational problem of running containerized workloads at scale with automated scheduling, self-healing, and rolling deployments. If you have that problem, it's the right tool.
+
+If you're deploying a monolith to a single VPS, you need Docker Compose and a cron job for health checks. Don't let anyone shame you into Kubernetes for a service that gets 200 requests a day.
+
+The operational overhead of K8s is real:
+
+- etcd quorum management
+- Certificate rotation
+- Pod disruption budgets
+- Node affinity rules that only one engineer on the team fully understands
+- Ingress controllers that inexplicably stop routing traffic at 2am on a Friday
+
+## 2. Resource Requests and Limits: The Part Everyone Gets Wrong
+
+If you don't set resource requests and limits, the scheduler is guessing. If you set them too low, your pods get OOM-killed in production and you find out from a user, not an alert.
+
+```yaml
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+```
+
+The `requests` value is what the scheduler uses to place your pod. The `limits` value is what the kernel enforces. A pod that regularly hits its CPU limit is being throttled — you'll see it in latency, not in errors, which makes it the most fun class of production incident to diagnose.
+
+## 3. Liveness vs. Readiness Probes: Not Interchangeable
+
+This mistake costs people their weekends:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+```
+
+**Liveness** probes answer: "Is this container alive? Should we restart it?"  
+**Readiness** probes answer: "Should traffic be sent to this container right now?"
+
+If you put your DB connection check in the liveness probe, a temporary database blip will cause K8s to restart all your pods simultaneously. This is not fault tolerance. This is a self-inflicted outage.
+
+## 4. HPA Is Not Free Scaling
+
+The Horizontal Pod Autoscaler sounds like automatic infinite scaling. It is not. It requires metrics-server, meaningful CPU/memory baselines, and enough node capacity in your cluster to actually schedule the new pods.
+
+If you trigger an HPA scale-out and the cluster has no capacity, your new pods sit in `Pending` state while traffic drowns the existing pods. You've scaled nothing except your stress.
+
+## Conclusion
+
+Kubernetes is excellent infrastructure for organizations that have outgrown simpler solutions. Use it when you need it. Understand the failure modes before you're discovering them at midnight. And for the love of all things observable, set your resource requests.
+
+The YAML is not the hard part. The operational discipline is the hard part. The YAML is just where the operational discipline becomes someone else's problem.

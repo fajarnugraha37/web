@@ -1,0 +1,96 @@
+---
+title: "Distributed Tracing: Or How I Learned to Stop Guessing and Read the Spans"
+date: "2024-06-11"
+tags: ["observability", "tracing", "opentelemetry", "microservices"]
+description: "If your debugging strategy is reading logs in five different tabs while screaming into the void, distributed tracing is for you. A practical guide to OpenTelemetry."
+---
+
+# Distributed Tracing: Stop Guessing
+
+Here is a perfectly normal debugging session in a microservices system without distributed tracing:
+
+1. User reports request is slow.
+2. You check Service A logs. Nothing obvious.
+3. You check Service B logs. Nothing obvious.
+4. You realize Service A calls Service B which calls Service C which calls a database.
+5. You lose 45 minutes correlating timestamps across four systems.
+6. The problem was in Service C all along. A missing index. Two lines in the query plan would have told you immediately.
+
+Distributed tracing gives you the unified timeline you needed in step 1. OpenTelemetry is the standard. Let's use it.
+
+## 1. The Anatomy of a Trace
+
+A **trace** is a DAG of **spans**. Each span represents a unit of work: an HTTP call, a DB query, a cache lookup, a message produce/consume. Spans have a parent-child relationship that reconstructs the full call chain.
+
+```
+[TRACE: user-request-checkout]
+  └── [SPAN: api-gateway → order-service] 12ms
+        └── [SPAN: order-service → inventory-service] 8ms
+        │     └── [SPAN: inventory DB query] 6ms   ← HERE
+        └── [SPAN: order-service → payment-service] 45ms
+              └── [SPAN: payment external API call] 43ms
+```
+
+You can see immediately that `inventory DB query` is taking 6ms of the 8ms inventory call, and the payment external API is your actual bottleneck at 43ms.
+
+## 2. Instrumenting With OpenTelemetry in Go
+
+```go
+import (
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/trace"
+)
+
+func ProcessOrder(ctx context.Context, orderID string) error {
+    tracer := otel.Tracer("order-service")
+
+    ctx, span := tracer.Start(ctx, "ProcessOrder",
+        trace.WithAttributes(
+            attribute.String("order.id", orderID),
+        ),
+    )
+    defer span.End()
+
+    if err := validateInventory(ctx, orderID); err != nil {
+        span.RecordError(err)
+        span.SetStatus(codes.Error, "inventory validation failed")
+        return err
+    }
+
+    return nil
+}
+```
+
+The `ctx` propagation is the critical part. If you don't pass the context through every function call, you break the trace chain. The span becomes an orphan. The timeline becomes fiction.
+
+## 3. Propagation Across Service Boundaries
+
+HTTP propagation via W3C TraceContext headers:
+
+```go
+// On the client side (outbound call):
+req, _ := http.NewRequest("GET", "http://inventory-service/check", nil)
+otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(req.Header))
+
+// On the server side (incoming request):
+ctx = otel.GetTextMapPropagator().Extract(r.Context(), propagation.HeaderCarrier(r.Header))
+```
+
+If you're using a framework (Gin, Echo, Chi), use their OTel middleware and stop writing this manually. The headers are `traceparent` and `tracestate`. If your services are dropping them, your traces will be disconnected orphans and the waterfall view will be useless.
+
+## 4. What to Actually Instrument
+
+Don't instrument everything. Instrument:
+- All inbound HTTP/gRPC endpoints
+- All outbound HTTP/gRPC calls
+- All database queries (use auto-instrumentation drivers)
+- All message produce/consume operations
+- Any business-logic function that takes >5ms on the hot path
+
+Do not create a span for every helper function that formats a string. You'll drown in noise and nobody will read the traces anyway.
+
+## Conclusion
+
+Distributed tracing transforms "where is this slow?" from a 45-minute hunt into a 45-second observation. OpenTelemetry is vendor-neutral, battle-tested, and has auto-instrumentation for most databases, HTTP clients, and messaging systems.
+
+The trace has been trying to show you the answer this whole time. You just weren't listening.

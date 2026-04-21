@@ -1,0 +1,102 @@
+---
+title: "API Design Is Communication. Stop Making Your APIs Scream."
+date: "2024-07-08"
+tags: ["api", "rest", "design", "backend"]
+description: "A field guide to REST API design decisions that prevent your consumers from filing bug reports that are actually just documentation complaints."
+---
+
+# API Design Is Communication
+
+An API is a contract. When you design it badly, every caller inherits your bad decisions forever, or until you break them with a v2 that you'll have to maintain alongside v1 for 18 months because enterprise clients can't migrate.
+
+Design it right the first time. Or at least, design it intentionally.
+
+## 1. HTTP Status Codes Are Not Decorative
+
+This endpoint returns 200 for everything including errors:
+
+```json
+HTTP/1.1 200 OK
+{
+  "success": false,
+  "error": "User not found",
+  "code": 404
+}
+```
+
+This is wrong. The HTTP layer has a rich, standardized status code vocabulary. Use it. Clients, load balancers, CDN caches, and monitoring tools all understand HTTP status codes. None of them parse your response body to check if `success` is `false`.
+
+The correct mapping:
+- `200 OK` — it worked, here's your data
+- `201 Created` — resource created, include a `Location` header
+- `204 No Content` — it worked, nothing to return (DELETE success)
+- `400 Bad Request` — the client sent garbage input; their fault
+- `401 Unauthorized` — missing or invalid auth token
+- `403 Forbidden` — authenticated but not authorized
+- `404 Not Found` — resource doesn't exist
+- `409 Conflict` — state conflict (duplicate creation, optimistic lock failure)
+- `422 Unprocessable Entity` — valid syntax, invalid semantics
+- `429 Too Many Requests` — include `Retry-After` header
+- `500 Internal Server Error` — your fault; don't leak stack traces
+
+## 2. Pagination That Doesn't Lie
+
+Offset pagination is the default and it has a fun property: if items are added or deleted between pages, callers get duplicates or miss records.
+
+```json
+// Offset pagination — fragile
+GET /orders?page=3&limit=20
+
+// Cursor pagination — stable
+GET /orders?cursor=eyJpZCI6MTIzfQ&limit=20
+```
+
+Cursor-based pagination returns a stable next cursor opaque to the client. The cursor encodes the position (often the last seen ID or timestamp). No matter what happens to the dataset between requests, the cursor points to the right next position.
+
+If you're building an API that will handle mutations during pagination, use cursors. If it's a static report endpoint, offset is fine. Know which one you need before you ship it.
+
+## 3. Error Responses Deserve as Much Design as Success Responses
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Request validation failed",
+    "details": [
+      {
+        "field": "email",
+        "code": "INVALID_FORMAT",
+        "message": "Must be a valid email address"
+      },
+      {
+        "field": "age",
+        "code": "OUT_OF_RANGE",
+        "message": "Must be between 18 and 120"
+      }
+    ],
+    "trace_id": "01HXYZ..."
+  }
+}
+```
+
+This error is actionable. The client knows exactly which fields failed and why. The `trace_id` lets your support team pull the distributed trace for the exact request. Contrast with:
+
+```json
+{ "message": "Something went wrong" }
+```
+
+That's not an error response. That's an apology.
+
+## 4. Versioning: Accept the Inevitability Early
+
+Your API will change. Design versioning in before you ship v1 or you'll be having an uncomfortable conversation with your consumers when you need to make a breaking change.
+
+URL versioning is the most explicit: `/v1/users`, `/v2/users`. Clients know exactly what they're calling. Breaking changes land in a new prefix. Old prefix stays alive until migration is complete.
+
+Header versioning (`Accept: application/vnd.api+json;version=2`) is cleaner but less visible. Pick one strategy and apply it consistently. The worst option is having no strategy and hoping your API never needs to change.
+
+## Conclusion
+
+Your API design is a communication decision. Bad API design creates a bug report backlog that is actually a documentation backlog disguised as a bug report backlog. Clear status codes, stable pagination, actionable errors, and explicit versioning are not nice-to-haves. They are the contract.
+
+Your callers will thank you. Or they'll just stop filing issues because they gave up. Either way, something improved.

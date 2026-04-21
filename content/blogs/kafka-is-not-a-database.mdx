@@ -1,0 +1,83 @@
+---
+title: "Kafka Is Not a Database (And Other Things I've Had to Say Out Loud)"
+date: "2024-08-19"
+tags: ["kafka", "messaging", "distributed-systems", "architecture"]
+description: "Apache Kafka is a log. A brilliant, battle-tested, infinitely scalable log. It is not a query engine, it is not a database, and it should not be your primary source of truth. Let's discuss."
+---
+
+# Kafka Is Not a Database
+
+Every few months, someone proposes using Kafka as the primary persistence layer for a service because "everything is already flowing through it anyway." This post is for them.
+
+Kafka is a distributed commit log with publish-subscribe semantics, configurable retention, and excellent throughput characteristics. It is remarkable at what it does. What it does is not what a database does.
+
+## 1. The Log, Explained
+
+Kafka stores messages in an ordered, immutable, append-only log partitioned across brokers. Consumers track their position (offset) independently. Messages are retained for a configured window — hours, days, or forever with log compaction.
+
+```
+Partition 0: [msg@0] [msg@1] [msg@2] [msg@3] ← latest
+Partition 1: [msg@0] [msg@1] [msg@2]
+Partition 2: [msg@0] [msg@1] [msg@2] [msg@3] [msg@4]
+```
+
+Consumers read from an offset and move forward. There's no random access. There's no `WHERE` clause. There's no `JOIN`. If you need those things, you need a database.
+
+## 2. What Kafka Is Excellent At
+
+- **Event streaming**: Audit trails, activity feeds, CDC pipelines
+- **Fan-out**: One producer, many independent consumers
+- **Decoupling**: Services communicate without knowing about each other
+- **Replay**: Re-process historical events after deploying a fix
+- **Buffering**: Absorb write spikes without dropping data
+
+```java
+producer.send(new ProducerRecord<>("order-events",
+    orderId,
+    OrderEvent.builder()
+        .type(EventType.ORDER_PLACED)
+        .orderId(orderId)
+        .userId(userId)
+        .timestamp(Instant.now())
+        .build()
+));
+```
+
+This is appropriate. The event is published, consumers react. The order record still lives in a database. Kafka has the event. The database has the state.
+
+## 3. At-Least-Once Delivery Is Not a Bug
+
+Kafka guarantees at-least-once delivery by default. Your consumer will see a message at least once. It might see it more than once after a rebalance or a crash.
+
+If your consumer is not idempotent, this is your problem, not Kafka's. Design your consumers to handle duplicate messages:
+
+```java
+@Transactional
+public void processPayment(PaymentEvent event) {
+    // Check if already processed
+    if (paymentRepository.existsByIdempotencyKey(event.getIdempotencyKey())) {
+        log.info("Duplicate event, skipping: {}", event.getIdempotencyKey());
+        return;
+    }
+
+    // Process and store the idempotency key atomically
+    Payment payment = processPaymentLogic(event);
+    paymentRepository.save(payment);
+}
+```
+
+The idempotency key is usually the event's Kafka offset or a business-level ID. Store it in the same transaction as the side effect. Process-and-store is atomic, or it didn't happen.
+
+## 4. Consumer Groups and Partition Math
+
+A consumer group distributes partitions across members. Each partition is owned by exactly one consumer in the group. If you have 12 partitions and 15 consumers in a group, 3 consumers are idle. If you have 12 partitions and 3 consumers, each consumer handles 4 partitions.
+
+Partition count drives your maximum parallelism. You cannot have more parallel consumers than partitions. Choose your partition count at topic creation based on your expected consumer parallelism ceiling. Increasing partition count later is possible but requires care under rebalancing.
+
+## Conclusion
+
+Use Kafka for what it's for: streaming events, decoupling producers from consumers, and building pipelines that can replay. Use a database for state, queries, and lookups.
+
+The engineers who built Kafka are brilliant. They built a log, not a database. Trust their architectural judgment by using it as a log.
+
+Your Kafka cluster does not want to answer `SELECT * FROM orders WHERE status = 'pending'`. It is doing its best. Let it do what it's good at.

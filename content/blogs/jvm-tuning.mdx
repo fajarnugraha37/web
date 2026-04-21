@@ -1,0 +1,37 @@
+---
+title: "JVM Tuning for Low-Latency Systems"
+date: "2023-11-15"
+tags: ["java", "jvm", "performance"]
+description: "A deep dive into Garbage Collection tuning, CPU pinning, and memory alignment for high-frequency trading applications."
+---
+
+# JVM Tuning for Low-Latency
+
+When it comes to building high-frequency trading (HFT) platforms in Java, the standard JVM defaults are your enemy. You're entering a world where microseconds (μs) matter and garbage collection pauses can cost millions.
+ 
+## 1. Discarding the Old Gods (CMS/G1)
+
+Forget CMS or G1 GC if you want sub-millisecond pauses. The modern approach relies on **ZGC** or **Shenandoah**. But we're going a step further: **Epsilon GC**.
+
+If you're truly low-latency, you *don't* collect garbage on the hot path.
+
+```bash
+-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC
+```
+
+You allocate a large, contiguous block of memory on startup. You write object pools. You never `new` an object during the trading window. If the heap fills up, the application crashes—which is the desired behavior. By the time you fill 128GB of heap, the trading day is over.
+
+## 2. Kernel Bypass and CPU Pinning
+
+The OS scheduler is a source of jitter. We bypass it.
+
+```bash
+# Isolate cores via kernel boot params
+isolcpus=2-15 nohz_full=2-15 rcu_nocbs=2-15
+```
+
+In Java, we use JNI to pin threads to these isolated cores using `sched_setaffinity`.
+
+## Conclusion
+
+The JVM is a beast. To tame it for HFT, you must strip away its "managed" features and treat it like C++, with object pooling and zero-allocation paths.

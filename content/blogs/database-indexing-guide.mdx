@@ -1,0 +1,84 @@
+---
+title: "The Database Index You're Missing Is the One Killing Your Production"
+date: "2024-05-20"
+tags: ["database", "postgresql", "performance", "sql"]
+description: "How to stop guessing and start reading query plans. A field guide to indexing strategies that engineers avoid looking at because the truth is uncomfortable."
+---
+
+# The Database Index You're Missing
+
+You've profiled the application layer. Everything looks fine. The service has a p99 of 800ms. Users are complaining. You profile again. Still fine. Then you run `EXPLAIN ANALYZE` on the slowest query and discover it's doing a sequential scan of 12 million rows.
+
+The index was never created. It was just never noticed because the table had 200 rows in development.
+
+Welcome to production.
+
+## 1. Read the Query Plan Before You Add the Index
+
+This is the step most engineers skip. They see a slow query, add an index on the filtered column, and move on. Sometimes it works. Sometimes the query plan still does a seq scan because the planner decided the index isn't worth it given the data distribution.
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT *
+FROM orders
+WHERE user_id = 42
+  AND status = 'pending'
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+Look for:
+- `Seq Scan` on large tables — usually bad
+- `Rows Removed by Filter` being very high relative to returned rows — index opportunity
+- `Buffers: shared hit` vs `shared read` — high reads mean cold cache or missing index
+
+## 2. Composite Indexes and Column Order Actually Matters
+
+A composite index on `(user_id, status)` is not the same as `(status, user_id)`. PostgreSQL can use the leftmost prefix of a composite index. If your most selective filter is `user_id`, put it first.
+
+```sql
+-- For queries that filter by user_id alone, or user_id + status:
+CREATE INDEX idx_orders_user_status ON orders (user_id, status);
+
+-- For queries that also sort:
+CREATE INDEX idx_orders_user_status_created ON orders (user_id, status, created_at DESC);
+```
+
+If you have a query that only filters by `status`, the first index above is useless. PostgreSQL won't scan it from the middle. This surprises people every single time.
+
+## 3. Partial Indexes: The Underused Weapon
+
+If 95% of your queries only care about rows where `status = 'active'`, a partial index lets you index only those rows:
+
+```sql
+CREATE INDEX idx_orders_active ON orders (user_id, created_at)
+WHERE status = 'active';
+```
+
+This index is smaller, faster to scan, and cheaper to maintain on writes. The catch: your query must include the `WHERE status = 'active'` clause for the planner to use it. If you parameterize the status, it won't match.
+
+## 4. The Indexes You're Not Cleaning Up
+
+Every index you add costs write performance. Every `INSERT`, `UPDATE`, and `DELETE` must maintain all indexes on the table. A table with 15 indexes on it is paying that cost 15 times per write.
+
+Check your unused indexes:
+
+```sql
+SELECT
+  schemaname,
+  tablename,
+  indexname,
+  idx_scan,
+  pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;
+```
+
+If `idx_scan` is zero and the index has been up for more than two weeks in production, it's dead weight. Drop it. Yes, the one someone added in 2021 "just in case." That one especially.
+
+## Conclusion
+
+The database is not magic. It is a data structure with deterministic performance characteristics, and those characteristics are completely visible if you read the query plan. Stop guessing. Run `EXPLAIN ANALYZE`. Create targeted indexes. Clean up the old ones.
+
+The query plan has been trying to tell you this for months. It just can't talk back.

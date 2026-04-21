@@ -1,0 +1,100 @@
+---
+title: "Microservices: The Good Parts, The Bad Parts, and the Parts That Will End Your On-Call Rotation"
+date: "2024-12-01"
+tags: ["microservices", "architecture", "distributed-systems", "backend"]
+description: "Microservices solve the problem of large monoliths being hard to scale and deploy. They introduce the problem of distributed systems being hard to understand and debug. A balanced view from the trenches."
+---
+
+# Microservices: The Good, The Bad, The Oncall Nightmare
+
+Microservices are not inherently good or bad. They are an architectural trade-off that makes sense above a certain scale and organizational complexity threshold, and is pure overhead below it.
+
+That threshold is higher than most teams think.
+
+## 1. When Microservices Actually Make Sense
+
+You have a legitimate case for microservices when:
+
+- **Independent deployment velocity**: Team A needs to ship 20 times a day. Team B ships weekly. A monolith couples their release cycles.
+- **Independent scaling**: Your payment service needs 10x the compute of your notification service. You want to scale them separately.
+- **Technology heterogeneity**: One component genuinely benefits from a different language/runtime (e.g., ML inference in Python alongside transactional logic in Go).
+- **Fault isolation**: An expensive, flaky external API call should not be able to bring down your entire application.
+
+Notice what's not on this list: "microservices look good on the architecture diagram" and "the conference talk made it sound simple."
+
+## 2. The Distribution Tax
+
+Every service boundary you introduce costs you:
+
+- **Latency**: Network calls are ~100x slower than in-process calls
+- **Serialization**: You must serialize and deserialize data at every boundary
+- **Operational complexity**: N services means N deployment pipelines, N health checks, N alert configurations
+- **Distributed transaction pain**: ACID across service boundaries requires saga patterns or two-phase commit. Both are harder than a database transaction.
+
+```
+Monolith call chain: 5 function calls = ~0.1ms
+Microservice call chain:
+  Service A → Service B → Service C → Database
+  = 3 network hops + 3 serializations
+  = 3ms+ per request just in overhead
+```
+
+This overhead is acceptable when the benefits outweigh it. Know the cost before you commit.
+
+## 3. Saga Pattern for Distributed Transactions
+
+When you need atomicity across services and can't use a database transaction:
+
+```
+Order Placement Saga (Choreography):
+
+1. OrderService: Creates order (PENDING)
+   → Publishes: OrderCreated event
+
+2. InventoryService: Reserves stock
+   → Success: Publishes StockReserved event
+   → Failure: Publishes StockReservationFailed event
+
+3. PaymentService: Charges customer
+   → Success: Publishes PaymentProcessed event
+   → Failure: Publishes PaymentFailed event
+
+4. OrderService: On PaymentProcessed → marks order CONFIRMED
+   OrderService: On PaymentFailed → publishes OrderCancelled
+   InventoryService: On OrderCancelled → releases reserved stock
+```
+
+Each step is a local transaction. Compensation transactions undo the effect of previous steps on failure. This is eventually consistent, not immediately consistent. Your business logic must tolerate the window between steps where the system is in a partially complete state.
+
+If you can't tolerate that, use a monolith with a database transaction.
+
+## 4. Service Mesh vs. DIY Network Handling
+
+Every service needs timeouts, retries, circuit breaking, and mTLS. You can implement this in every service (expensive, inconsistent), or you can use a service mesh (Istio, Linkerd) that puts it in the network layer as a sidecar proxy.
+
+```yaml
+# Istio VirtualService: retry and timeout policy
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: inventory-service
+spec:
+  http:
+    - timeout: 3s
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: gateway-error,connect-failure,retriable-4xx
+```
+
+This policy applies to all callers of inventory-service without any code change. The downside is that service meshes add operational complexity of their own. You've traded application-level complexity for infrastructure-level complexity. Know what you're getting into.
+
+## Conclusion
+
+Microservices amplify your organization. If your organization has good engineering practices — CI/CD, observability, runbooks, defined service contracts — microservices make those practices scale. If your organization doesn't have those things, microservices distribute the chaos across more systems.
+
+Fix the organization first. The architecture will follow.
+
+A well-structured monolith that ships reliably is better than 47 microservices that collectively do the same thing while being harder to debug, deploy, and understand.
+
+You can always extract services later. You cannot easily merge poorly-designed services back together. Design the monolith well. Let it guide the service boundaries if you split it.

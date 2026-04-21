@@ -1,0 +1,127 @@
+---
+title: "Redis Patterns That Don't Age Like Milk"
+date: "2024-10-14"
+tags: ["redis", "caching", "backend", "performance"]
+description: "Cache invalidation is famously hard. Redis is famously fast. This post explains how to use Redis correctly so you don't end up serving stale data with confidence."
+---
+
+# Redis Patterns That Don't Age Like Milk
+
+Redis is one of the most misused tools in the backend ecosystem. Not because it's complicated — it isn't — but because people treat it as a magic performance layer without understanding its failure modes. Stale cache. Cache stampede. Missing TTLs. Unbounded key growth. All avoidable.
+
+Let's avoid them.
+
+## 1. Cache-Aside Is the Default Pattern for a Reason
+
+Read-through caching done manually:
+
+```go
+func GetUser(ctx context.Context, userID string) (*User, error) {
+    cacheKey := fmt.Sprintf("user:%s", userID)
+
+    // Try cache first
+    cached, err := redis.Get(ctx, cacheKey).Result()
+    if err == nil {
+        var user User
+        if err := json.Unmarshal([]byte(cached), &user); err == nil {
+            return &user, nil
+        }
+    }
+
+    // Cache miss — fetch from DB
+    user, err := db.GetUser(ctx, userID)
+    if err != nil {
+        return nil, err
+    }
+
+    // Populate cache with TTL
+    data, _ := json.Marshal(user)
+    redis.Set(ctx, cacheKey, data, 5*time.Minute)
+
+    return user, nil
+}
+```
+
+The TTL is not optional. A cache key without a TTL is a memory leak. It stays in Redis forever, serving increasingly stale data. Every cache entry must have a TTL proportional to how stale you can tolerate the data being.
+
+## 2. Cache Stampede: The Problem Nobody Thinks About Until It Happens
+
+A cache stampede happens when a popular cached key expires and 10,000 concurrent requests all miss the cache simultaneously, all hit the database at once, and the database collapses under load.
+
+Mitigate with a probabilistic early expiry (also called "cache jitter"):
+
+```go
+// Instead of a fixed TTL, add random jitter
+ttl := 5*time.Minute + time.Duration(rand.Intn(60))*time.Second
+redis.Set(ctx, cacheKey, data, ttl)
+```
+
+Or use a mutex to ensure only one goroutine fetches the data on a cache miss:
+
+```go
+func GetUserWithLock(ctx context.Context, userID string) (*User, error) {
+    cacheKey := fmt.Sprintf("user:%s", userID)
+    lockKey := fmt.Sprintf("lock:user:%s", userID)
+
+    cached, err := redis.Get(ctx, cacheKey).Result()
+    if err == nil {
+        // Cache hit
+        var user User
+        json.Unmarshal([]byte(cached), &user)
+        return &user, nil
+    }
+
+    // Try to acquire lock
+    locked, _ := redis.SetNX(ctx, lockKey, "1", 10*time.Second).Result()
+    if !locked {
+        // Another goroutine is fetching; wait and retry
+        time.Sleep(50 * time.Millisecond)
+        return GetUserWithLock(ctx, userID)
+    }
+    defer redis.Del(ctx, lockKey)
+
+    // Fetch and populate
+    user, err := db.GetUser(ctx, userID)
+    if err != nil {
+        return nil, err
+    }
+    data, _ := json.Marshal(user)
+    redis.Set(ctx, cacheKey, data, 5*time.Minute)
+    return user, nil
+}
+```
+
+## 3. Use Appropriate Data Structures
+
+Redis is not just a key-value store with strings. Using the wrong structure costs memory and forces application-side logic that Redis can do natively.
+
+```bash
+# Tracking a leaderboard? Use Sorted Sets.
+ZADD leaderboard 1500 "player:123"
+ZADD leaderboard 2200 "player:456"
+ZREVRANGE leaderboard 0 9 WITHSCORES  # Top 10
+
+# Deduplicating events? Use Sets.
+SADD processed-events "event-uuid-123"
+SISMEMBER processed-events "event-uuid-123"  # Returns 1 if seen
+
+# Rate limiting? Use a counter with INCR + EXPIRE.
+INCR "rate:user:123:minute:2024-10-14T15:30"
+EXPIRE "rate:user:123:minute:2024-10-14T15:30" 60
+```
+
+If you're storing JSON blobs for everything and doing all the filtering in application code, you're paying Redis for memory and doing the compute yourself anyway.
+
+## 4. Redis Is Not Durable By Default
+
+Redis's default persistence is RDB snapshots at intervals. Between snapshots, data can be lost on crash. If you're caching transient data, this is fine. If you're using Redis as a queue or a session store with real session data, configure AOF (Append Only File) persistence or accept the possibility of data loss on restart.
+
+For queues: consider using Redis Streams or an actual queue system instead.
+
+## Conclusion
+
+Redis is extraordinarily fast and flexible. It's also a rope long enough to hang your entire caching strategy if you skip the TTLs, ignore the data structures, and forget that it's not a database.
+
+Set the TTLs. Use the right structures. Handle stampedes. Know what you're caching and why.
+
+Your database will thank you by not melting.

@@ -1,0 +1,85 @@
+---
+title: "The On-Call Handbook Nobody Gave You"
+date: "2024-09-03"
+tags: ["oncall", "sre", "operations", "reliability"]
+description: "A practical survival guide for engineers entering on-call rotation for the first time, from someone who has been paged during dinner, during sleep, and once during a wedding."
+---
+
+# The On-Call Handbook Nobody Gave You
+
+Someone gave you a pager. Or a PagerDuty account. Or a Slack handle that routes to your phone at 3am. Congratulations — you are now on-call. What they probably didn't give you is any guidance on what to actually do when the alert fires.
+
+This is that guidance.
+
+## 1. The First Rule of On-Call: Don't Panic, Triage
+
+When an alert fires, your job is not to immediately fix the problem. Your job is to understand the blast radius and scope.
+
+Ask these questions in order:
+
+1. **Who is affected?** Is this one user, one region, or all users globally?
+2. **What is the impact?** Are requests failing with 500s, or just slow? Is data being corrupted or just delayed?
+3. **When did it start?** Correlate with recent deploys, config changes, and cron job schedules.
+4. **Can I reproduce it?**
+
+A precise triage saves 30 minutes of debugging in the wrong direction. "The payment service is slow for 8% of users in the US-East region starting at 14:32 UTC, correlating with the v2.4.1 deploy at 14:28 UTC" is infinitely more useful than "payments are broken."
+
+## 2. Runbooks Are Not Optional, They Are the Product
+
+If your team decides an alert is worth waking someone up for, there must be a runbook. A runbook is a documented decision tree for exactly that alert. No implied knowledge. No "you'll know what to do." Written steps.
+
+```markdown
+## Alert: OrderProcessingLatencyHigh
+
+**Trigger:** p99 > 2s for 5 minutes
+
+### Step 1: Check current deployment
+- Run: `kubectl rollout history deployment/order-service`
+- If recent deploy: consider rollback → [Rollback Runbook]
+
+### Step 2: Check database connection pool
+- Dashboard: [Order Service DB Connections]
+- If pool exhausted: increase pool size or kill idle connections
+
+### Step 3: Check downstream dependencies
+- Inventory service health: [link]
+- Payment service health: [link]
+
+### Escalate to: @backend-platform-team if unresolved in 30 minutes
+```
+
+Write your runbooks before you need them. If you're writing a runbook at 3am mid-incident, you've already failed the preparation part.
+
+## 3. The Mitigation Hierarchy
+
+When production is on fire, apply mitigations in order of speed, not elegance:
+
+1. **Rollback** the last deploy. Fast, reversible, often correct.
+2. **Feature flag** to disable the broken feature path.
+3. **Traffic shift** to a healthy region or instance.
+4. **Scale out** if the problem is capacity.
+5. **Debug and fix** — this comes last.
+
+"Finding the root cause" is not the goal during an active incident. Restoring service is. Root cause analysis happens in the post-mortem. During the incident, you optimize for MTTR.
+
+## 4. Write the Post-Mortem While It's Fresh
+
+A post-mortem is not a blame document. It's a systems analysis. The goal is to understand what properties of the system allowed this failure to happen, and what changes (to code, process, tooling, or monitoring) prevent recurrence.
+
+The five sections you need:
+
+1. **Impact**: What happened, how many users, how long, in numbers
+2. **Timeline**: When things happened, in UTC, with who did what
+3. **Root Cause**: The actual technical cause, not the person
+4. **Contributing Factors**: What made this worse than it needed to be
+5. **Action Items**: Concrete tasks with owners and due dates
+
+Post-mortems without action items are archaeology. Post-mortems with action items that nobody follows up on are archaeology with false hope.
+
+## Conclusion
+
+On-call is a skill. It degrades without practice and improves with discipline: good runbooks, fast triage, mitigation-first thinking, and honest post-mortems that result in actual change.
+
+Being woken up is not the problem. Being woken up for the same problem twice is the problem. That's on the system, not just the engineer.
+
+Fix the system. Sleep better.
