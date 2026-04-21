@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111111" />
+      <stop offset="100%" stop-color="#050505" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Cyberpunk Background -->
+  <rect width="512" height="512" rx="48" fill="url(#bg)" />
+  <rect width="512" height="512" rx="48" fill="none" stroke="#ff00ff" stroke-width="6" stroke-dasharray="15, 10" stroke-opacity="0.3" />
+  
+  <!-- Chamfer Outer Border -->
+  <polygon points="100,160 160,100 412,100 412,352 352,412 100,412" fill="none" stroke="#00d4ff" stroke-width="24" filter="url(#glow)" />
+  
+  <!-- Inner Detail -->
+  <polygon points="120,170 170,120 392,120 392,342 342,392 120,392" fill="none" stroke="#00d4ff" stroke-width="4" stroke-opacity="0.5" />
+  
+  <!-- Terminal Prompt -->
+  <path d="M190,200 L260,256 L190,312" fill="none" stroke="#00ff88" stroke-width="40" stroke-linecap="square" stroke-linejoin="miter" filter="url(#glow)" />
+  
+  <!-- Blinking Block Cursor -->
+  <rect x="290" y="280" width="50" height="32" fill="#00ff88" filter="url(#glow)" />
+  
+  <!-- Decorative Tech Elements -->
+  <circle cx="100" cy="100" r="10" fill="#ff00ff" filter="url(#glow)" />
+  <circle cx="412" cy="412" r="10" fill="#ff00ff" filter="url(#glow)" />
+  
+  <rect x="360" y="100" width="30" height="10" fill="#ff00ff" />
+  <rect x="100" y="380" width="10" height="30" fill="#ff00ff" />
+</svg>

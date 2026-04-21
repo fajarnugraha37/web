@@ -42,6 +42,9 @@ export const metadata: Metadata = {
       "application/rss+xml": "/feed.xml",
     },
   },
+  icons: {
+    icon: [{ url: "/web/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({
