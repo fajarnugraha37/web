@@ -90,21 +90,25 @@ export function MobileNav() {
           <div className="absolute inset-0 cyber-grid-bg opacity-20 pointer-events-none" />
 
           <ul className="relative flex flex-col divide-y divide-border/50">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={`flex items-center gap-3 px-6 py-4 font-sans text-sm uppercase tracking-widest transition-colors ${
-                    link.highlight
-                      ? "text-accent border-l-2 border-accent hover:bg-accent/10"
-                      : `text-foreground/80 border-l-2 border-transparent hover:border-accent ${link.accentClass}`
-                  } ${pathname === link.href ? "text-accent border-l-accent border-l-2" : ""}`}
-                >
-                  <span className="font-mono text-accent/60 text-xs">&gt;</span>
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isExternal = link.href.endsWith(".xml");
+              const LinkComponent = isExternal ? "a" : Link;
+              return (
+                <li key={link.href}>
+                  <LinkComponent
+                    href={link.href}
+                    className={`flex items-center gap-3 px-6 py-4 font-sans text-sm uppercase tracking-widest transition-colors ${
+                      link.highlight
+                        ? "text-accent border-l-2 border-accent hover:bg-accent/10"
+                        : `text-foreground/80 border-l-2 border-transparent hover:border-accent ${link.accentClass}`
+                    } ${pathname === link.href ? "text-accent border-l-accent border-l-2" : ""}`}
+                  >
+                    <span className="font-mono text-accent/60 text-xs">&gt;</span>
+                    {link.label}
+                  </LinkComponent>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Corner accent */}

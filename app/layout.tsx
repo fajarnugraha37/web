@@ -56,6 +56,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${orbitron.variable} ${jetbrains.variable} ${shareTech.variable}`}
+      data-scroll-behavior="smooth"
     >
       <body suppressHydrationWarning className="min-h-screen flex flex-col">
         <header className="fixed top-0 w-full z-40 border-b border-border bg-background/80 backdrop-blur-md">

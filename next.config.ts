@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'export',
   basePath: '/web',
+  trailingSlash: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
