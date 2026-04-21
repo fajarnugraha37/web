@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "404 // SIGNAL_LOST",
+  title: "404 // PAGE_NOT_FOUND",
   description: "The requested node does not exist in this sector of the net.",
 };
 
@@ -22,8 +22,8 @@ export default function NotFound() {
       <div className="relative z-10 flex flex-col items-center text-center px-4 py-8 max-w-3xl mx-auto">
         {/* Status badge */}
         <div className="inline-block border border-destructive/50 bg-card px-3 py-1 text-xs font-mono mb-8 cyber-chamfer-reverse text-destructive self-center">
-          <span className="animate-blink mr-2">&gt;</span> KERNEL_PANIC //
-          SEGFAULT_DETECTED
+          <span className="animate-blink mr-2">&gt;</span> PAGE_NOT_FOUND //
+          ROUTE_UNREACHABLE
         </div>
 
         {/* Big 404 glitch */}
@@ -45,9 +45,9 @@ export default function NotFound() {
         {/* Error heading */}
         <h2
           className="text-3xl md:text-5xl font-black uppercase tracking-widest text-foreground mb-4 cyber-glitch-text"
-          data-text="SIGNAL_LOST"
+          data-text="PAGE_NOT_FOUND"
         >
-          SIGNAL_LOST
+          PAGE_NOT_FOUND
         </h2>
 
         {/* Neon divider */}

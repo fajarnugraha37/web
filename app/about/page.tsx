@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const CAREER_DATA = [
   {
-    year: "Jun 2025 - PRESENT",
+    year: "Jun 2025 - March 2026",
     role: "LEAD SOFTWARE DEVELOPER",
     company: "Xtremax",
     descriptions: [
@@ -38,7 +38,7 @@ const CAREER_DATA = [
     ],
   },
   {
-    year: "Jul 2023 - Jun 2025",
+    year: "Jul 2023 - May 2025",
     role: "Software Developer - Backend",
     company: "Xtremax",
     descriptions: [
@@ -81,7 +81,7 @@ const CAREER_DATA = [
     ],
   },
   {
-    year: "Jan 2020 - Oct 2022",
+    year: "Feb 2022 - Oct 2022",
     role: "Back End Developer",
     company: "QuickPro / FOREXimf / PT International Mitra Futures",
     descriptions: [
@@ -109,7 +109,7 @@ const CAREER_DATA = [
     ],
   },
   {
-    year: "Feb 2022 - Oct 2022",
+    year: "Jan 2020 - Jan 2022",
     role: "Fullstack Developer",
     company: "QuickPro / FOREXimf / PT International Mitra Futures",
     descriptions: [
@@ -133,7 +133,7 @@ const CAREER_DATA = [
     ],
   },
   {
-    year: "Jan 2020 - Jan 2022",
+    year: "Sep 2019 - Dec 2019",
     role: "Fullstack Web Developer",
     company: "QuickPro / FOREXimf / PT International Mitra Futures",
     descriptions: [
