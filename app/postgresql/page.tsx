@@ -24,25 +24,68 @@ export default function PostgreSQLPlayground() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [layoutMode, setLayoutMode] = useState<"stack" | "wide">("stack");
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [lastQuery, setLastQuery] = useState<string | null>(null);
+
   const handleExecute = useCallback(
-    async (query: string) => {
+    async (query: string, page = 1, size = pageSize) => {
       setIsExecuting(true);
       setQueryError(null);
+      setLastQuery(query);
+      setCurrentPage(page);
+
       const start = performance.now();
+      let trimmedQuery = query.trim();
+
+      // Remove trailing semicolon if present for subquery wrapping
+      if (trimmedQuery.endsWith(";")) {
+        trimmedQuery = trimmedQuery.slice(0, -1);
+      }
+
+      const isSelect = trimmedQuery.toUpperCase().startsWith("SELECT");
 
       try {
-        const res = await exec(query);
-        setResults(res.rows);
+        if (isSelect) {
+          // 1. Get Total Count
+          const countQuery = `SELECT COUNT(*) as total FROM (${trimmedQuery}) AS sub`;
+          const countRes = await exec(countQuery);
+          const total = parseInt(countRes.rows[0].total);
+          setTotalRecords(total);
+
+          // 2. Fetch Page
+          const offset = (page - 1) * size;
+          const pagedQuery = `SELECT * FROM (${trimmedQuery}) AS sub LIMIT ${size} OFFSET ${offset}`;
+          const res = await exec(pagedQuery);
+          setResults(res.rows);
+        } else {
+          // Non-SELECT queries run directly
+          const res = await exec(trimmedQuery);
+          setResults(res.rows);
+          setTotalRecords(res.rows.length);
+        }
         setExecutionTime(performance.now() - start);
       } catch (err: any) {
         setQueryError(err.message || "Unknown execution error");
         setResults(null);
+        setTotalRecords(0);
       } finally {
         setIsExecuting(false);
       }
     },
-    [exec],
+    [exec, pageSize],
   );
+
+  const onPageChange = (page: number) => {
+    if (lastQuery) handleExecute(lastQuery, page, pageSize);
+  };
+
+  const onPageSizeChange = (size: number) => {
+    setPageSize(size);
+    if (lastQuery) handleExecute(lastQuery, 1, size);
+  };
 
   const handlePurge = () => {
     if (
@@ -60,6 +103,42 @@ export default function PostgreSQLPlayground() {
     }
   };
 
+  const listTables = () => {
+    handleExecute(
+      "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';",
+    );
+  };
+
+  const exportFullCsv = async () => {
+    if (!lastQuery) return;
+    setIsExecuting(true);
+    try {
+      const res = await exec(lastQuery);
+      const rows = res.rows;
+      if (rows.length === 0) return;
+
+      const headers = Object.keys(rows[0]);
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) =>
+          headers
+            .map((h) => `"${String(row[h] || "").replace(/"/g, '""')}"`)
+            .join(","),
+        ),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `query_results_full_${new Date().getTime()}.csv`;
+      link.click();
+    } catch (err) {
+      console.error("Export failed", err);
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 py-8 md:py-12 max-w-6xl mx-auto px-4">
@@ -73,11 +152,18 @@ export default function PostgreSQLPlayground() {
               </h1>
             </div>
             <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">
-              Persistent PostgreSQL WASM Node // Level-4 Authorization Required
+              Persistent PostgreSQL WASM Node
             </p>
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={listTables}
+              className="px-3 py-1.5 border border-accent/30 text-accent hover:bg-accent hover:text-black transition-all font-mono text-[10px] uppercase tracking-widest cyber-chamfer-sm"
+            >
+              LIST_TABLES
+            </button>
+
             <div className="flex bg-muted/20 p-1 border border-border cyber-chamfer-sm">
               <button
                 onClick={() => setLayoutMode("stack")}
@@ -118,7 +204,7 @@ export default function PostgreSQLPlayground() {
             icon={<HardDrive className="w-4 h-4" />}
             label="STORAGE_MODE"
             value={
-              status === "volatile" ? "VOLATILE (RAM)" : "PERSISTENT (IDB)"
+              status === "volatile" ? "VOLATILE (RAM)" : "PERSISTENT (IndexDB)"
             }
             color={
               status === "volatile"
@@ -129,13 +215,13 @@ export default function PostgreSQLPlayground() {
           <StatusCard
             icon={<ShieldAlert className="w-4 h-4" />}
             label="SEC_CLEARANCE"
-            value="LEVEL_04"
+            value="N/A"
             color="text-accent"
           />
           <StatusCard
             icon={<TableIcon className="w-4 h-4" />}
             label="ACTIVE_NODES"
-            value="01 / PROD"
+            value="01"
             color="text-white"
           />
         </div>
@@ -154,13 +240,12 @@ export default function PostgreSQLPlayground() {
             />
 
             {/* Quick Tips */}
-            <div className="mt-4 p-4 border border-border/30 bg-muted/5 cyber-chamfer-sm font-mono text-[10px] text-muted-foreground">
+            <div className="mt-4 p-4 border border-border/30 bg-muted/5 cyber-chamfer-sm font-mono text-[10px] text-muted-foreground leading-relaxed">
               <span className="text-accent-tertiary"># SYSTEM_TIP:</span> Try
               querying <code className="text-accent">system_control</code>,{" "}
               <code className="text-accent">net_nodes</code>,{" "}
-              <code className="text-accent">access_logs</code> and{" "}
-              <code className="text-accent">sys_config</code> to view current
-              system telemetry.
+              <code className="text-accent">access_logs</code> or{" "}
+              <code className="text-accent">sys_config</code>.
               <br />
               <span className="text-accent-tertiary"># OR:</span>{" "}
               <code className="text-accent-secondary">
@@ -176,6 +261,14 @@ export default function PostgreSQLPlayground() {
               results={results}
               error={queryError || (status === "error" ? error : null)}
               executionTime={executionTime}
+              onExportFull={exportFullCsv}
+              pagination={{
+                currentPage,
+                pageSize,
+                totalRecords,
+                onPageChange,
+                onPageSizeChange,
+              }}
             />
           </div>
         </div>
