@@ -89,6 +89,12 @@ export default function RootLayout({
                 /About
               </Link>
               <Link
+                href="/postgresql"
+                className="hover:text-accent-tertiary transition-colors"
+              >
+                /SQL Lab
+              </Link>
+              <Link
                 href="/feed.xml"
                 className="hover:text-accent transition-colors"
                 prefetch={false}

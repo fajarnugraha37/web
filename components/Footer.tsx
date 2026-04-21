@@ -72,6 +72,17 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/postgresql"
+                  className="text-muted-foreground hover:text-accent-tertiary transition-colors flex items-center gap-2 group w-fit"
+                >
+                  <span className="opacity-0 group-hover:opacity-100 text-accent-tertiary transition-opacity">
+                    &gt;
+                  </span>{" "}
+                  SQL Lab
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/feed.xml"
                   prefetch={false}
                   className="text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group w-fit"
