@@ -5,8 +5,6 @@ tags: ["api", "rest", "design", "backend"]
 description: "A field guide to REST API design decisions that prevent your consumers from filing bug reports that are actually just documentation complaints."
 ---
 
-# API Design Is Communication
-
 An API is a contract. When you design it badly, every caller inherits your bad decisions forever, or until you break them with a v2 that you'll have to maintain alongside v1 for 18 months because enterprise clients can't migrate.
 
 Design it right the first time. Or at least, design it intentionally.
@@ -27,6 +25,7 @@ HTTP/1.1 200 OK
 This is wrong. The HTTP layer has a rich, standardized status code vocabulary. Use it. Clients, load balancers, CDN caches, and monitoring tools all understand HTTP status codes. None of them parse your response body to check if `success` is `false`.
 
 The correct mapping:
+
 - `200 OK` — it worked, here's your data
 - `201 Created` — resource created, include a `Location` header
 - `204 No Content` — it worked, nothing to return (DELETE success)

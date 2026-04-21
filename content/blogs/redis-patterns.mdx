@@ -5,8 +5,6 @@ tags: ["redis", "caching", "backend", "performance"]
 description: "Cache invalidation is famously hard. Redis is famously fast. This post explains how to use Redis correctly so you don't end up serving stale data with confidence."
 ---
 
-# Redis Patterns That Don't Age Like Milk
-
 Redis is one of the most misused tools in the backend ecosystem. Not because it's complicated — it isn't — but because people treat it as a magic performance layer without understanding its failure modes. Stale cache. Cache stampede. Missing TTLs. Unbounded key growth. All avoidable.
 
 Let's avoid them.

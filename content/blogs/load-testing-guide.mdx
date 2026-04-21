@@ -5,8 +5,6 @@ tags: ["performance", "load-testing", "k6", "reliability"]
 description: "Your service has a breaking point. You will find it. The only question is whether it's during a controlled test or during peak traffic on a launch day. Choose wisely."
 ---
 
-# Load Testing Is Not Optional
-
 Every service has a capacity limit. Every. Single. One. The question is not whether your service will break under sufficient load — it's whether you know the number before your users discover it for you.
 
 Load testing answers two questions: at what load does the system degrade, and how does it degrade? Graceful degradation (increased latency, then rejection) is acceptable. Cascading failure is not.
@@ -24,31 +22,31 @@ Establish baseline values at low load. The deviation from baseline as load incre
 k6 scripts are JavaScript. They run outside your application. They simulate real user scenarios.
 
 ```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export const options = {
   stages: [
-    { duration: '2m', target: 100 },   // Ramp up to 100 users
-    { duration: '5m', target: 100 },   // Hold at 100 users
-    { duration: '2m', target: 500 },   // Ramp to 500 users
-    { duration: '5m', target: 500 },   // Hold at 500 users (stress zone)
-    { duration: '2m', target: 0 },     // Ramp down
+    { duration: "2m", target: 100 }, // Ramp up to 100 users
+    { duration: "5m", target: 100 }, // Hold at 100 users
+    { duration: "2m", target: 500 }, // Ramp to 500 users
+    { duration: "5m", target: 500 }, // Hold at 500 users (stress zone)
+    { duration: "2m", target: 0 }, // Ramp down
   ],
   thresholds: {
-    http_req_duration: ['p95<500'],     // 95% of requests under 500ms
-    http_req_failed: ['rate<0.01'],     // Error rate under 1%
+    http_req_duration: ["p95<500"], // 95% of requests under 500ms
+    http_req_failed: ["rate<0.01"], // Error rate under 1%
   },
 };
 
 export default function () {
-  const res = http.get('https://api.example.com/orders', {
+  const res = http.get("https://api.example.com/orders", {
     headers: { Authorization: `Bearer ${__ENV.API_TOKEN}` },
   });
 
   check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
+    "status is 200": (r) => r.status === 200,
+    "response time < 500ms": (r) => r.timings.duration < 500,
   });
 
   sleep(1);
@@ -62,6 +60,7 @@ Run it. Watch the p99 latency curve. Find the inflection point where latency sta
 Load tests find bottlenecks. The first bottleneck is rarely the application code. It's usually:
 
 **Database connection pool exhaustion:**
+
 ```
 # Connection pool size: 20
 # 500 concurrent requests each holding a connection for 200ms

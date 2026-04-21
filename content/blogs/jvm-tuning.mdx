@@ -5,15 +5,13 @@ tags: ["java", "jvm", "performance"]
 description: "A deep dive into Garbage Collection tuning, CPU pinning, and memory alignment for high-frequency trading applications."
 ---
 
-# JVM Tuning for Low-Latency
-
 When it comes to building high-frequency trading (HFT) platforms in Java, the standard JVM defaults are your enemy. You're entering a world where microseconds (μs) matter and garbage collection pauses can cost millions.
- 
+
 ## 1. Discarding the Old Gods (CMS/G1)
 
 Forget CMS or G1 GC if you want sub-millisecond pauses. The modern approach relies on **ZGC** or **Shenandoah**. But we're going a step further: **Epsilon GC**.
 
-If you're truly low-latency, you *don't* collect garbage on the hot path.
+If you're truly low-latency, you _don't_ collect garbage on the hot path.
 
 ```bash
 -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC

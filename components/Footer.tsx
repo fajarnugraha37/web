@@ -39,7 +39,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm font-mono flex flex-col">
               <li>
                 <Link
-                  href="/blogs"
+                  href="/"
                   className="text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="opacity-0 group-hover:opacity-100 text-accent transition-opacity">

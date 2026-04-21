@@ -5,8 +5,6 @@ tags: ["oncall", "sre", "operations", "reliability"]
 description: "A practical survival guide for engineers entering on-call rotation for the first time, from someone who has been paged during dinner, during sleep, and once during a wedding."
 ---
 
-# The On-Call Handbook Nobody Gave You
-
 Someone gave you a pager. Or a PagerDuty account. Or a Slack handle that routes to your phone at 3am. Congratulations — you are now on-call. What they probably didn't give you is any guidance on what to actually do when the alert fires.
 
 This is that guidance.
@@ -34,14 +32,17 @@ If your team decides an alert is worth waking someone up for, there must be a ru
 **Trigger:** p99 > 2s for 5 minutes
 
 ### Step 1: Check current deployment
+
 - Run: `kubectl rollout history deployment/order-service`
 - If recent deploy: consider rollback → [Rollback Runbook]
 
 ### Step 2: Check database connection pool
+
 - Dashboard: [Order Service DB Connections]
 - If pool exhausted: increase pool size or kill idle connections
 
 ### Step 3: Check downstream dependencies
+
 - Inventory service health: [link]
 - Payment service health: [link]
 

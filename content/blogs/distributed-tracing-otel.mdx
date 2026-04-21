@@ -5,8 +5,6 @@ tags: ["observability", "tracing", "opentelemetry", "microservices"]
 description: "If your debugging strategy is reading logs in five different tabs while screaming into the void, distributed tracing is for you. A practical guide to OpenTelemetry."
 ---
 
-# Distributed Tracing: Stop Guessing
-
 Here is a perfectly normal debugging session in a microservices system without distributed tracing:
 
 1. User reports request is slow.
@@ -81,6 +79,7 @@ If you're using a framework (Gin, Echo, Chi), use their OTel middleware and stop
 ## 4. What to Actually Instrument
 
 Don't instrument everything. Instrument:
+
 - All inbound HTTP/gRPC endpoints
 - All outbound HTTP/gRPC calls
 - All database queries (use auto-instrumentation drivers)

@@ -207,78 +207,78 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-24">
           <ScrollReveal delay={0.1} direction="right">
-            <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group h-full">
-              <div className="absolute top-0 right-0 p-4 opacity-10 font-bold text-4xl group-hover:opacity-20 transition-opacity">
+            <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group h-full transition-all duration-300 hover:border-accent-tertiary/50 hover:shadow-[0_0_20px_rgba(0,212,255,0.15)]">
+              {/* Animated scanning bar on hover */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-accent-tertiary opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
+              
+              <div className="absolute top-0 right-0 p-4 opacity-10 font-bold text-4xl group-hover:opacity-30 group-hover:text-accent-tertiary transition-all duration-500">
                 &lt;/&gt;
               </div>
-              <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3">
-                <span className="w-2 h-2 bg-yellow-500"></span> 02 // TECHNICAL
+              <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3 group-hover:text-accent-tertiary transition-colors">
+                <span className="w-2 h-2 bg-yellow-500 group-hover:animate-pulse"></span> 02 // TECHNICAL
                 ARSENAL
               </h3>
               <div className="space-y-4 px-3">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">
+                <div className="group/item">
+                  <div className="text-xs text-muted-foreground mb-1 group-hover/item:text-accent-tertiary/70 transition-colors">
                     LANGUAGES
                   </div>
-                  <div className="font-mono text-sm text-accent-tertiary">
+                  <div className="font-mono text-sm text-accent-tertiary group-hover:brightness-125 transition-all">
                     Java, .NET, NodeJS, Go, Vue, Typescript
                   </div>
                 </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">
+                <div className="group/item">
+                  <div className="text-xs text-muted-foreground mb-1 group-hover/item:text-accent-secondary/70 transition-colors">
                     INFRASTRUCTURE
                   </div>
-                  <div className="font-mono text-sm text-accent-secondary">
+                  <div className="font-mono text-sm text-accent-secondary group-hover:brightness-125 transition-all">
                     AWS, Kubernetes, Docker
                   </div>
                 </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">
+                <div className="group/item">
+                  <div className="text-xs text-muted-foreground mb-1 group-hover/item:text-accent/70 transition-colors">
                     DATABASES & QUEUES
                   </div>
-                  <div className="font-mono text-sm text-accent">
+                  <div className="font-mono text-sm text-accent group-hover:brightness-125 transition-all">
                     OracleSQL, PostgreSQL, Redis, Kafka, RabbitMQ
                   </div>
                 </div>
               </div>
+              
+              {/* Corner accent that brightens on hover */}
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-accent-tertiary/10 group-hover:border-accent-tertiary/40 transition-all" />
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2} direction="left">
-            <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group h-full">
-              <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3">
-                <span className="w-2 h-2 bg-destructive animate-pulse"></span> 03
+            <div className="bg-card border border-border p-8 cyber-chamfer relative overflow-hidden group h-full transition-all duration-300 hover:border-destructive/50 hover:shadow-[0_0_20px_rgba(255,51,102,0.15)]">
+              {/* Animated scanning bar on hover */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-destructive opacity-0 group-hover:opacity-100 group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
+
+              <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-3 group-hover:text-destructive transition-colors">
+                <span className="w-2 h-2 bg-destructive animate-pulse shadow-[0_0_5px_#ff3366]"></span> 03
                 {"//"} OPERATIONAL AXIOMS
               </h3>
-              <ul className="space-y-3 px-3 font-mono text-sm">
-                <li className="flex gap-2">
-                  <span className="text-accent">&gt;</span>
-                  <span className="text-foreground/80">
-                    Firefighting doesn&apos;t scale, build systems that are boring
-                    in production.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent">&gt;</span>
-                  <span className="text-foreground/80">
-                    Documentation is infrastructure, If it&apos;s not documented,
-                    it&apos;s debt.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent">&gt;</span>
-                  <span className="text-foreground/80">
-                    Capacity must meet commitment, optimism is not a strategy.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent">&gt;</span>
-                  <span className="text-foreground/80">
-                    Ship safely over ship quickly, delivery without safety is
-                    shipping problems.
-                  </span>
-                </li>
+              <ul className="space-y-4 px-3 font-mono text-sm">
+                {[
+                  "Firefighting doesn't scale, build systems that are boring in production.",
+                  "Documentation is infrastructure, If it's not documented, it's debt.",
+                  "Capacity must meet commitment, optimism is not a strategy.",
+                  "Ship safely over ship quickly, delivery without safety is shipping problems."
+                ].map((axiom, i) => (
+                  <li key={i} className="flex gap-3 group/li">
+                    <span className="text-accent group-hover:text-destructive transition-colors">&gt;</span>
+                    <span className="text-foreground/80 group-hover:text-foreground transition-colors group-hover/li:translate-x-1 transition-transform">
+                      {axiom}
+                    </span>
+                  </li>
+                ))}
               </ul>
+
+              {/* Decorative background text */}
+              <div className="absolute -bottom-4 -right-4 font-black text-6xl text-white/[0.02] pointer-events-none uppercase italic group-hover:text-destructive/[0.05] transition-colors">
+                RULES
+              </div>
             </div>
           </ScrollReveal>
         </div>

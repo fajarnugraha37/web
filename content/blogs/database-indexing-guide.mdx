@@ -5,8 +5,6 @@ tags: ["database", "postgresql", "performance", "sql"]
 description: "How to stop guessing and start reading query plans. A field guide to indexing strategies that engineers avoid looking at because the truth is uncomfortable."
 ---
 
-# The Database Index You're Missing
-
 You've profiled the application layer. Everything looks fine. The service has a p99 of 800ms. Users are complaining. You profile again. Still fine. Then you run `EXPLAIN ANALYZE` on the slowest query and discover it's doing a sequential scan of 12 million rows.
 
 The index was never created. It was just never noticed because the table had 200 rows in development.
@@ -28,6 +26,7 @@ LIMIT 20;
 ```
 
 Look for:
+
 - `Seq Scan` on large tables — usually bad
 - `Rows Removed by Filter` being very high relative to returned rows — index opportunity
 - `Buffers: shared hit` vs `shared read` — high reads mean cold cache or missing index

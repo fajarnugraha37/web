@@ -5,6 +5,7 @@ import "./app.css";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const jetbrains = JetBrains_Mono({
@@ -62,6 +63,7 @@ export default function RootLayout({
     >
       <body suppressHydrationWarning className="min-h-screen flex flex-col">
         <ScrollProgress />
+        <ScrollToTop />
         <header className="fixed top-0 w-full z-40 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link
@@ -105,13 +107,11 @@ export default function RootLayout({
             <MobileNav />
           </div>
         </header>
-
         <main className="flex-1 pt-16 relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 pb-20">
           {children}
         </main>
 
         <Footer />
-        <ScrollProgress />
       </body>
     </html>
   );
