@@ -97,7 +97,9 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between border-b border-border pb-1">
                     <span>Cloud</span>
-                    <span className="text-accent-tertiary">AWS, K8s</span>
+                    <span className="text-accent-tertiary">
+                      AWS, EKS, Lambda, K8s
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-border pb-1">
                     <span>Primary_Focus</span>
@@ -237,8 +239,8 @@ export default function Home() {
               <li className="flex gap-2">
                 <span className="text-accent">&gt;</span>
                 <span className="text-foreground/80">
-                  Documentation is infrastructure, If it&apos;s not documented, it&apos;s
-                  debt.
+                  Documentation is infrastructure, If it&apos;s not documented,
+                  it&apos;s debt.
                 </span>
               </li>
               <li className="flex gap-2">

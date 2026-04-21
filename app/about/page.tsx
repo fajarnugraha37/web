@@ -101,6 +101,7 @@ const CAREER_DATA = [
       "MySQL",
       "RabbitMQ",
       "Redis",
+      "GCP",
       "Docker",
       "Meta Trader",
       "ZeroMQ",
@@ -193,10 +194,11 @@ export default function AboutPage() {
             (capacity vs commitment), not just optimism.
           </p>
           <p className="font-mono text-foreground/90 leading-relaxed mb-4">
-            I&apos;m adaptive and tend to place myself where I can create the most
-            impact. Sometimes that means being the firefighter, jumping into
-            issues, unblocking delivery, and doing the hard triage when things
-            go sideways. But systems that rely on heroes are already broken.
+            I&apos;m adaptive and tend to place myself where I can create the
+            most impact. Sometimes that means being the firefighter, jumping
+            into issues, unblocking delivery, and doing the hard triage when
+            things go sideways. But systems that rely on heroes are already
+            broken.
           </p>
           <p className="font-mono text-foreground/90 leading-relaxed mb-4">
             I handle solutioning, yearly planning, resource management, speed up
@@ -209,15 +211,16 @@ export default function AboutPage() {
             Work closely across BA, QA, Infra and PMTs because shipping software
             is a team sport, not a solo speedrun and{" "}
             <span className="text-destructive font-bold">
-              &ldquo;ship it&rdquo; without &ldquo;safely&rdquo; is just shipping problems
+              &ldquo;ship it&rdquo; without &ldquo;safely&rdquo; is just
+              shipping problems
             </span>
             .
           </p>
           <p className="font-mono text-accent leading-relaxed">
             I strongly believe in a documentation-based approach and clear
-            engineering guidelines, because heroics don&apos;t scale. <br />I like
-            boring production, docs that don&apos;t lie, honest plans, and systems
-            that don&apos;t require heroic measures to operate.
+            engineering guidelines, because heroics don&apos;t scale. <br />I
+            like boring production, docs that don&apos;t lie, honest plans, and
+            systems that don&apos;t require heroic measures to operate.
           </p>
         </ExpandableSummary>
       </div>
