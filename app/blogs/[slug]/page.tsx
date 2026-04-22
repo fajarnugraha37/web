@@ -19,10 +19,11 @@ export async function generateMetadata({
   const resolvedParams = await params;
   const postData = await getBlogData(resolvedParams.slug);
   return {
-    title: `${postData.title} // SYS_OP`,
+    title: `${postData.title} | Fajar Abdi Nugraha`,
     description: postData.description,
+    authors: [{ name: "Fajar Abdi Nugraha" }],
     openGraph: {
-      title: `${postData.title} // SYS_OP`,
+      title: `${postData.title} | Fajar Abdi Nugraha`,
       description: postData.description,
       type: "article",
       publishedTime: postData.date,
@@ -30,7 +31,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${postData.title} // SYS_OP`,
+      title: `${postData.title} | Fajar Abdi Nugraha`,
       description: postData.description,
     },
   };

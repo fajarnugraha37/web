@@ -9,20 +9,19 @@ const LAB_NODES = [
     id: "postgresql",
     name: "SQL_LAB.EXE",
     description:
-      "Persistent PostgreSQL WASM Node for relational database exploration and transactional logic testing.",
+      "Persistent PostgreSQL WASM Node for relational database exploration.",
     icon: <Database className="w-8 h-8" />,
     path: "/labs/postgresql",
-    status: "ONLINE",
+    status: "✔",
     color: "text-accent",
   },
   {
     id: "duckdb",
     name: "TELEMETRY_ANALYTICS.EXE",
-    description:
-      "High-speed OLAP engine for big data analysis. Drop massive CSV/Parquet files and query them with zero latency.",
+    description: "OLAP engine (DuckDB) for big data analysis exploration.",
     icon: <BarChart3 className="w-8 h-8" />,
     path: "/labs/duckdb",
-    status: "DE-ACTIVATED",
+    status: "✔",
     color: "text-accent-secondary",
   },
 ];

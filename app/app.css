@@ -137,6 +137,88 @@
   .neon-text {
     text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
   }
+
+  /* Sunset Theme overrides (Scoped to specific pages) */
+  .theme-sunset {
+    --color-background: #0a0a0f;
+    --color-foreground: #f0e6e6;
+    --color-card: #160a22;
+    --color-muted: #241136;
+    --color-muted-foreground: #a695b5;
+    --color-accent: #ff7300;
+    --color-accent-secondary: #ff007f;
+    --color-accent-tertiary: #ffd700;
+    --color-border: #381a4a;
+    --color-input: #160a22;
+    --color-ring: #ff7300;
+    --color-destructive: #ff3333;
+
+    --box-shadow-neon: 0 0 5px #ff7300, 0 0 10px #ff730040;
+    --box-shadow-neon-sm: 0 0 3px #ff7300, 0 0 6px #ff730030;
+    --box-shadow-neon-lg: 0 0 10px #ff7300, 0 0 20px #ff730060, 0 0 40px #ff730030;
+    --box-shadow-neon-secondary: 0 0 5px #ff007f, 0 0 20px #ff007f60;
+    --box-shadow-neon-tertiary: 0 0 5px #ffd700, 0 0 20px #ffd70060;
+  }
+
+  .theme-sunset .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(255, 115, 0, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 115, 0, 0.1) 1px, transparent 1px);
+    opacity: 0.15;
+  }
+
+  .theme-sunset .cyber-glitch-text::before {
+    text-shadow: -1px 0 #ff007f;
+  }
+
+  .theme-sunset .cyber-glitch-text::after {
+    text-shadow: -1px 0 #ffd700;
+  }
+
+  .theme-sunset .neon-text {
+    text-shadow: 0 0 10px rgba(255, 115, 0, 0.6);
+  }
+
+  /* Morning Theme overrides (Scoped to specific pages) */
+  .theme-morning {
+    --color-background: #0a0a0f; /* Keep base same to blend with header/footer */
+    --color-foreground: #f8fafc;
+    --color-card: #1e293b;
+    --color-muted: #334155;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #38bdf8; /* Soft Neon Cyan */
+    --color-accent-secondary: #fb923c; /* Sunrise Orange */
+    --color-accent-tertiary: #fcd34d; /* Pale Yellow */
+    --color-border: #475569;
+    --color-input: #1e293b;
+    --color-ring: #38bdf8;
+    --color-destructive: #ef4444;
+
+    --box-shadow-neon: 0 0 5px #38bdf8, 0 0 10px #38bdf840;
+    --box-shadow-neon-sm: 0 0 3px #38bdf8, 0 0 6px #38bdf830;
+    --box-shadow-neon-lg: 0 0 10px #38bdf8, 0 0 20px #38bdf860, 0 0 40px #38bdf830;
+    --box-shadow-neon-secondary: 0 0 5px #fb923c, 0 0 20px #fb923c60;
+    --box-shadow-neon-tertiary: 0 0 5px #fcd34d, 0 0 20px #fcd34d60;
+  }
+
+  .theme-morning .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+    opacity: 0.2;
+  }
+
+  .theme-morning .cyber-glitch-text::before {
+    text-shadow: -1px 0 #fb923c;
+  }
+
+  .theme-morning .cyber-glitch-text::after {
+    text-shadow: -1px 0 #fcd34d;
+  }
+
+  .theme-morning .neon-text {
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  }
 }
 
 @keyframes glitch-anim-1 {
@@ -168,12 +250,12 @@
 
 .glow-btn:hover {
   box-shadow: var(--box-shadow-neon);
-  text-shadow: 0 0 5px #00ff88;
+  text-shadow: 0 0 5px var(--color-accent);
 }
 
 .glow-btn-secondary:hover {
   box-shadow: var(--box-shadow-neon-secondary);
-  text-shadow: 0 0 5px #ff00ff;
+  text-shadow: 0 0 5px var(--color-accent-secondary);
 }
 
 .markdown-body {
@@ -330,12 +412,12 @@
 
 ::-webkit-scrollbar-thumb {
   background: rgba(42, 42, 58, 0.8); /* --color-border */
-  border: 1px solid rgba(0, 255, 136, 0.3); /* --color-accent */
+  border: 1px solid var(--color-accent); 
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff88; /* --color-accent */
-  box-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+  background: var(--color-accent); 
+  box-shadow: 0 0 8px var(--color-accent);
 }
 
 ::-webkit-scrollbar-corner {
@@ -345,6 +427,5 @@
 /* For Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 136, 0.3) rgba(10, 10, 15, 0.8);
+  scrollbar-color: var(--color-accent) rgba(10, 10, 15, 0.8);
 }
-
