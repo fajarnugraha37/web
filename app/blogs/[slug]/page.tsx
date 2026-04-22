@@ -99,24 +99,7 @@ export default async function BlogPost({
   return (
     <PageTransition>
       <div className="relative min-h-screen">
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-background/80 backdrop-blur-xl border-b border-accent/20 shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
-            <Link
-              href="/blogs"
-              className="inline-flex items-center text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-accent transition-all group"
-            >
-              <div className="mr-3 p-1 border border-border group-hover:border-accent group-hover:bg-accent group-hover:text-black transition-all cyber-chamfer-sm">
-                <ChevronLeft className="w-3 h-3" />
-              </div>
-              <span className="sm:inline">DISCONNECT</span>
-            </Link>
-            <time className="text-accent-secondary font-mono text-[9px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5 tracking-tighter shadow-[0_0_10px_rgba(var(--accent-secondary-rgb),0.1)]">
-              [ TS: {postData.date} ]
-            </time>
-          </div>
-        </div>
-
-        <article className="max-w-[1400px] mx-auto relative z-10 px-4 pt-24 md:pt-32 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_240px] gap-12">
+        <article className="max-w-[1400px] mx-auto relative z-10 px-4 pt-8 md:pt-12 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_240px] gap-12">
           <aside className="hidden lg:block relative">
             <div className="sticky top-24 font-mono text-xs">
               <h3 className="text-accent uppercase tracking-widest mb-6 border-b border-border pb-2">
@@ -127,12 +110,43 @@ export default async function BlogPost({
           </aside>
 
           <main className="min-w-0">
+            {/* Sticky HUD */}
+            <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-xl border-b border-accent/20 shadow-[0_15px_35px_rgba(0,0,0,0.9)] -mx-4 md:-mx-10 mb-12 px-4 md:px-10 py-4 flex items-center justify-between gap-4">
+              <Link
+                href="/blogs"
+                className="inline-flex items-center text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-accent transition-all group"
+              >
+                <div className="mr-3 p-1 border border-border group-hover:border-accent group-hover:bg-accent group-hover:text-black transition-all cyber-chamfer-sm">
+                  <ChevronLeft className="w-3 h-3" />
+                </div>
+                <span className="sm:inline">DISCONNECT</span>
+              </Link>
+              <time className="text-accent-secondary font-mono text-[9px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5 tracking-tighter shadow-[0_0_10px_rgba(var(--accent-secondary-rgb),0.1)]">
+                [ TS: {postData.date} ]
+              </time>
+
+              {/* Visual HUD accent line */}
+              <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+            </div>
+
             <h1
               id={headings[0].id}
-              className="text-4xl md:text-6xl font-black font-sans text-foreground leading-tight tracking-tighter mb-16"
+              className="text-4xl md:text-6xl font-black font-sans text-foreground leading-tight tracking-tighter mb-6"
             >
               {postData.title}
             </h1>
+
+            <div className="flex flex-wrap gap-2 mb-16">
+              {postData.tags.map((t: string) => (
+                <span
+                  key={t}
+                  className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+
             <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 mb-16">
               <div className="flex items-center gap-3 text-[10px] md:text-xs text-muted-foreground font-mono">
                 <span>{postData.stats.readingTime} MIN READ</span>
@@ -146,7 +160,7 @@ export default async function BlogPost({
               />
             </div>
 
-            <div className="markdown-body p-6 md:p-10 bg-card/5 border border-border/20 text-foreground/90 font-mono relative overflow-x-auto">
+            <div className="markdown-body p-6 md:p-10 bg-card/5 border border-border/20 text-foreground/90 font-mono relative overflow-x-auto mb-16">
               <div className="relative z-10 prose prose-invert max-w-none">
                 <MDXRemote
                   source={postData.content}
@@ -160,8 +174,23 @@ export default async function BlogPost({
                 />
               </div>
             </div>
-          </main>
 
+            {/* Footer matching main branch style */}
+            <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest pb-20">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-accent/40 rounded-full" />
+                  TRANSMISSION_COMPLETE
+                </span>
+                <span className="text-border">|</span>
+                <span>NODE: {postData.slug}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>EOF</span>
+                <span className="w-1.5 h-3 bg-accent animate-blink" />
+              </div>
+            </div>
+          </main>
           <aside className="hidden lg:block relative">
             <div className="sticky top-24">
               <h3 className="font-mono text-accent-secondary text-xs uppercase tracking-widest mb-6 border-b border-border pb-2">
@@ -188,6 +217,12 @@ export default async function BlogPost({
             </div>
           </aside>
         </article>
+
+        {/* Ambient Room Glows from main branch */}
+        <div className="fixed inset-0 pointer-events-none -z-10">
+          <div className="absolute top-0 right-0 w-[50vw] h-[50vh] bg-accent/5 blur-[150px] rounded-full" />
+          <div className="absolute bottom-0 left-0 w-[50vw] h-[50vh] bg-accent-secondary/5 blur-[150px] rounded-full" />
+        </div>
       </div>
     </PageTransition>
   );

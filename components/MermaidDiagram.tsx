@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import mermaid from "mermaid";
 import {
   ZoomIn,
@@ -25,8 +26,10 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgCode, setSvgCode] = useState<string>("");
   const [isZoomed, setIsZoomed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     let isMounted = true;
     const renderDiagram = async () => {
       try {
@@ -137,6 +140,113 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
     setIsZoomed(false);
   }, []);
 
+  const modalContent = (
+    <AnimatePresence>
+      {isZoomed && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8"
+          onClick={closeZoom}
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="relative w-full max-w-6xl h-[80vh] flex flex-col items-center justify-center bg-card rounded-xl border border-accent/30 shadow-[0_0_50px_rgba(var(--accent-rgb),0.2)] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/50 backdrop-blur-md border-b border-border/50 z-20">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                <span className="text-[10px] font-mono text-accent uppercase tracking-[0.2em]">
+                  Diagram_Node::Inspected
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex bg-background/80 border border-border rounded-md p-0.5">
+                  <button
+                    onClick={handleCopy}
+                    className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
+                    title="Copy Raw"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleDownloadSVG}
+                    className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
+                    title="Save SVG"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <button
+                  onClick={closeZoom}
+                  className="p-2 bg-accent/10 border border-accent/20 rounded-md hover:bg-accent hover:text-black transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <TransformWrapper
+              initialScale={1}
+              centerOnInit={true}
+              minScale={0.1}
+              maxScale={8}
+            >
+              {({ zoomIn, zoomOut, resetTransform }) => (
+                <>
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 bg-background/90 backdrop-blur-md border border-accent/30 rounded-full p-1.5 shadow-2xl">
+                    <button
+                      onClick={() => zoomIn()}
+                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => zoomOut()}
+                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
+                    >
+                      <Minus className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => resetTransform()}
+                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing pt-16">
+                    <TransformComponent
+                      wrapperStyle={{ width: "100%", height: "100%" }}
+                      contentStyle={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        className="p-12 md:p-24 flex items-center justify-center"
+                        dangerouslySetInnerHTML={{ __html: svgCode }}
+                      />
+                    </TransformComponent>
+                  </div>
+                </>
+              )}
+            </TransformWrapper>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <>
       <div className="relative group my-8 p-4 border border-border/50 rounded-lg bg-card/30 overflow-x-auto">
@@ -178,110 +288,7 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
         />
       </div>
 
-      <AnimatePresence>
-        {isZoomed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8"
-            onClick={closeZoom}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="relative w-full max-w-6xl h-[80vh] flex flex-col items-center justify-center bg-card rounded-xl border border-accent/30 shadow-[0_0_50px_rgba(var(--accent-rgb),0.2)] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/50 backdrop-blur-md border-b border-border/50 z-20">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                  <span className="text-[10px] font-mono text-accent uppercase tracking-[0.2em]">
-                    Diagram_Node::Inspected
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex bg-background/80 border border-border rounded-md p-0.5">
-                    <button
-                      onClick={handleCopy}
-                      className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
-                      title="Copy Raw"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={handleDownloadSVG}
-                      className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
-                      title="Save SVG"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <button
-                    onClick={closeZoom}
-                    className="p-2 bg-accent/10 border border-accent/20 rounded-md hover:bg-accent hover:text-black transition-all"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <TransformWrapper
-                initialScale={1}
-                centerOnInit={true}
-                minScale={0.1}
-                maxScale={8}
-              >
-                {({ zoomIn, zoomOut, resetTransform }) => (
-                  <>
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 bg-background/90 backdrop-blur-md border border-accent/30 rounded-full p-1.5 shadow-2xl">
-                      <button
-                        onClick={() => zoomIn()}
-                        className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => zoomOut()}
-                        className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                      >
-                        <Minus className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => resetTransform()}
-                        className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                      >
-                        <RotateCcw className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    <div className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing pt-16">
-                      <TransformComponent
-                        wrapperStyle={{ width: "100%", height: "100%" }}
-                        contentStyle={{
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <div
-                          className="p-12 md:p-24 flex items-center justify-center"
-                          dangerouslySetInnerHTML={{ __html: svgCode }}
-                        />
-                      </TransformComponent>
-                    </div>
-                  </>
-                )}
-              </TransformWrapper>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mounted && createPortal(modalContent, document.body)}
     </>
   );
 };
