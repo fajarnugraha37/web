@@ -72,13 +72,13 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/postgresql"
+                  href="/labs"
                   className="text-muted-foreground hover:text-accent-tertiary transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="opacity-0 group-hover:opacity-100 text-accent-tertiary transition-opacity">
                     &gt;
                   </span>{" "}
-                  SQL Lab
+                  Laboratory
                 </Link>
               </li>
               <li>
@@ -110,9 +110,30 @@ export function Footer() {
           {/* Socials */}
           <div className="space-y-4">
             <h3 className="font-sans text-sm font-bold tracking-widest text-foreground uppercase border-b border-border/50 pb-2 inline-block">
-              /Connect
+              /Active_Nodes
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <ul className="space-y-2 text-sm font-mono flex flex-col">
+              <li>
+                <Link
+                  href="/labs/postgresql"
+                  className="text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group w-fit"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  SQL_LAB.EXE
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/labs/duckdb"
+                  className="text-muted-foreground hover:text-accent-secondary transition-colors flex items-center gap-2 group w-fit"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary" />
+                  TELEMETRY_ANALYTICS.EXE
+                </Link>
+              </li>
+            </ul>
+
+            <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border/30">
               <a
                 href="https://github.com/fajarnugraha37"
                 target="_blank"

@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Play, RotateCcw, Clock } from "lucide-react";
 
 interface SqlEditorProps {
-  onExecute: (query: string) => void;
+  onExecute: (query: string, page?: number, size?: number) => void;
   isLoading: boolean;
   disabled: boolean;
 }
