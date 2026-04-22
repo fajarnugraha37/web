@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Orbitron, Share_Tech_Mono, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import "./app.css";
+import "katex/dist/katex.min.css";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
