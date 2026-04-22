@@ -7,7 +7,7 @@ import { Database, BarChart3, ChevronRight, Binary } from "lucide-react";
 const LAB_NODES = [
   {
     id: "postgresql",
-    name: "SQL_LAB.EXE",
+    name: "SQL LAB.EXE",
     description:
       "Persistent PostgreSQL WASM Node for relational database exploration.",
     icon: <Database className="w-8 h-8" />,
@@ -17,7 +17,7 @@ const LAB_NODES = [
   },
   {
     id: "duckdb",
-    name: "TELEMETRY_ANALYTICS.EXE",
+    name: "TELEMETRY ANALYTICS.EXE",
     description: "OLAP engine (DuckDB) for big data analysis exploration.",
     icon: <BarChart3 className="w-8 h-8" />,
     path: "/labs/duckdb",
