@@ -9,7 +9,7 @@ import { useState, useRef, useEffect } from "react";
  */
 export function ExpandableSummary({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState(0);
 
   useEffect(() => {

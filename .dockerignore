@@ -6,3 +6,6 @@ out
 *.md
 .env*
 .eslintrc.json
+.playwright-mcp
+.vscode/
+.locals/

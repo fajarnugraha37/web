@@ -3,7 +3,7 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Clock } from "lucide-react";
 
 interface SqlEditorProps {
@@ -18,16 +18,23 @@ export function SqlEditor({ onExecute, isLoading, disabled }: SqlEditorProps) {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showHistory, setShowHistory] = useState(false);
 
-  // Load history from localStorage on mount
+  // Load history from localStorage on mount. 
+  // Wrapped to ensure it only runs once and without causing side-effects.
   useEffect(() => {
-    const saved = localStorage.getItem("sysop_cmd_history");
-    if (saved) {
-      try {
-        setHistory(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse command history");
+    const loadHistory = () => {
+      const saved = localStorage.getItem("sysop_cmd_history");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setHistory(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse command history");
+        }
       }
-    }
+    };
+    loadHistory();
   }, []);
 
   const handleExecute = useCallback(() => {
@@ -131,7 +138,7 @@ export function SqlEditor({ onExecute, isLoading, disabled }: SqlEditorProps) {
             <Clock className="w-4 h-4" />
           </button>
           <button
-            onClick={setQuery.bind(null, "")}
+            onClick={() => setQuery("")}
             className="p-1.5 hover:text-destructive transition-colors text-muted-foreground"
             title="Clear Buffer"
           >

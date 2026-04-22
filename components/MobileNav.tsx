@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -51,22 +51,31 @@ export function MobileNav() {
   const [expandedLabs, setExpandedLabs] = useState(false);
   const pathname = usePathname();
 
+  const handleClose = useCallback(() => {
+    setOpen(false);
+    setExpandedLabs(false);
+  }, []);
+
   // Close menu when resizing to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768 && open) {
-        setOpen(false);
+        handleClose();
       }
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [open]);
+  }, [open, handleClose]);
 
-  // Close menu on navigation (including same page)
+  // Handle navigation updates via effect - using a ref to track if this is the initial load
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    setOpen(false);
-    setExpandedLabs(false);
-  }, [pathname]);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    handleClose();
+  }, [pathname, handleClose]);
 
   return (
     <div className="md:hidden">
@@ -100,7 +109,7 @@ export function MobileNav() {
       {open && (
         <div
           className="fixed inset-0 bg-background/40 backdrop-blur-sm z-30"
-          onClick={() => setOpen(false)}
+          onClick={handleClose}
           aria-hidden="true"
         />
       )}
@@ -126,7 +135,7 @@ export function MobileNav() {
                     <div className="flex items-center justify-between px-6 py-4">
                       <Link
                         href={link.href}
-                        onClick={() => setOpen(false)}
+                        onClick={handleClose}
                         className={`flex items-center gap-3 font-sans text-sm uppercase tracking-widest transition-colors text-foreground/80 hover:text-accent ${pathname.startsWith(link.href) ? "text-accent" : ""}`}
                       >
                         <span className="font-mono text-accent/60 text-xs">
@@ -149,7 +158,7 @@ export function MobileNav() {
                           <li key={child.href}>
                             <Link
                               href={child.href}
-                              onClick={() => setOpen(false)}
+                              onClick={handleClose}
                               className={`flex items-center gap-3 pl-12 pr-6 py-3 font-mono text-[11px] uppercase tracking-widest transition-colors ${pathname === child.href ? "text-accent" : "text-muted-foreground hover:text-accent"}`}
                             >
                               <span className="opacity-40">#</span>
@@ -164,7 +173,7 @@ export function MobileNav() {
                   <Link
                     href={link.href}
                     prefetch={link.href.endsWith(".xml") ? false : undefined}
-                    onClick={() => setOpen(false)}
+                    onClick={handleClose}
                     className={`flex items-center gap-3 px-6 py-4 font-sans text-sm uppercase tracking-widest transition-colors ${
                       link.highlight
                         ? "text-accent border-l-2 border-accent hover:bg-accent/10"

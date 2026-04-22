@@ -13,7 +13,7 @@ type Props = {
  */
 export function ExpandableDescriptions({ descriptions }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const fullRef = useRef<HTMLDivElement>(null);
+  const fullRef = useRef<HTMLDivElement | null>(null);
   const [fullHeight, setFullHeight] = useState(0);
 
   useEffect(() => {

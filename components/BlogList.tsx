@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -33,12 +33,10 @@ export function BlogList({ blogs }: BlogListProps) {
   const isMobile = useIsMobile();
   const listTopRef = useRef<HTMLDivElement>(null);
 
-  // Close tags when switching to mobile, but they'll be open on desktop via conditional rendering
-  useEffect(() => {
-    if (!isMobile) {
-      setIsTagsExpanded(false);
-    }
-  }, [isMobile]);
+  // Fix: Use conditional rendering or direct state management to avoid effect-based sync
+  // If we want tags to be collapsed on mobile by default but open on desktop,
+  // we control this with a derived state or logic within the render.
+  const shouldTagsExpand = isMobile ? isTagsExpanded : true;
 
   // Extract unique tags
   const allTags = Array.from(
@@ -65,7 +63,6 @@ export function BlogList({ blogs }: BlogListProps) {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    // Smooth scroll to top of the list container
     listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -110,7 +107,6 @@ export function BlogList({ blogs }: BlogListProps) {
           </div>
 
           <div className="flex flex-col">
-            {/* Header: Toggle on mobile, static on desktop */}
             <button
               type="button"
               onClick={() => {
@@ -145,15 +141,14 @@ export function BlogList({ blogs }: BlogListProps) {
                 )}
                 <ChevronDown
                   className={`w-4 h-4 text-accent transition-transform md:hidden ${
-                    isTagsExpanded ? "rotate-180" : ""
+                    shouldTagsExpand ? "rotate-180" : ""
                   }`}
                 />
               </div>
             </button>
 
-            {/* Tag Cloud: Collapsible on mobile, always visible on desktop */}
             <AnimatePresence initial={false}>
-              {(isTagsExpanded || !isMobile) && (
+              {shouldTagsExpand && (
                 <motion.div
                   key="tags-content"
                   initial={isMobile ? { height: 0, opacity: 0 } : false}
@@ -358,7 +353,7 @@ export function BlogList({ blogs }: BlogListProps) {
 
             <button
               type="button"
-              onClick={() => handlePageChange(Math.min(totalPages, p + 1))}
+              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
               disabled={safePage === totalPages}
               className="px-4 py-2 font-mono text-xs border border-border cyber-chamfer-sm transition-all hover:border-accent hover:text-accent disabled:opacity-20 disabled:cursor-not-allowed group"
             >
