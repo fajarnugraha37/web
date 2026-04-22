@@ -144,7 +144,7 @@ export function Footer() {
                 <Github className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </a>
               <a
-                href="https://linkedin.com/in/fajar-nugraha"
+                href="https://www.linkedin.com/in/fajar-abdi-nugraha-81b26618a/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="LinkedIn"
@@ -153,7 +153,7 @@ export function Footer() {
                 <Linkedin className="w-4 h-4 group-hover:scale-110 transition-transform" />
               </a>
               <a
-                href="mailto:fajar.nugraha37@gmail.com"
+                href="mailto:nugrahafajar37@gmail.com"
                 aria-label="Email"
                 className="p-2 border border-border bg-card/50 cyber-chamfer-sm hover:border-destructive hover:text-destructive transition-all group hover:shadow-[0_0_10px_rgba(255,51,102,0.4)]"
               >
