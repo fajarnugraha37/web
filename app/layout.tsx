@@ -88,12 +88,40 @@ export default function RootLayout({
               >
                 /About
               </Link>
-              <Link
-                href="/postgresql"
-                className="hover:text-accent-tertiary transition-colors"
-              >
-                /SQL Lab
-              </Link>
+              
+              {/* Labs Dropdown */}
+              <div className="relative group">
+                <Link
+                  href="/labs"
+                  className="hover:text-accent-tertiary transition-colors flex items-center gap-1"
+                >
+                  /Labs
+                  <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform duration-300">▼</span>
+                </Link>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute top-full -left-4 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50">
+                  <div className="min-w-[180px] bg-background border border-border p-2 cyber-chamfer-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                    <div className="absolute inset-0 cyber-grid-bg opacity-10 pointer-events-none" />
+                    <Link
+                      href="/labs/postgresql"
+                      className="block px-3 py-2 hover:bg-accent/10 hover:text-accent transition-all border-l-2 border-transparent hover:border-accent font-mono text-[10px]"
+                    >
+                      SQL_LAB.EXE
+                    </Link>
+                    <Link
+                      href="/labs/duckdb"
+                      className="block px-3 py-2 hover:bg-accent-secondary/10 hover:text-accent-secondary transition-all border-l-2 border-transparent hover:border-accent-secondary font-mono text-[10px]"
+                    >
+                      TELEMETRY_ANALYTICS.EXE
+                    </Link>
+                    <div className="mt-2 pt-2 border-t border-border/50 text-[8px] px-3 text-muted-foreground italic">
+                      Hardware accelerated nodes
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <Link
                 href="/feed.xml"
                 className="hover:text-accent transition-colors"

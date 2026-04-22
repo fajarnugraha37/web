@@ -316,3 +316,35 @@
   max-height: var(--expand-height, 9999px);
 }
 
+/* ── Cyberpunk Scrollbars ─────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 10, 15, 0.8); /* --color-background */
+  border-left: 1px solid rgba(42, 42, 58, 0.5); /* --color-border */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(42, 42, 58, 0.8); /* --color-border */
+  border: 1px solid rgba(0, 255, 136, 0.3); /* --color-accent */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ff88; /* --color-accent */
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 136, 0.3) rgba(10, 10, 15, 0.8);
+}
+
