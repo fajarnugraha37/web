@@ -136,7 +136,7 @@ export default async function Home() {
             </ScrollReveal>
           </div>
 
-          <div className="col-span-1 lg:col-span-5 flex flex-col relative justify-center order-1 lg:order-2 w-full max-w-lg mx-auto lg:max-w-none">
+          <div className="hidden col-span-1 lg:col-span-5 lg:flex flex-col relative justify-center order-1 lg:order-2 w-full max-w-lg mx-auto lg:max-w-none">
             <ScrollReveal delay={0.4} direction="left">
               <div className="bg-card border border-border p-1 relative shadow-[0_10px_40px_rgba(255,115,0,0.15)] cyber-chamfer">
                 {/* Terminal Header */}
@@ -277,8 +277,8 @@ export default async function Home() {
                 TELEMETRY ANALYTICS.EXE
               </h3>
               <p className="text-sm font-mono text-muted-foreground mb-6">
-                High-speed OLAP engine powered by DuckDB-WASM. Drop massive
-                CSV/Parquet files and query them with zero latency.
+                OLAP engine powered by DuckDB-WASM. Drop massive CSV/Parquet
+                files and query them with zero latency.
               </p>
               <div className="mt-auto flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-accent-secondary opacity-80 group-hover:opacity-100 transition-opacity">
                 <span>CONNECT_NODE</span>
@@ -380,26 +380,26 @@ export default async function Home() {
               <div className="space-y-5 px-1 md:px-3 relative z-10">
                 <div className="group/item">
                   <div className="text-[10px] md:text-xs text-muted-foreground mb-1 group-hover/item:text-accent-tertiary/70 transition-colors font-sans font-bold tracking-widest">
-                    LANGUAGES & COMPUTE
+                    LANGUAGES
                   </div>
                   <div className="font-mono text-xs md:text-sm text-accent-tertiary group-hover:brightness-125 transition-all">
-                    Java, Go, TypeScript, WebAssembly (WASM)
+                    Java, Node.js, Go, .NET, PHP, Vue
                   </div>
                 </div>
                 <div className="group/item">
                   <div className="text-[10px] md:text-xs text-muted-foreground mb-1 group-hover/item:text-accent-secondary/70 transition-colors font-sans font-bold tracking-widest">
-                    INFRASTRUCTURE & EDGE
+                    INFRASTRUCTURE
                   </div>
                   <div className="font-mono text-xs md:text-sm text-accent-secondary group-hover:brightness-125 transition-all">
-                    AWS, Kubernetes, Docker, Edge Functions
+                    AWS, EKS, Kubernetes, Docker
                   </div>
                 </div>
                 <div className="group/item">
                   <div className="text-[10px] md:text-xs text-muted-foreground mb-1 group-hover/item:text-accent/70 transition-colors font-sans font-bold tracking-widest">
-                    DATABASES & ANALYTICS
+                    DATABASES & MESSAGING
                   </div>
                   <div className="font-mono text-xs md:text-sm text-accent group-hover:brightness-125 transition-all">
-                    PostgreSQL, DuckDB, Redis, Kafka, RabbitMQ
+                    OracleSQL, MySQL, DuckDB, Redis, Kafka, RabbitMQ
                   </div>
                 </div>
               </div>
