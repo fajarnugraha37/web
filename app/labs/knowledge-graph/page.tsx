@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useCallback } from "react";
 import { PageTransition } from "@/components/PageTransition";
 import { KnowledgeGraphCanvas } from "@/components/KnowledgeGraph/KnowledgeGraphCanvas";
 import relations from "@/public/relations.json";
@@ -9,6 +11,16 @@ import { ChevronLeft, Info, Activity, Database, Share2 } from "lucide-react";
 
 export default function KnowledgeGraphPage() {
   const graphData = transformDataToGraph(relations, searchIndex);
+
+  const handleExport = useCallback(() => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(graphData, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "blog_network_data.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }, [graphData]);
 
   return (
     <PageTransition>
@@ -115,7 +127,10 @@ export default function KnowledgeGraphPage() {
               <p className="text-[9px] font-mono text-muted-foreground mb-3">
                 Download relational data for offline processing.
               </p>
-              <button className="w-full py-2 bg-accent/10 border border-accent/30 text-accent text-[9px] font-mono uppercase hover:bg-accent hover:text-black transition-all">
+              <button 
+                onClick={handleExport}
+                className="w-full py-2 bg-accent/10 border border-accent/30 text-accent text-[9px] font-mono uppercase hover:bg-accent hover:text-black transition-all cursor-pointer"
+              >
                 INITIATE_DATA_DUMP
               </button>
             </div>

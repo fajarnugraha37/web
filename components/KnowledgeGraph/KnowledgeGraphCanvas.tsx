@@ -7,15 +7,15 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
   Html,
-  Stars,
-  MeshDistortMaterial,
-  Line,
+  MeshWobbleMaterial,
+  Grid,
 } from "@react-three/drei";
+import { EffectComposer, Bloom, Noise } from "@react-three/postprocessing";
 import * as THREE from "three";
 import {
   forceSimulation,
@@ -24,9 +24,13 @@ import {
   forceCenter,
 } from "d3-force-3d";
 import { GraphData, GraphNode, GraphLink } from "@/lib/graph-utils";
-import { useRouter } from "next/navigation";
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, X, Zap } from "lucide-react";
 
+const CP_YELLOW = "#fcee0a";
+const CP_CYAN = "#00f0ff";
+const CP_MAGENTA = "#ff003c";
+
+// Single Node Component - Performance Optimized
 const Node = ({
   node,
   isHovered,
@@ -40,13 +44,31 @@ const Node = ({
   onHover: (id: string | null) => void;
   onClick: (e: any, id: string) => void;
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const active = isHovered || isSelected;
 
+  // Manual update of position via ref to avoid React re-renders
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.position.set(node.x || 0, node.y || 0, node.z || 0);
+    }
+  });
+
   return (
-    <group position={[node.x || 0, node.y || 0, node.z || 0]}>
+    <group ref={groupRef}>
+      {active && (
+        <mesh>
+          <icosahedronGeometry args={[2.5, 0]} />
+          <meshBasicMaterial
+            color={isSelected ? CP_CYAN : CP_YELLOW}
+            transparent
+            opacity={0.05}
+            wireframe
+          />
+        </mesh>
+      )}
+
       <mesh
-        ref={meshRef}
         onPointerOver={(e) => {
           e.stopPropagation();
           onHover(node.id);
@@ -58,69 +80,85 @@ const Node = ({
         }}
         onClick={(e) => onClick(e, node.id)}
       >
-        <sphereGeometry args={[active ? 1.5 : 0.8, 32, 32]} />
-        <MeshDistortMaterial
-          color={active ? (isSelected ? "#00d4ff" : "#ff00ff") : "#00ff88"}
-          emissive={active ? (isSelected ? "#00d4ff" : "#ff00ff") : "#00ff88"}
-          emissiveIntensity={active ? 2 : 0.5}
-          distort={active ? 0.4 : 0.2}
-          speed={active ? 4 : 2}
-          metalness={0.8}
-          roughness={0.2}
+        <icosahedronGeometry args={[active ? 4.5 : 2.4, 0]} />
+        <MeshWobbleMaterial
+          color={active ? (isSelected ? CP_CYAN : CP_YELLOW) : "#111"}
+          emissive={active ? (isSelected ? CP_CYAN : CP_YELLOW) : CP_CYAN}
+          emissiveIntensity={active ? 8 : 0.6}
+          factor={active ? 0.4 : 0}
+          speed={active ? 4 : 0}
         />
       </mesh>
 
       {active && (
         <Html distanceFactor={15} position={[0, 2, 0]} zIndexRange={[100, 0]}>
           <div
-            className={`bg-background/95 backdrop-blur-xl border-2 ${isSelected ? "border-accent-secondary shadow-[0_0_30px_rgba(0,212,255,0.4)]" : "border-accent shadow-[0_0_20px_rgba(0,255,136,0.3)]"} p-5 rounded-lg min-w-[280px] pointer-events-auto select-none cyber-chamfer transition-all duration-300 transform scale-110`}
+            className={`bg-[#050505]/95 backdrop-blur-xl border-t-4 ${isSelected ? "border-t-[#00f0ff] shadow-[0_0_40px_rgba(0,240,255,0.4)]" : "border-t-[#fcee0a] shadow-[0_0_30px_rgba(252,238,10,0.3)]"} p-6 min-w-[300px] pointer-events-auto select-none transition-all duration-300 transform scale-110 relative overflow-hidden`}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              clipPath: "polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%)",
+            }}
           >
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <div className="text-[10px] font-mono text-accent uppercase tracking-[0.2em] mb-1">
-                  {isSelected ? "NODE_LOCKED" : "NODE_SIGNAL_DETECTED"}
+            <div className="absolute inset-0 cyber-grid-bg opacity-10 pointer-events-none" />
+            <div className="absolute top-0 right-0 p-2 opacity-20">
+              <Zap
+                className={`w-8 h-8 ${isSelected ? "text-[#00f0ff]" : "text-[#fcee0a]"}`}
+              />
+            </div>
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <div
+                    className={`text-[10px] font-mono ${isSelected ? "text-[#00f0ff]" : "text-[#fcee0a]"} uppercase tracking-[0.3em] mb-1 font-black animate-pulse`}
+                  >
+                    {isSelected ? "://DATA_LOCKED" : "://SIGNAL_FOUND"}
+                  </div>
+                  <div className="text-xl font-black text-white leading-tight tracking-tighter uppercase italic">
+                    {node.title}
+                  </div>
                 </div>
-                <div className="text-lg font-black text-foreground leading-tight">
-                  {node.title}
-                </div>
+                {isSelected && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClick(e, node.id);
+                    }}
+                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white/50" />
+                  </button>
+                )}
               </div>
-              {isSelected && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick(e, node.id);
-                  }}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
-                >
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </button>
-              )}
+
+              <p className="text-[11px] font-mono text-white/70 leading-relaxed mb-5 border-l-2 border-white/20 pl-3">
+                {node.description}
+              </p>
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                {node.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className={`text-[9px] font-mono font-black border ${isSelected ? "border-[#00f0ff]/40 text-[#00f0ff]" : "border-[#fcee0a]/40 text-[#fcee0a]"} px-2 py-0.5 uppercase tracking-tighter`}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              <a
+                href={`/web/blogs/${node.id}`}
+                target="_blank"
+                className={`flex items-center justify-center gap-3 w-full py-3 ${isSelected ? "bg-[#00f0ff] text-black" : "bg-[#fcee0a] text-black"} text-[11px] font-black font-mono uppercase hover:brightness-125 transition-all group`}
+                style={{
+                  clipPath:
+                    "polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%)",
+                }}
+              >
+                <span>OPEN_ENCRYPTED_LOG</span>
+                <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
             </div>
-
-            <p className="text-xs font-mono text-muted-foreground leading-relaxed mb-4 line-clamp-3">
-              {node.description}
-            </p>
-
-            <div className="flex flex-wrap gap-2 mb-5">
-              {node.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[9px] font-mono bg-accent/5 border border-accent/20 text-accent px-2 py-0.5 uppercase tracking-tighter"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-
-            <a
-              href={`/web/blogs/${node.id}`}
-              target="_blank"
-              className="flex items-center justify-center gap-2 w-full py-2.5 bg-accent/10 border border-accent/40 text-accent text-[10px] font-bold font-mono uppercase hover:bg-accent hover:text-black transition-all group cyber-chamfer-sm"
-            >
-              <span>READ_LOG.EXE</span>
-              <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
           </div>
         </Html>
       )}
@@ -128,35 +166,48 @@ const Node = ({
   );
 };
 
+// Fixed Optimized Link Component using native line and buffer update
 const Link = ({ link }: { link: GraphLink }) => {
-  const sourceNode = link.source as any as GraphNode;
-  const targetNode = link.target as any as GraphNode;
+  const lineRef = useRef<THREE.Line>(null);
+  const geoRef = useRef<THREE.BufferGeometry>(null);
 
-  if (!sourceNode || !targetNode) return null;
+  useFrame(() => {
+    if (lineRef.current && geoRef.current) {
+      const source = link.source as any as GraphNode;
+      const target = link.target as any as GraphNode;
+      const posAttr = geoRef.current.attributes.position;
+      const pa = posAttr.array as Float32Array;
 
-  const points = [
-    [sourceNode.x || 0, sourceNode.y || 0, sourceNode.z || 0],
-    [targetNode.x || 0, targetNode.y || 0, targetNode.z || 0],
-  ] as [number, number, number][];
+      pa[0] = source.x || 0;
+      pa[1] = source.y || 0;
+      pa[2] = source.z || 0;
+      pa[3] = target.x || 0;
+      pa[4] = target.y || 0;
+      pa[5] = target.z || 0;
+
+      posAttr.needsUpdate = true;
+    }
+  });
 
   return (
-    <Line
-      points={points}
-      color="#00d4ff"
-      lineWidth={0.5}
-      transparent
-      opacity={0.15}
-    />
+    <line ref={lineRef}>
+      <bufferGeometry ref={geoRef}>
+        <bufferAttribute
+          attach="attributes-position"
+          count={2}
+          array={new Float32Array(6)}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <lineBasicMaterial color={CP_MAGENTA} transparent opacity={0.2} />
+    </line>
   );
 };
 
 const Scene = ({ data }: { data: GraphData }) => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [, setTick] = useState(0);
-  const router = useRouter();
 
-  // Initialize simulation
   const { nodes, links } = useMemo(() => {
     return {
       nodes: data.nodes.map((d) => ({ ...d })),
@@ -170,57 +221,47 @@ const Scene = ({ data }: { data: GraphData }) => {
         "link",
         forceLink<GraphNode, GraphLink>(links)
           .id((d) => d.id)
-          .distance(30),
+          .distance(40),
       )
-      .force("charge", forceManyBody().strength(-150))
-      .force("center", forceCenter(0, 0, 0))
-      .on("tick", () => {
-        setTick((t) => t + 1);
-      });
+      .force("charge", forceManyBody().strength(-200))
+      .force("center", forceCenter(0, 0, 0));
 
-    const timer = setTimeout(() => simulation.stop(), 5000);
-
+    const timer = setTimeout(() => simulation.stop(), 8000);
     return () => {
       simulation.stop();
       clearTimeout(timer);
     };
   }, [nodes, links]);
 
-  const handleNodeClick = useCallback(
-    (e: any, id: string) => {
-      e.stopPropagation();
-      if (selectedNode === id) {
-        setSelectedNode(null);
-      } else {
-        setSelectedNode(id);
-      }
-    },
-    [selectedNode],
-  );
-
-  const handleMissClick = useCallback(() => {
-    setSelectedNode(null);
+  const handleNodeClick = useCallback((e: any, id: string) => {
+    e.stopPropagation();
+    setSelectedNode((prev) => (prev === id ? null : id));
   }, []);
+
+  const handleMissClick = useCallback(() => setSelectedNode(null), []);
 
   return (
     <>
-      <Stars
-        radius={100}
-        depth={50}
-        count={5000}
-        factor={4}
-        saturation={0}
-        fade
-        speed={1}
-      />
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#00ff88" />
-      <pointLight position={[-10, -10, -10]} intensity={1} color="#ff00ff" />
+      <color attach="background" args={["#030305"]} />
 
-      {/* Background click handler */}
-      <mesh position={[0, 0, 0]} onClick={handleMissClick} visible={false}>
-        <sphereGeometry args={[500, 32, 32]} />
-      </mesh>
+      <Grid
+        position={[0, -40, 0]}
+        infiniteGrid
+        fadeDistance={100}
+        fadeStrength={3}
+        cellSize={10}
+        sectionSize={50}
+        sectionColor={CP_MAGENTA}
+        cellColor="#111"
+      />
+
+      <ambientLight intensity={0.2} />
+      <pointLight position={[10, 10, 10]} intensity={1.5} color={CP_CYAN} />
+      <pointLight
+        position={[-10, -10, -10]}
+        intensity={1.5}
+        color={CP_MAGENTA}
+      />
 
       <group>
         {links.map((link, i) => (
@@ -238,50 +279,80 @@ const Scene = ({ data }: { data: GraphData }) => {
         ))}
       </group>
 
+      <EffectComposer disableNormalPass multisampling={0}>
+        <Bloom
+          intensity={1.0}
+          luminanceThreshold={0.2}
+          luminanceSmoothing={0.9}
+        />
+        <Noise opacity={0.03} />
+      </EffectComposer>
+
       <OrbitControls
         enablePan={false}
-        minDistance={20}
+        minDistance={30}
         maxDistance={200}
         autoRotate={!hoveredNode && !selectedNode}
         autoRotateSpeed={0.5}
         makeDefault
       />
+
+      <mesh position={[0, 0, 0]} onClick={handleMissClick} visible={false}>
+        <sphereGeometry args={[400, 8, 8]} />
+      </mesh>
     </>
   );
 };
 
 export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted)
+    return (
+      <div className="w-full h-full min-h-[600px] bg-[#030305] rounded-xl border-2 border-[#ff003c]/10 flex items-center justify-center">
+        <div className="text-accent font-mono text-xs animate-pulse">
+          INIT_NEURAL_LINK...
+        </div>
+      </div>
+    );
+
   return (
-    <div className="w-full h-full min-h-[600px] bg-[#050505] rounded-xl border border-accent/20 relative overflow-hidden">
-      {/* HUD Overlay */}
-      <div className="absolute top-6 left-6 z-10 pointer-events-none">
+    <div className="w-full h-full min-h-[600px] md:min-h-[700px] bg-[#030305] rounded-xl border-2 border-[#ff003c]/10 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-10">
+        <div className="w-full h-1 bg-[#00f0ff] absolute top-0 animate-[scan_6s_linear_infinite] shadow-[0_0_15px_#00f0ff]" />
+      </div>
+
+      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10 pointer-events-none">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-2 h-2 bg-accent rounded-full animate-pulse shadow-[0_0_10px_#00ff88]" />
-          <span className="text-[10px] font-mono text-accent uppercase tracking-[0.3em]">
-            Article_Connections::Active
+          <div className="w-2 h-2 bg-[#fcee0a] rotate-45 animate-pulse" />
+          <span className="text-[10px] font-mono text-[#fcee0a] uppercase tracking-[0.3em] font-black">
+            NET_RUNNER::ACTIVE
           </span>
         </div>
-        <div className="text-xs font-mono text-muted-foreground/60 max-w-xs">
-          Visualizing the interconnected web of blog posts. Each node represents
-          an article; connections highlight related topics and shared concepts.
+        <div className="text-[9px] font-mono text-[#00f0ff]/60 max-w-xs uppercase leading-tight">
+          Mapping blog content network. [ SECURE LINK ESTABLISHED ]
         </div>
       </div>
 
-      <div className="absolute bottom-6 right-6 z-10 pointer-events-none text-right">
-        <div className="text-[10px] font-mono text-accent-secondary uppercase tracking-widest">
-          Controls
-        </div>
-        <div className="text-[8px] font-mono text-muted-foreground/40 mt-1">
-          DRAG TO ROTATE // SCROLL TO ZOOM
-          <br />
-          CLICK NODE TO ACCESS DATA
-        </div>
-      </div>
-
-      <Canvas dpr={[1, 2]}>
-        <PerspectiveCamera makeDefault position={[0, 0, 80]} fov={60} />
+      <Canvas
+        dpr={1}
+        gl={{ antialias: false, powerPreference: "high-performance" }}
+      >
+        <PerspectiveCamera makeDefault position={[0, 20, 100]} fov={60} />
         <Scene data={data} />
       </Canvas>
+
+      <style jsx global>{`
+        @keyframes scan {
+          from {
+            top: -5%;
+          }
+          to {
+            top: 105%;
+          }
+        }
+      `}</style>
     </div>
   );
 };
