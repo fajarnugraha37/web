@@ -160,8 +160,8 @@ export default async function Home() {
                 </div>
 
                 {/* Decorative Corner Accents */}
-                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-accent-secondary opacity-60 shadow-[0_0_10px_#ff007f]"></div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-accent opacity-60 shadow-[0_0_10px_#ff7300]"></div>
+                {/* <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-accent-secondary opacity-60 shadow-[0_0_10px_#ff007f]"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-accent opacity-60 shadow-[0_0_10px_#ff7300]"></div> */}
               </div>
             </ScrollReveal>
           </div>

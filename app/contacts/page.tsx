@@ -31,12 +31,13 @@ export default function ContactsPage() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const terminalBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let isMounted = true;
     const lines = [
-      "Welcome to SYS//OP Secure Terminal",
+      "Welcome to SYS//OP Secure Terminal [MORNING_PROTO_v1.0]",
+      "Establishing connection to neural net...",
       "Type 'help' to see available commands or 'ls' to view comm channels.",
       "",
     ];
@@ -61,11 +62,13 @@ export default function ContactsPage() {
     };
   }, []);
 
+  // scroll behavior
   useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    if (terminalBodyRef.current) {
+      // terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
+      terminalBodyRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [output]);
+  }, []);
 
   const handleCommand = (cmd: string) => {
     const trimmed = cmd.trim().toLowerCase();
@@ -148,102 +151,151 @@ export default function ContactsPage() {
   };
 
   return (
-    <PageTransition>
-      <div className="py-12 md:py-20 h-full flex flex-col items-center">
-        <div className="w-full max-w-3xl flex-1 flex flex-col">
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-foreground">
-              TERMINAL
+    <div className="theme-morning relative min-h-screen font-mono text-foreground overflow-x-hidden pb-20">
+      {/* Base Background Override */}
+      <div className="fixed inset-0 bg-background -z-50 pointer-events-none" />
+
+      {/* Cyberpunk Morning Environment: Hazy atmospheric flares */}
+      <div className="fixed inset-0 pointer-events-none z-[-40] bg-gradient-to-tr from-accent/5 via-background to-accent-secondary/5 mix-blend-screen" />
+      <div className="fixed top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-accent-secondary/10 blur-[150px] pointer-events-none z-[-30] opacity-50" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-accent/10 blur-[120px] pointer-events-none z-[-30] opacity-50" />
+      <div className="fixed top-[40%] right-[20%] w-[30vw] h-[30vw] rounded-full bg-accent-tertiary/10 blur-[100px] pointer-events-none z-[-30] opacity-30" />
+
+      {/* Morning Grid Overlay */}
+      <div className="fixed inset-0 cyber-grid-bg -z-20 pointer-events-none" />
+
+      {/* CRT Scanline Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-[100] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(56,189,248,0.03),rgba(251,146,60,0.02),rgba(253,224,71,0.03))] bg-[length:100%_4px,3px_100%] opacity-30 mix-blend-overlay" />
+
+      <PageTransition>
+        <div className="pt-12 md:pt-24 max-w-4xl mx-auto px-4 md:px-8 relative z-10 space-y-16 md:space-y-24">
+          {/* Header Title */}
+          <div className="animate-[fadeIn_1s_ease-out] flex flex-col items-center text-center">
+            <h1
+              className="text-4xl md:text-6xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary cyber-glitch-text pb-2"
+              data-text="COMMS UPLINK"
+            >
+              COMMS UPLINK
             </h1>
+            <p className="text-muted-foreground mt-4 text-sm max-w-xl">
+              Establish a secure connection vector. Awaiting user input
+              parameters...
+            </p>
           </div>
 
-          {/* Terminal Window */}
-          <div
-            ref={bottomRef}
-            className="border border-border bg-[#050508] shadow-[0_0_30px_rgba(0,0,0,0.8)] flex-1 min-h-[500px] flex flex-col cyber-chamfer overflow-hidden relative"
-          >
-            {/* Scanline overlay for terminal only */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none z-10" />
-
-            {/* Terminal Header */}
-            <div className="bg-card border-b border-border p-2 flex items-center justify-between z-20">
-              <div className="flex space-x-2 px-2">
-                <div className="w-3 h-3 rounded-none bg-destructive cyber-chamfer-sm"></div>
-                <div className="w-3 h-3 rounded-none bg-yellow-500 cyber-chamfer-sm"></div>
-                <div className="w-3 h-3 rounded-none bg-accent cyber-chamfer-sm"></div>
+          <div className="flex flex-col gap-12 w-full max-w-3xl mx-auto">
+            {/* SECTION 1: Holographic Terminal */}
+            <section className="relative" ref={terminalBodyRef}>
+              <div className="inline-flex items-center border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-bold mb-4 text-accent cyber-chamfer-reverse shadow-[0_0_10px_rgba(56,189,248,0.3)]">
+                <span className="animate-blink mr-2 text-accent-tertiary">
+                  &gt;
+                </span>
+                HOLO_TERM // SYS_OP
               </div>
-              <div
-                className="text-xs font-mono text-muted-foreground uppercase tracking-widest cyber-glitch-text"
-                data-text="root@sys_op: ~/comms"
-              >
-                root@sys_op: ~/comms
-              </div>
-            </div>
 
-            {/* Terminal Body */}
-            <div
-              className="p-6 font-mono text-sm leading-relaxed overflow-y-auto flex-1 z-20 scrollbar-hide"
-              onClick={() => document.getElementById("terminal-input")?.focus()}
-            >
-              <div className="text-accent mb-6 whitespace-pre-wrap">
-                {`   _____ __  _______  __   ____  ____ 
+              {/* Glowing Frosted Glass Container */}
+              <div className="relative p-[1px] bg-gradient-to-br from-accent/50 via-accent-secondary/30 to-transparent shadow-[0_0_30px_rgba(56,189,248,0.15)] group hover:shadow-[0_0_40px_rgba(56,189,248,0.3)] transition-shadow duration-500">
+                <div className="bg-card/40 backdrop-blur-xl border border-transparent flex flex-col h-[400px] md:h-[450px] overflow-hidden relative">
+                  {/* Terminal Header */}
+                  <div className="bg-background/60 border-b border-accent/20 p-2 flex items-center justify-between z-20 backdrop-blur-sm">
+                    <div className="flex space-x-2 px-2">
+                      <div className="w-3 h-3 rounded-none bg-destructive/80 shadow-[0_0_5px_#ef4444]"></div>
+                      <div className="w-3 h-3 rounded-none bg-accent-tertiary/80 shadow-[0_0_5px_#fde047]"></div>
+                      <div className="w-3 h-3 rounded-none bg-accent/80 shadow-[0_0_5px_#38bdf8]"></div>
+                    </div>
+                    <div className="text-[10px] md:text-xs font-mono text-accent-secondary uppercase tracking-widest drop-shadow-[0_0_2px_#fb923c]">
+                      root@sys_op: ~/comms
+                    </div>
+                  </div>
+
+                  {/* Terminal Body */}
+                  <div
+                    className="p-4 md:p-6 font-mono text-xs md:text-sm leading-relaxed overflow-y-auto flex-1 z-20 scrollbar-hide"
+                    onClick={() =>
+                      document.getElementById("terminal-input")?.focus()
+                    }
+                  >
+                    <div className="text-accent-secondary mb-6 whitespace-pre-wrap drop-shadow-[0_0_3px_#fb923c] font-bold">
+                      {`   _____ __  _______  __   ____  ____ 
   / ___// / / / ___/ / /  / __ \\/ __ \\
   \\__ \\/ /_/ /\\__ \\ / /  / / / / /_/ /
  ___/ /\\__, /___/ // /__/ /_/ / ____/ 
 /____/ /____//____//____\\____/_/     
 `}
-              </div>
+                    </div>
 
-              <div className="space-y-1 mb-4 text-foreground/80">
-                {output.map((line, i) => (
-                  <div
-                    key={i}
-                    className={
-                      line.startsWith("sys_op@") ? "text-accent mt-4" : ""
-                    }
-                  >
-                    {line}
+                    <div className="space-y-2 mb-4 text-foreground/90">
+                      {output.map((line, i) => (
+                        <div
+                          key={i}
+                          className={
+                            line.startsWith("sys_op@")
+                              ? "text-accent mt-4 font-bold drop-shadow-[0_0_2px_#38bdf8]"
+                              : line.startsWith("Error:")
+                                ? "text-destructive"
+                                : "text-accent-tertiary"
+                          }
+                        >
+                          {line}
+                        </div>
+                      ))}
+                      <div />
+                    </div>
+
+                    {/* Input Line */}
+                    <div className="flex items-center text-accent mt-4 drop-shadow-[0_0_2px_#38bdf8]">
+                      <span className="mr-2 font-bold">sys_op@terminal:~$</span>
+                      <input
+                        id="terminal-input"
+                        type="text"
+                        aria-label="Terminal input"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="flex-1 bg-transparent outline-none border-none text-foreground caret-accent-secondary p-0 focus:ring-0"
+                        autoComplete="off"
+                        spellCheck="false"
+                      />
+                    </div>
                   </div>
+                </div>
+              </div>
+            </section>
+            {/* SECTION 3: Neural Links */}
+            <section className="relative">
+              <div className="inline-flex items-center border border-accent-tertiary/40 bg-accent-tertiary/10 px-3 py-1 text-xs font-bold mb-4 text-accent-tertiary cyber-chamfer-reverse shadow-[0_0_10px_rgba(253,224,71,0.2)]">
+                <span className="animate-blink mr-2 text-accent">&gt;</span>
+                NEURAL_LINKS
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {LINKS.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative flex flex-col p-4 bg-card/30 backdrop-blur-md border border-accent/20 cyber-chamfer-sm hover:border-accent hover:bg-accent/5 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    <span className="font-bold text-xs md:text-sm text-foreground group-hover:text-accent transition-colors drop-shadow-[0_0_2px_rgba(56,189,248,0.5)]">
+                      {"//"} {link.name}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground mt-1 line-clamp-1 group-hover:text-accent/70 transition-colors">
+                      {link.desc}
+                    </span>
+
+                    {/* Bracket animation effect on hover */}
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300 text-accent font-bold">
+                      ]
+                    </div>
+                  </a>
                 ))}
               </div>
-
-              {/* Input Line */}
-              <div className="flex items-center text-accent mt-4">
-                <span className="mr-2">sys_op@terminal:~$</span>
-                <input
-                  id="terminal-input"
-                  type="text"
-                  aria-label="Terminal input"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1 bg-transparent outline-none border-none text-foreground caret-accent p-0 focus:ring-0"
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoFocus
-                />
-              </div>
-              {/* Blinking cursor effect handled by CSS caret or manual if needed */}
-              <div />
-            </div>
-          </div>
-
-          {/* Fallback standard links for mobile/accessibility */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {LINKS.map((link) => (
-              <a
-                key={link.name}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-center font-mono text-xs p-3 border border-border hover:border-accent hover:text-accent hover:shadow-[0_0_10px_rgba(0,255,136,0.3)] transition-all cyber-chamfer-sm"
-              >
-                {"//"} {link.name}
-              </a>
-            ))}
+            </section>
           </div>
         </div>
-      </div>
-    </PageTransition>
+      </PageTransition>
+    </div>
   );
 }
