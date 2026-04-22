@@ -16,7 +16,7 @@ import {
   Grid,
 } from "@react-three/drei";
 import { EffectComposer, Bloom, Noise } from "@react-three/postprocessing";
-import * as THREE from "three";
+import * as THREE_LIB from "three";
 import {
   forceSimulation,
   forceLink,
@@ -24,6 +24,7 @@ import {
   forceCenter,
 } from "d3-force-3d";
 import { GraphData, GraphNode, GraphLink } from "@/lib/graph-utils";
+import { useRouter } from "next/navigation";
 import { ExternalLink, X, Zap } from "lucide-react";
 
 const CP_YELLOW = "#fcee0a";
@@ -44,7 +45,7 @@ const Node = ({
   onHover: (id: string | null) => void;
   onClick: (e: any, id: string) => void;
 }) => {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE_LIB.Group>(null);
   const active = isHovered || isSelected;
 
   // Manual update of position via ref to avoid React re-renders
@@ -80,11 +81,11 @@ const Node = ({
         }}
         onClick={(e) => onClick(e, node.id)}
       >
-        <icosahedronGeometry args={[active ? 4.5 : 2.4, 0]} />
+        <icosahedronGeometry args={[active ? 3.0 : 1.6, 0]} />
         <MeshWobbleMaterial
           color={active ? (isSelected ? CP_CYAN : CP_YELLOW) : "#111"}
           emissive={active ? (isSelected ? CP_CYAN : CP_YELLOW) : CP_CYAN}
-          emissiveIntensity={active ? 8 : 0.6}
+          emissiveIntensity={active ? 6 : 0.4}
           factor={active ? 0.4 : 0}
           speed={active ? 4 : 0}
         />
@@ -166,41 +167,86 @@ const Node = ({
   );
 };
 
-// Fixed Optimized Link Component using native line and buffer update
+// Optimized Link Component with Electro-Flow effect
 const Link = ({ link }: { link: GraphLink }) => {
-  const lineRef = useRef<THREE.Line>(null);
-  const geoRef = useRef<THREE.BufferGeometry>(null);
+  const lineRef = useRef<THREE_LIB.Line>(null);
+  const geoRef = useRef<THREE_LIB.BufferGeometry>(null);
+  const pulseRef = useRef<THREE_LIB.Mesh>(null);
+
+  const [pulseData] = useState(() => ({
+    progress: Math.random(),
+    speed: 0.005 + Math.random() * 0.015,
+  }));
 
   useFrame(() => {
+    const source = link.source as any as GraphNode;
+    const target = link.target as any as GraphNode;
+
+    if (!source.x || !target.x) return;
+
+    // Use performance.now() to avoid state.clock/THREE.Clock deprecation
+    const time = performance.now() / 1000;
+
     if (lineRef.current && geoRef.current) {
-      const source = link.source as any as GraphNode;
-      const target = link.target as any as GraphNode;
       const posAttr = geoRef.current.attributes.position;
       const pa = posAttr.array as Float32Array;
 
-      pa[0] = source.x || 0;
-      pa[1] = source.y || 0;
-      pa[2] = source.z || 0;
-      pa[3] = target.x || 0;
-      pa[4] = target.y || 0;
-      pa[5] = target.z || 0;
+      // High-frequency jitter for "electro" feel
+      const jitter = Math.sin(time * 30 + Number(link.value)) * 0.05;
+
+      pa[0] = source.x;
+      pa[1] = source.y + jitter;
+      pa[2] = source.z;
+      pa[3] = target.x;
+      pa[4] = target.y - jitter;
+      pa[5] = target.z;
 
       posAttr.needsUpdate = true;
+    }
+
+    if (pulseRef.current) {
+      pulseData.progress = (pulseData.progress + pulseData.speed) % 1;
+      pulseRef.current.position.set(
+        source.x + (target.x - source.x) * pulseData.progress,
+        source.y + (target.y - source.y) * pulseData.progress,
+        source.z + (target.z - source.z) * pulseData.progress,
+      );
+
+      // Pulse brightness oscillation
+      const s = 0.5 + Math.sin(time * 10) * 0.2;
+      pulseRef.current.scale.set(s, s, s);
     }
   });
 
   return (
-    <line ref={lineRef}>
-      <bufferGeometry ref={geoRef}>
-        <bufferAttribute
-          attach="attributes-position"
-          count={2}
-          array={new Float32Array(6)}
-          itemSize={3}
+    <group>
+      <line ref={lineRef}>
+        <bufferGeometry ref={geoRef}>
+          <bufferAttribute
+            attach="attributes-position"
+            count={2}
+            array={new Float32Array(6)}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color={CP_MAGENTA}
+          transparent
+          opacity={0.25}
+          blending={THREE_LIB.AdditiveBlending}
         />
-      </bufferGeometry>
-      <lineBasicMaterial color={CP_MAGENTA} transparent opacity={0.2} />
-    </line>
+      </line>
+
+      <mesh ref={pulseRef}>
+        <sphereGeometry args={[0.4, 4, 4]} />
+        <meshBasicMaterial
+          color={CP_CYAN}
+          transparent
+          opacity={0.6}
+          blending={THREE_LIB.AdditiveBlending}
+        />
+      </mesh>
+    </group>
   );
 };
 
@@ -221,12 +267,12 @@ const Scene = ({ data }: { data: GraphData }) => {
         "link",
         forceLink<GraphNode, GraphLink>(links)
           .id((d) => d.id)
-          .distance(40),
+          .distance(45),
       )
-      .force("charge", forceManyBody().strength(-200))
+      .force("charge", forceManyBody().strength(-250))
       .force("center", forceCenter(0, 0, 0));
 
-    const timer = setTimeout(() => simulation.stop(), 8000);
+    const timer = setTimeout(() => simulation.stop(), 10000);
     return () => {
       simulation.stop();
       clearTimeout(timer);
@@ -245,9 +291,9 @@ const Scene = ({ data }: { data: GraphData }) => {
       <color attach="background" args={["#030305"]} />
 
       <Grid
-        position={[0, -40, 0]}
+        position={[0, -50, 0]}
         infiniteGrid
-        fadeDistance={100}
+        fadeDistance={120}
         fadeStrength={3}
         cellSize={10}
         sectionSize={50}
@@ -256,9 +302,9 @@ const Scene = ({ data }: { data: GraphData }) => {
       />
 
       <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} color={CP_CYAN} />
+      <pointLight position={[20, 20, 20]} intensity={1.5} color={CP_CYAN} />
       <pointLight
-        position={[-10, -10, -10]}
+        position={[-20, -20, -20]}
         intensity={1.5}
         color={CP_MAGENTA}
       />
@@ -281,24 +327,24 @@ const Scene = ({ data }: { data: GraphData }) => {
 
       <EffectComposer disableNormalPass multisampling={0}>
         <Bloom
-          intensity={1.0}
-          luminanceThreshold={0.2}
+          intensity={1.2}
+          luminanceThreshold={0.15}
           luminanceSmoothing={0.9}
         />
-        <Noise opacity={0.03} />
+        <Noise opacity={0.04} />
       </EffectComposer>
 
       <OrbitControls
         enablePan={false}
-        minDistance={30}
-        maxDistance={200}
+        minDistance={40}
+        maxDistance={250}
         autoRotate={!hoveredNode && !selectedNode}
         autoRotateSpeed={0.5}
         makeDefault
       />
 
       <mesh position={[0, 0, 0]} onClick={handleMissClick} visible={false}>
-        <sphereGeometry args={[400, 8, 8]} />
+        <sphereGeometry args={[500, 8, 8]} />
       </mesh>
     </>
   );
@@ -311,7 +357,7 @@ export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
   if (!mounted)
     return (
       <div className="w-full h-full min-h-[600px] bg-[#030305] rounded-xl border-2 border-[#ff003c]/10 flex items-center justify-center">
-        <div className="text-accent font-mono text-xs animate-pulse">
+        <div className="text-accent font-mono text-xs animate-pulse tracking-[0.5em]">
           INIT_NEURAL_LINK...
         </div>
       </div>
@@ -326,7 +372,7 @@ export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10 pointer-events-none">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-2 h-2 bg-[#fcee0a] rotate-45 animate-pulse" />
-          <span className="text-[10px] font-mono text-[#fcee0a] uppercase tracking-[0.3em] font-black">
+          <span className="text-[10px] font-mono text-[#fcee0a] uppercase tracking-[0.3em] font-black text-shadow-glow">
             NET_RUNNER::ACTIVE
           </span>
         </div>
@@ -339,7 +385,7 @@ export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
         dpr={1}
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
-        <PerspectiveCamera makeDefault position={[0, 20, 100]} fov={60} />
+        <PerspectiveCamera makeDefault position={[0, 30, 120]} fov={60} />
         <Scene data={data} />
       </Canvas>
 
@@ -351,6 +397,9 @@ export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
           to {
             top: 105%;
           }
+        }
+        .text-shadow-glow {
+          text-shadow: 0 0 10px rgba(252, 238, 10, 0.5);
         }
       `}</style>
     </div>
