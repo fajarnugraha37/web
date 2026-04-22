@@ -19,26 +19,55 @@ const shareTech = Share_Tech_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SYS//OP - Lead Backend Engineer",
+  title: "Fajar Abdi Nugraha | Software Engineer & Solution Architect",
   description:
-    "High-performance backend engineering, cloud architecture, and AI-driven development.",
+    "Portfolio of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Microservices, Cloud Services, and Modern Web Development.",
+  keywords: [
+    "Fajar",
+    "Fajar Abdi",
+    "Fajar Abdi Nugraha",
+    "Fajar Nugraha",
+    "Software Engineer",
+    "Backend Developer",
+    "Backend Engineer",
+    "Tech Lead",
+    "Team Lead Software Engineer",
+    "Team Lead Software Developer",
+    "Solution Architect",
+    "GovTech",
+    "Microservices",
+    "Cloud Service",
+    "Modern Web Development",
+    "DevOps",
+  ],
+  authors: [{ name: "Fajar Abdi Nugraha" }],
+  creator: "Fajar Abdi Nugraha",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io/web",
   ),
   openGraph: {
-    type: "website",
+    type: "profile",
     locale: "en_US",
     url: "/",
-    title: "SYS//OP - Lead Backend Engineer",
+    title: "Fajar Abdi Nugraha | Software Engineer & Solution Architect",
     description:
-      "High-performance backend engineering, cloud architecture, and AI-driven development.",
-    siteName: "SYS//OP",
+      "Portfolio of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Microservices, Cloud Services, and Modern Web Development.",
+    siteName: "Fajar Abdi Nugraha - SYS//OP",
+    images: [
+      {
+        url: "/web/icon.svg", // Replace with a dedicated OG image if available
+        width: 1200,
+        height: 630,
+        alt: "Fajar Abdi Nugraha - Software Engineer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SYS//OP - Lead Backend Engineer",
+    title: "Fajar Abdi Nugraha | Software Engineer & Solution Architect",
     description:
-      "High-performance backend engineering, cloud architecture, and AI-driven development.",
+      "Portfolio of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Microservices, Cloud Services, and Modern Web Development.",
+    images: ["/web/icon.svg"],
   },
   alternates: {
     types: {
@@ -88,7 +117,7 @@ export default function RootLayout({
               >
                 /About
               </Link>
-              
+
               {/* Labs Dropdown */}
               <div className="relative group">
                 <Link
@@ -96,9 +125,11 @@ export default function RootLayout({
                   className="hover:text-accent-tertiary transition-colors flex items-center gap-1"
                 >
                   /Labs
-                  <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform duration-300">▼</span>
+                  <span className="text-[8px] opacity-50 group-hover:rotate-180 transition-transform duration-300">
+                    ▼
+                  </span>
                 </Link>
-                
+
                 {/* Dropdown Menu */}
                 <div className="absolute top-full -left-4 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50">
                   <div className="min-w-[180px] bg-background border border-border p-2 cyber-chamfer-sm shadow-[0_10px_30px_rgba(0,0,0,0.5)]">

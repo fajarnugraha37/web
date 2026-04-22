@@ -7,8 +7,42 @@ import { Database, BarChart3, ChevronRight, Terminal } from "lucide-react";
 export default async function Home() {
   const recentBlogs = getSortedBlogsData().slice(0, 3);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Fajar Abdi Nugraha",
+    alternateName: ["Fajar", "Fajar Abdi", "Fajar Nugraha"],
+    jobTitle: [
+      "Software Engineer",
+      "Backend Developer",
+      "Tech Lead",
+      "Team Lead Software Engineer",
+      "Solution Architect",
+    ],
+    url: "https://fajarnugraha37.github.io/web", // Update to your actual prod domain if different
+    sameAs: [
+      "https://github.com/fajarnugraha37",
+      "https://www.linkedin.com/in/fajar-abdi-nugraha-81b26618a/",
+    ],
+    knowsAbout: [
+      "GovTech",
+      "Microservices",
+      "Cloud Service",
+      "Modern Web Development",
+      "DevOps",
+      "Java",
+      "Node.js",
+      "Go",
+      "AWS",
+    ],
+  };
+
   return (
     <div className="theme-sunset flex flex-col min-h-[calc(100vh-4rem)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Solid Sunset Background to override global body theme */}
       <div className="fixed inset-0 bg-background -z-50 pointer-events-none" />
       {/* Sunset Vibe Background Overlay */}
@@ -45,20 +79,25 @@ export default async function Home() {
                     I&apos;m Fajar!
                   </span>
                 </h1>
+                {/* Hidden full name for SEO ranking */}
+                <span className="sr-only">Fajar Abdi Nugraha</span>
                 <div className="h-1 w-24 bg-accent mt-4 shadow-[0_0_15px_#ff7300]"></div>
               </div>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2} direction="right">
               <div className="max-w-md">
-                <p className="text-base md:text-lg text-foreground/80 leading-relaxed font-mono">
-                  A Software Engineer who builds and operates backend systems.
-                  My job is to keep production running, deliveries predictable,
-                  and scope honest.
+                <h2 className="text-base md:text-lg text-foreground/80 leading-relaxed font-mono mt-4 font-normal normal-case">
+                  A <strong>Software Engineer</strong> and sometimes a{" "}
+                  <strong>Solution Architect</strong> who builds and operates
+                  systems. My job is to keep production running, annual plans
+                  aligned, technical decisions made responsibly, deliveries
+                  predictable, and scope honest.
                   <span className="text-accent block mt-2 drop-shadow-[0_0_5px_rgba(255,115,0,0.5)]">
-                    Java / Node.js / Go / WASM / AWS
+                    <strong>GovTech</strong> / <strong>Cloud Services</strong> /{" "}
+                    <strong>Microservices</strong>
                   </span>
-                </p>
+                </h2>
 
                 <div className="mt-8 flex items-center gap-4 text-xs font-bold font-sans">
                   <span className="text-muted-foreground">STATUS:</span>
@@ -121,22 +160,22 @@ export default async function Home() {
                     </p>
                   </div>
                   <div className="pl-6 space-y-2 text-foreground/70">
-                    <div className="flex justify-between border-b border-border pb-1">
+                    {/* <div className="flex justify-between border-b border-border pb-1">
                       <span>SQL_Engine</span>
                       <span className="text-accent-tertiary">
-                        PostgreSQL (PGlite WASM)
+                        PostgreSQL, OracleSQL, MySQL
                       </span>
-                    </div>
+                    </div> */}
                     <div className="flex justify-between border-b border-border pb-1">
-                      <span>OLAP_Engine</span>
+                      <span>Language_Stack</span>
                       <span className="text-accent-secondary">
-                        DuckDB-WASM (In-Memory)
+                        Java, Node.js, Go, .NET, PHP
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-border pb-1">
                       <span>Primary_Focus</span>
                       <span className="text-accent">
-                        Data Systems, Backend, Edge
+                        Backend, Sometimes Frontend
                       </span>
                     </div>
                   </div>

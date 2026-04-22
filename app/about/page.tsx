@@ -4,8 +4,18 @@ import { ExpandableDescriptions } from "@/components/ExpandableDescriptions";
 import { PageTransition } from "@/components/PageTransition";
 
 export const metadata: Metadata = {
-  title: "Profile // SYS_OP",
-  description: "Career and technical background.",
+  title:
+    "Profile | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
+  description:
+    "Career logs and technical background of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Cloud, and Java/Node.js.",
+  openGraph: {
+    title:
+      "Profile | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
+    description:
+      "Career logs and technical background of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Cloud, and Java/Node.js.",
+    type: "profile",
+    url: "/about",
+  },
 };
 
 const CAREER_DATA = [
@@ -209,7 +219,7 @@ export default function AboutPage() {
                 <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary drop-shadow-[0_0_5px_rgba(255,115,0,0.5)]">
                   Lead Software Engineer
                 </span>{" "}
-                working on a massive{" "}
+                working on a{" "}
                 <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-accent-secondary to-accent-tertiary drop-shadow-[0_0_5px_rgba(255,0,127,0.5)]">
                   GovTech microservices platform
                 </span>{" "}
