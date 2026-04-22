@@ -29,7 +29,7 @@ export default function NotFound() {
         {/* Big 404 glitch */}
         <div className="relative mb-4 select-none" aria-hidden="true">
           <h1
-            className="text-[10rem] md:text-[14rem] font-black leading-none tracking-tighter text-foreground/10 cyber-glitch-text relative"
+            className="text-[6rem] sm:text-[10rem] md:text-[14rem] font-black leading-none tracking-tighter text-foreground/10 cyber-glitch-text relative"
             data-text="404"
           >
             <span className="relative z-10 text-foreground/10">404</span>
@@ -44,7 +44,7 @@ export default function NotFound() {
 
         {/* Error heading */}
         <h2
-          className="text-3xl md:text-5xl font-black uppercase tracking-widest text-foreground mb-4 cyber-glitch-text"
+          className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-widest text-foreground mb-4 cyber-glitch-text"
           data-text="PAGE_NOT_FOUND"
         >
           PAGE_NOT_FOUND
@@ -89,7 +89,7 @@ export default function NotFound() {
         </div>
 
         {/* Error code details */}
-        <div className="grid grid-cols-3 gap-4 w-full mb-10 text-center font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 w-full mb-10 text-center font-mono text-xs">
           <div className="border border-border/50 bg-card/40 p-3 cyber-chamfer-sm">
             <div className="text-muted-foreground mb-1">ERROR_CODE</div>
             <div className="text-destructive font-bold">0x404</div>
@@ -105,25 +105,25 @@ export default function NotFound() {
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
           <Link
             href="/"
             id="not-found-home-btn"
-            className="px-6 py-3 border border-accent text-accent text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:bg-accent hover:text-black transition-all glow-btn"
+            className="px-6 py-3 border border-accent text-accent text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:bg-accent hover:text-black transition-all glow-btn w-full sm:w-auto text-center"
           >
             &gt; SYS//OP
           </Link>
           <Link
             href="/blogs"
             id="not-found-blogs-btn"
-            className="px-6 py-3 border border-border text-muted-foreground text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:border-accent-tertiary hover:text-accent-tertiary transition-all"
+            className="px-6 py-3 border border-border text-muted-foreground text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:border-accent-tertiary hover:text-accent-tertiary transition-all w-full sm:w-auto text-center"
           >
             READ_LOGS
           </Link>
           <Link
             href="/contacts"
             id="not-found-contact-btn"
-            className="px-6 py-3 border border-border text-muted-foreground text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:border-accent-secondary hover:text-accent-secondary glow-btn-secondary transition-all"
+            className="px-6 py-3 border border-border text-muted-foreground text-sm font-sans font-bold uppercase tracking-widest cyber-chamfer-sm hover:border-accent-secondary hover:text-accent-secondary glow-btn-secondary transition-all w-full sm:w-auto text-center"
           >
             CONTACT.EXE
           </Link>
