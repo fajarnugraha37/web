@@ -39,7 +39,7 @@ export default function LabsDashboard() {
             </h1>
           </div>
           <p className="text-muted-foreground font-mono text-sm uppercase tracking-[0.3em]">
-            Select an active node to begin hardware-accelerated computation
+            Select an active node to begin
           </p>
         </div>
 
