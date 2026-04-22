@@ -275,7 +275,7 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
   return (
     <div
       id="blog-actions"
-      className={`flex items-center gap-3 my-8 relative z-40 ${isExporting ? "opacity-0" : "opacity-100"} transition-opacity`}
+      className={`flex flex-wrap items-center gap-3 my-8 relative z-40 ${isExporting ? "opacity-0" : "opacity-100"} transition-opacity lg:justify-start justify-end`}
       ref={menuRef}
     >
       {/* Copy Button */}

@@ -23,21 +23,23 @@ A statically exported **Next.js 15** personal website, **Tailwind CSS v4**, and 
 
 ---
 
-## 🧪 Laboratory Nodes
+## Laboratory Nodes
 
 High-performance, browser-native computation environments designed for technical exploration and system telemetry analysis. Accessed via the central `/labs` dashboard.
 
 ### 1. SQL Laboratory (`SQL_LAB.EXE`)
+
 - **PostgreSQL WASM Engine**: Powered by PGlite for true ACID-compliant SQL in the browser.
 - **Persistent Storage**: Uses IndexedDB to save your tables, data, and command history across sessions.
 - **IDE Features**: Command History, SQL file import, CSV export, and virtualized results handling 100k+ rows with zero lag.
 
 ### 2. Telemetry Analytics (`TELEMETRY_ANALYTICS.EXE`)
+
 - **DuckDB OLAP Engine**: Streaming analytics node built on DuckDB-WASM for massive data processing.
 - **Zero-Copy Ingestion**: Drag and drop large CSV or Parquet files. The engine reads them directly from disk without crashing your browser's RAM.
 - **Stateless Execution**: Ad-hoc analytical processing. Drop files, query them, and the data disappears when you close the tab.
 
-## 🔐 Security Architecture
+## Security Architecture
 
 The Laboratory ecosystem is designed to be **safe by default** without requiring authentication on static platforms like GitHub Pages:
 
@@ -135,7 +137,7 @@ The Docker setup builds the static export with Bun and serves it via Nginx on th
 docker compose up --build
 ```
 
-Then open: [http://localhost:3000/web](http://localhost:3000/web)
+Then open: [http://localhost:80/web](http://localhost:3000/web)
 
 The first build will take a while because `re2` has a postinstall script that takes roughly the same time as brewing coffee.
 

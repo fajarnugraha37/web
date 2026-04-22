@@ -124,7 +124,7 @@ const CAREER_DATA = [
     role: "Fullstack Developer",
     company: "QuickPro / FOREXimf / PT International Mitra Futures",
     descriptions: [
-      "Designed, developed, and maintained a trading application (QuickPro) featuring real-time market data, OHLC charts, price/volatility alerts, trading signals, news, economic calendars, custom indicators, candlestick pattern detection, safety alert (to notify if the user&apos;s trading activity has a high risk such as overtrade, stop loss is too big), and more.",
+      "Designed, developed, and maintained a trading application (QuickPro) featuring real-time market data, OHLC charts, price/volatility alerts, trading signals, news, economic calendars, custom indicators, candlestick pattern detection, safety alert (to notify if the user's trading activity has a high risk such as overtrade, stop loss is too big), and more.",
       "Worked with marketing and sales teams to implement new features aligned with business objectives and user needs.",
       "Integrated the backend with the MetaTrader trading platform for real-time market data, enabling the application to display up-to-date price information and facilitate trading activities.",
       "Developed web crawlers to collect economic calendar data and technical analysis from external sources (Investing.com).",
@@ -205,7 +205,6 @@ export default function AboutPage() {
           {/* Section 1: Executive Summary */}
           <div className="mb-24 animate-[fadeIn_1s_ease-out]">
             <div className="inline-flex items-center border border-accent/50 bg-accent/10 px-3 py-1 text-xs font-bold mb-6 text-accent cyber-chamfer-reverse shadow-[0_0_10px_rgba(255,115,0,0.3)]">
-              {/* SYSTEM_INIT */}
               <span className="animate-blink mr-2 text-accent-tertiary">
                 &gt;
               </span>
