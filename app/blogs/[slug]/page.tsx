@@ -1,10 +1,17 @@
-﻿import { getBlogData, getAllBlogSlugs } from "@/lib/mdx";
+import { getBlogData, getAllBlogSlugs } from "@/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import * as motion from "motion/react-client";
 import type { Metadata } from "next";
+import { mdxComponents } from "@/components/MDXComponents";
+import { BlogActions } from "@/components/BlogActions";
+import remarkMath from "remark-math";
+import remarkEmoji from "remark-emoji";
+import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 export async function generateStaticParams() {
   const slugs = getAllBlogSlugs();
@@ -95,16 +102,33 @@ export default async function BlogPost({
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap gap-2"
+              className="flex flex-col gap-4 mt-6"
             >
-              {postData.tags.map((t: string) => (
-                <span
-                  key={t}
-                  className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors"
-                >
-                  #{t}
-                </span>
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {postData.tags.map((t: string) => (
+                  <span
+                    key={t}
+                    className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors"
+                  >
+                    #{t}
+                  </span>
+                ))}
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-3 text-[10px] md:text-xs text-muted-foreground font-mono">
+                  <span>{postData.stats.readingTime} MIN READ</span>
+                  <span className="text-accent/50">&bull;</span>
+                  <span>{postData.stats.wordCount} WORDS</span>
+                  <span className="text-accent/50">&bull;</span>
+                  <span>{postData.stats.charCount} CHARS</span>
+                </div>
+
+                <BlogActions
+                  title={postData.title}
+                  slug={postData.slug}
+                  content={postData.content}
+                />
+              </div>
             </motion.div>
           </div>
 
@@ -121,15 +145,24 @@ export default async function BlogPost({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7, duration: 1 }}
-              className="markdown-body p-6 md:p-10 bg-card/5 backdrop-blur-[1px] cyber-chamfer border border-border/20 text-foreground/90 font-mono relative overflow-hidden"
+              className="markdown-body p-6 md:p-10 bg-card/5 backdrop-blur-[1px] cyber-chamfer border border-border/20 text-foreground/90 font-mono relative overflow-x-auto"
             >
               <div
                 className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] pointer-events-none z-0"
                 style={{ backgroundSize: "100% 4px, 4px 100%" }}
               />
 
-              <div className="relative z-10">
-                <MDXRemote source={postData.content} />
+              <div className="relative z-10 prose prose-invert max-w-none prose-pre:bg-transparent prose-pre:p-0 prose-pre:m-0">
+                <MDXRemote
+                  source={postData.content}
+                  components={mdxComponents}
+                  options={{
+                    mdxOptions: {
+                      remarkPlugins: [remarkMath, remarkEmoji, remarkGfm],
+                      rehypePlugins: [rehypeKatex],
+                    },
+                  }}
+                />
               </div>
             </motion.div>
           </div>

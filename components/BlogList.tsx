@@ -3,7 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Tag, X, ChevronsLeft, ChevronsRight, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Tag,
+  X,
+  ChevronsLeft,
+  ChevronsRight,
+  ChevronDown,
+} from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGE_SIZE = 5;

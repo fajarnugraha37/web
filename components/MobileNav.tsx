@@ -25,9 +25,17 @@ const NAV_LINKS: NavLink[] = [
     label: "/Labs",
     accentClass: "hover:text-accent-tertiary",
     children: [
-      { href: "/labs/postgresql", label: "SQL_LAB.EXE", accentClass: "hover:text-accent" },
-      { href: "/labs/duckdb", label: "TELEMETRY_ANALYTICS.EXE", accentClass: "hover:text-accent-secondary" },
-    ]
+      {
+        href: "/labs/postgresql",
+        label: "SQL_LAB.EXE",
+        accentClass: "hover:text-accent",
+      },
+      {
+        href: "/labs/duckdb",
+        label: "TELEMETRY_ANALYTICS.EXE",
+        accentClass: "hover:text-accent-secondary",
+      },
+    ],
   },
   { href: "/feed.xml", label: "/RSS Feed", accentClass: "hover:text-accent" },
   {
@@ -121,14 +129,18 @@ export function MobileNav() {
                         onClick={() => setOpen(false)}
                         className={`flex items-center gap-3 font-sans text-sm uppercase tracking-widest transition-colors text-foreground/80 hover:text-accent ${pathname.startsWith(link.href) ? "text-accent" : ""}`}
                       >
-                        <span className="font-mono text-accent/60 text-xs">&gt;</span>
+                        <span className="font-mono text-accent/60 text-xs">
+                          &gt;
+                        </span>
                         {link.label}
                       </Link>
-                      <button 
+                      <button
                         onClick={() => setExpandedLabs(!expandedLabs)}
                         className="p-2 -mr-2 text-muted-foreground hover:text-accent transition-colors"
                       >
-                        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${expandedLabs ? "rotate-180" : ""}`} />
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-300 ${expandedLabs ? "rotate-180" : ""}`}
+                        />
                       </button>
                     </div>
                     {expandedLabs && (
@@ -159,7 +171,9 @@ export function MobileNav() {
                         : `text-foreground/80 border-l-2 border-transparent hover:border-accent ${link.accentClass}`
                     } ${pathname === link.href ? "text-accent border-l-accent border-l-2" : ""}`}
                   >
-                    <span className="font-mono text-accent/60 text-xs">&gt;</span>
+                    <span className="font-mono text-accent/60 text-xs">
+                      &gt;
+                    </span>
                     {link.label}
                   </Link>
                 )}
