@@ -124,7 +124,7 @@ const CAREER_DATA = [
     role: "Fullstack Developer",
     company: "QuickPro / FOREXimf / PT International Mitra Futures",
     descriptions: [
-      "Designed, developed, and maintained a trading application (QuickPro) featuring real-time market data, OHLC charts, price/volatility alerts, trading signals, news, economic calendars, custom indicators, candlestick pattern detection, safety alert (to notify if the user's trading activity has a high risk such as overtrade, stop loss is too big), and more.",
+      "Designed, developed, and maintained a trading application (QuickPro) featuring real-time market data, OHLC charts, price/volatility alerts, trading signals, news, economic calendars, custom indicators, candlestick pattern detection, safety alert (to notify if the user&apos;s trading activity has a high risk such as overtrade, stop loss is too big), and more.",
       "Worked with marketing and sales teams to implement new features aligned with business objectives and user needs.",
       "Integrated the backend with the MetaTrader trading platform for real-time market data, enabling the application to display up-to-date price information and facilitate trading activities.",
       "Developed web crawlers to collect economic calendar data and technical analysis from external sources (Investing.com).",
@@ -190,7 +190,6 @@ const EDUCATION_DATA = [
 
 export default function AboutPage() {
   return (
-    // just add 'theme-sunset' to change the vibbe into sunset
     <div className="relative min-h-screen font-mono text-foreground overflow-x-hidden">
       {/* Solid Sunset Background to override global body theme */}
       <div className="fixed inset-0 bg-background -z-50 pointer-events-none" />
@@ -206,14 +205,13 @@ export default function AboutPage() {
           {/* Section 1: Executive Summary */}
           <div className="mb-24 animate-[fadeIn_1s_ease-out]">
             <div className="inline-flex items-center border border-accent/50 bg-accent/10 px-3 py-1 text-xs font-bold mb-6 text-accent cyber-chamfer-reverse shadow-[0_0_10px_rgba(255,115,0,0.3)]">
+              {/* SYSTEM_INIT */}
               <span className="animate-blink mr-2 text-accent-tertiary">
                 &gt;
               </span>
-              SYSTEM_INIT // EXECUTIVE_SUMMARY
+              SYSTEM_INIT
             </div>
 
-            {/* <div className="relative p-[2px] bg-gradient-to-r from-accent via-accent-secondary to-accent-tertiary shadow-[0_0_30px_rgba(255,115,0,0.2)]">
-              <div className="bg-card/90 backdrop-blur-md p-6 md:p-10 cyber-chamfer-sm"> */}
             <ExpandableSummary>
               <p className="text-base md:text-lg leading-relaxed mb-6 text-foreground/90">
                 <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary drop-shadow-[0_0_5px_rgba(255,115,0,0.5)]">
@@ -258,8 +256,6 @@ export default function AboutPage() {
                 systems that don&apos;t require heroic measures to operate.
               </p>
             </ExpandableSummary>
-            {/* </div>
-            </div> */}
           </div>
 
           {/* Section 2: Career Logs */}
