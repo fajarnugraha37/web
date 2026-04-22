@@ -147,6 +147,12 @@ export default function RootLayout({
                     >
                       TELEMETRY_ANALYTICS.EXE
                     </Link>
+                    <Link
+                      href="/labs/knowledge-graph"
+                      className="block px-3 py-2 hover:bg-accent-tertiary/10 hover:text-accent-tertiary transition-all border-l-2 border-transparent hover:border-accent-tertiary font-mono text-[10px]"
+                    >
+                      NEURAL_MAPPING.EXE
+                    </Link>
                     <div className="mt-2 pt-2 border-t border-border/50 text-[8px] px-3 text-muted-foreground italic">
                       Hardware accelerated nodes
                     </div>

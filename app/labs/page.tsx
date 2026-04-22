@@ -24,6 +24,16 @@ const LAB_NODES = [
     status: "✔",
     color: "text-accent-secondary",
   },
+  {
+    id: "knowledge-graph",
+    name: "BLOG NETWORK.EXE",
+    description:
+      "Interactive 3D visualization of how articles in the blog archive relate to each other.",
+    icon: <Binary className="w-8 h-8" />,
+    path: "/labs/knowledge-graph",
+    status: "✔",
+    color: "text-accent-tertiary",
+  },
 ];
 
 export default function LabsDashboard() {
