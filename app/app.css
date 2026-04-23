@@ -219,6 +219,14 @@
   .theme-morning .neon-text {
     text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes glitch-anim-1 {

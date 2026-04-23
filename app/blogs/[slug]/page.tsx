@@ -12,6 +12,7 @@ import remarkEmoji from "remark-emoji";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
+import rehypeRaw from "rehype-raw";
 import "katex/dist/katex.min.css";
 import { TocNav } from "@/components/TocNav";
 
@@ -168,7 +169,7 @@ export default async function BlogPost({
                   options={{
                     mdxOptions: {
                       remarkPlugins: [remarkMath, remarkEmoji, remarkGfm],
-                      rehypePlugins: [rehypeKatex, rehypeSlug],
+                      rehypePlugins: [rehypeKatex, rehypeSlug, rehypeRaw],
                     },
                   }}
                 />
