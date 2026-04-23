@@ -131,12 +131,12 @@ export default async function BlogPost({
 
             <h1
               id={headings[0].id}
-              className="text-4xl md:text-6xl font-black font-sans text-foreground leading-tight tracking-tighter mb-6"
+              className="text-2xl md:text-4xl font-black font-sans text-foreground leading-tight tracking-tighter mb-6"
             >
               {postData.title}
             </h1>
 
-            <div className="flex flex-wrap gap-2 mb-16">
+            <div className="flex flex-wrap gap-2 mb-2 lg:mb-8">
               {postData.tags.map((t: string) => (
                 <span
                   key={t}
@@ -147,7 +147,7 @@ export default async function BlogPost({
               ))}
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 mb-16">
+            <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 mb-8">
               <div className="flex items-center gap-3 text-[10px] md:text-xs text-muted-foreground font-mono">
                 <span>{postData.stats.readingTime} MIN READ</span>
                 <span className="text-accent/50">&bull;</span>

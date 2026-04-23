@@ -35,6 +35,11 @@ const NAV_LINKS: NavLink[] = [
         label: "TELEMETRY_ANALYTICS.EXE",
         accentClass: "hover:text-accent-secondary",
       },
+      {
+        href: "/labs/knowledge-graph",
+        label: "BLOG_NETWORK.EXE",
+        accentClass: "hover:text-accent-tertiary",
+      },
     ],
   },
   { href: "/feed.xml", label: "/RSS Feed", accentClass: "hover:text-accent" },
