@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "DuckDB Labs | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
+  title: "DuckDB Playground | Telemetry Analytics - Fajar Abdi Nugraha",
   description:
-    "High-speed OLAP engine running DuckDB-WASM for local file analysis. Part of Fajar Abdi Nugraha's technical labs.",
+    "High-performance analytical database (DuckDB WASM) for large-scale data processing directly in the browser. Query Parquet, CSV, and JSON with sub-second latency.",
+  keywords: ["DuckDB WASM", "OLAP in browser", "Data Analytics", "Parquet Query", "Fajar Abdi Nugraha", "Web Analytics"],
 };
 
 export default function DuckDBLayout({

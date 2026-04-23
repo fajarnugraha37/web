@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title:
-    "PostgreSQL Labs | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
+  title: "Postgres Playground | SQL Laboratory - Fajar Abdi Nugraha",
   description:
-    "Browser-native persistent PostgreSQL terminal using PGlite. Part of Fajar Abdi Nugraha's technical labs.",
+    "A full, persistent PostgreSQL instance running entirely in your browser using PGlite (WASM). No server, no cloud, just pure SQL power with IndexedDB persistence.",
+  keywords: ["PostgreSQL WASM", "PGlite", "Browser SQL", "Database Playground", "SQL Terminal", "Fajar Abdi Nugraha"],
 };
 
 export default function PostgresLayout({
