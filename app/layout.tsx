@@ -153,6 +153,12 @@ export default function RootLayout({
                     >
                       NEURAL_MAPPING.EXE
                     </Link>
+                    <Link
+                      href="/labs/markdown"
+                      className="block px-3 py-2 hover:bg-accent/10 hover:text-accent transition-all border-l-2 border-transparent hover:border-accent font-mono text-[10px]"
+                    >
+                      MARKDOWN.EXE
+                    </Link>
                     <div className="mt-2 pt-2 border-t border-border/50 text-[8px] px-3 text-muted-foreground italic">
                       Hardware accelerated nodes
                     </div>
