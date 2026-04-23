@@ -176,7 +176,7 @@ export default function MarkdownPlayground() {
   const [showToc, setShowToc] = useState(false);
   const [modal, setModal] = useState<"import" | "export" | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<{ id: string; rect: DOMRect } | null>(null);
   const [renameModal, setRenameModal] = useState<{
     id: string;
     name: string;
@@ -223,7 +223,8 @@ export default function MarkdownPlayground() {
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (activeMenu && !target.closest(".file-menu-trigger")) {
+      //Whitelisting triggers and content to prevent premature closure
+      if (activeMenu && !target.closest(".file-menu-trigger") && !target.closest(".file-menu-content")) {
         setActiveMenu(null);
       }
       if (modal && !target.closest(".modal-content")) {
@@ -557,22 +558,36 @@ export default function MarkdownPlayground() {
               <MoreHorizontal
                 size={14}
                 className="cursor-pointer opacity-60 hover:opacity-100 file-menu-trigger"
-                onClick={() => setActiveMenu(activeMenu === f.id ? null : f.id)}
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  setActiveMenu(activeMenu?.id === f.id ? null : { id: f.id, rect });
+                }}
               />
-              {activeMenu === f.id && (
-                <div className="fixed bg-black border border-accent p-2 z-[999] flex flex-col gap-2 w-28 shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+              {activeMenu?.id === f.id && (
+                <div 
+                  className="fixed bg-black border border-accent p-2 z-[9999] flex flex-col gap-2 w-32 shadow-[0_0_20px_rgba(0,255,136,0.3)] file-menu-content" 
+                  style={{ 
+                    top: `${activeMenu.rect.bottom + 8}px`, 
+                    left: `${activeMenu.rect.left}px`,
+                    clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)" 
+                  }}
+                >
                   <button
-                    className="text-[9px] text-left text-accent hover:text-white"
-                    onClick={() => {
+                    className="text-[9px] text-left text-accent hover:text-white px-2 py-1 hover:bg-accent/10 transition-colors"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setRenameModal({ id: f.id, name: f.name });
                       setActiveMenu(null);
                     }}
                   >
-                    RENAME
+                    RENAME_TAB
                   </button>
                   <button
-                    className="text-[9px] text-left text-accent hover:text-white"
-                    onClick={() => {
+                    className="text-[9px] text-left text-accent hover:text-white px-2 py-1 hover:bg-accent/10 transition-colors"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       const file = files.find((x) => x.id === f.id);
                       if (file) addFile(file.name + " (copy)", file.content);
                       setActiveMenu(null);
@@ -581,13 +596,15 @@ export default function MarkdownPlayground() {
                     DUPLICATE
                   </button>
                   <button
-                    className="text-[9px] text-left text-red-500 hover:text-red-300"
-                    onClick={() => {
+                    className="text-[9px] text-left text-red-500 hover:text-red-300 px-2 py-1 hover:bg-red-500/10 transition-colors"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setDeleteModal(f.id);
                       setActiveMenu(null);
                     }}
                   >
-                    DELETE
+                    WIPE_DATA
                   </button>
                 </div>
               )}
