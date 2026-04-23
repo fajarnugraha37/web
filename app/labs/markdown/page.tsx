@@ -617,18 +617,23 @@ export default function MarkdownPlayground() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               className="modal-content bg-[#050505] border border-accent/40 p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,255,136,0.15)] relative overflow-hidden"
-              style={{ clipPath: "polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%)" }}
+              style={{
+                clipPath:
+                  "polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%)",
+              }}
             >
               {/* Corner Accents */}
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-accent" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-accent" />
-              
+
               <div className="flex justify-between items-center mb-8 border-b border-accent/20 pb-4">
                 <div className="flex flex-col">
                   <h2 className="text-xl font-black text-accent tracking-[0.2em] uppercase italic italic-neon">
                     Import_Module
                   </h2>
-                  <span className="text-[8px] text-accent/40 uppercase tracking-widest">SYS//NETWORK_INITIALIZED</span>
+                  <span className="text-[8px] text-accent/40 uppercase tracking-widest">
+                    SYS//NETWORK_INITIALIZED
+                  </span>
                 </div>
                 <button
                   onClick={() => setModal(null)}
@@ -637,7 +642,7 @@ export default function MarkdownPlayground() {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="space-y-3">
                   <label className="text-[10px] text-accent font-black uppercase tracking-[0.3em] flex items-center gap-2">
@@ -672,13 +677,15 @@ export default function MarkdownPlayground() {
                   </div>
                 </div>
                 <div className="text-center pt-4">
-                  <p className="text-[8px] text-accent/30 uppercase tracking-[0.4em]">OR_USE_MAIN_DROPZONE_BUFFERS</p>
+                  <p className="text-[8px] text-accent/30 uppercase tracking-[0.4em]">
+                    OR_USE_MAIN_DROPZONE_BUFFERS
+                  </p>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
-        
+
         {modal === "export" && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -691,7 +698,10 @@ export default function MarkdownPlayground() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               className="modal-content bg-[#050505] border border-accent/40 p-8 max-w-lg w-full shadow-[0_0_50px_rgba(0,255,136,0.15)] relative overflow-hidden"
-              style={{ clipPath: "polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%)" }}
+              style={{
+                clipPath:
+                  "polygon(0 0, 95% 0, 100% 5%, 100% 100%, 5% 100%, 0 95%)",
+              }}
             >
               {/* Corner Accents */}
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-accent" />
@@ -702,7 +712,9 @@ export default function MarkdownPlayground() {
                   <h2 className="text-xl font-black text-accent tracking-[0.2em] uppercase italic">
                     Export_Sequence
                   </h2>
-                  <span className="text-[8px] text-accent/40 uppercase tracking-widest">SELECT_OUTPUT_FORMAT</span>
+                  <span className="text-[8px] text-accent/40 uppercase tracking-widest">
+                    SELECT_OUTPUT_FORMAT
+                  </span>
                 </div>
                 <button
                   onClick={() => setModal(null)}
@@ -711,20 +723,40 @@ export default function MarkdownPlayground() {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { id: "md", name: "Markdown", sub: "RAW_SRC.md", icon: MarkdownIcon, fn: () => {
-                    const blob = new Blob([activeFile.content], { type: "text/markdown" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = activeFile.name;
-                    a.click();
-                    setModal(null);
-                  }},
-                  { id: "html", name: "HTML_Doc", sub: "WEB_ARCH.html", icon: HtmlIcon, fn: downloadHtml },
-                  { id: "pdf", name: "PDF_Report", sub: "STAT_REC.pdf", icon: PdfIcon, fn: downloadPdf }
+                  {
+                    id: "md",
+                    name: "Markdown",
+                    sub: "RAW_SRC.md",
+                    icon: MarkdownIcon,
+                    fn: () => {
+                      const blob = new Blob([activeFile.content], {
+                        type: "text/markdown",
+                      });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = activeFile.name;
+                      a.click();
+                      setModal(null);
+                    },
+                  },
+                  {
+                    id: "html",
+                    name: "HTML_Doc",
+                    sub: "WEB_ARCH.html",
+                    icon: HtmlIcon,
+                    fn: downloadHtml,
+                  },
+                  {
+                    id: "pdf",
+                    name: "PDF_Report",
+                    sub: "STAT_REC.pdf",
+                    icon: PdfIcon,
+                    fn: downloadPdf,
+                  },
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -760,7 +792,10 @@ export default function MarkdownPlayground() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="modal-content bg-[#050505] border border-accent/40 p-8 max-w-sm w-full relative"
-              style={{ clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)" }}
+              style={{
+                clipPath:
+                  "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)",
+              }}
             >
               <h2 className="text-lg font-black text-accent mb-6 uppercase tracking-[0.2em] italic">
                 Rename_Module
@@ -812,14 +847,19 @@ export default function MarkdownPlayground() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="modal-content bg-[#050000] border border-red-500/40 p-8 max-w-sm w-full relative"
-              style={{ clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)" }}
+              style={{
+                clipPath:
+                  "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)",
+              }}
             >
               <h2 className="text-lg font-black text-red-500 mb-2 uppercase tracking-[0.2em] italic">
                 WIPE_MODULE?
               </h2>
               <p className="text-[10px] text-red-500/60 mb-8 font-mono uppercase tracking-widest leading-loose">
-                // CRITICAL_WARNING:<br/>
-                All sector data will be permanently overwritten. Operation cannot be reversed.
+                // CRITICAL_WARNING:
+                <br />
+                All sector data will be permanently overwritten. Operation
+                cannot be reversed.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -1004,7 +1044,7 @@ export default function MarkdownPlayground() {
           >
             <button
               onClick={() => setIsFullScreen(false)}
-              className="fixed top-6 right-6 p-4 bg-accent text-black rounded-full shadow-[0_0_30px_rgba(0,255,136,0.6)] hover:scale-110 active:scale-95 transition-all z-[510] border-2 border-black"
+              className="fixed opacity-50 top-24 right-6 p-4 bg-accent text-black rounded-full shadow-[0_0_30px_rgba(0,255,136,0.6)] hover:scale-110 active:scale-95 transition-all z-[510] border-2 border-black"
               title="Exit Full Screen (ESC)"
             >
               <Minimize2 size={24} />
