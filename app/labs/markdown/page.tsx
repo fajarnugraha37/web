@@ -176,7 +176,10 @@ export default function MarkdownPlayground() {
   const [showToc, setShowToc] = useState(false);
   const [modal, setModal] = useState<"import" | "export" | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
-  const [activeMenu, setActiveMenu] = useState<{ id: string; rect: DOMRect } | null>(null);
+  const [activeMenu, setActiveMenu] = useState<{
+    id: string;
+    rect: DOMRect;
+  } | null>(null);
   const [renameModal, setRenameModal] = useState<{
     id: string;
     name: string;
@@ -224,7 +227,11 @@ export default function MarkdownPlayground() {
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       //Whitelisting triggers and content to prevent premature closure
-      if (activeMenu && !target.closest(".file-menu-trigger") && !target.closest(".file-menu-content")) {
+      if (
+        activeMenu &&
+        !target.closest(".file-menu-trigger") &&
+        !target.closest(".file-menu-content")
+      ) {
         setActiveMenu(null);
       }
       if (modal && !target.closest(".modal-content")) {
@@ -241,20 +248,32 @@ export default function MarkdownPlayground() {
     return () => window.removeEventListener("mousedown", handleOutsideClick);
   }, [activeMenu, modal, renameModal, deleteModal]);
 
+  useEffect(() => {
+    if (isMobile && viewMode === "split") {
+      setViewMode("preview");
+    }
+  }, [isMobile, viewMode]);
+
   // Load from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("markdown-lab-files");
     const savedActiveId = localStorage.getItem("markdown-lab-active-id");
-    
+
     const fetchDefaultContent = async () => {
       try {
-        const res = await fetch("https://raw.githubusercontent.com/fajarnugraha37/web/refs/heads/main/README.md");
+        const res = await fetch(
+          "https://raw.githubusercontent.com/fajarnugraha37/web/refs/heads/main/README.md",
+        );
         const text = await res.text();
         const initialFile = { id: "1", name: "README.md", content: text };
         setFiles([initialFile]);
         setActiveFileId("1");
       } catch (e) {
-        const fallbackFile = { id: "1", name: "untitled.md", content: "# MARKDOWN.EXE" };
+        const fallbackFile = {
+          id: "1",
+          name: "untitled.md",
+          content: "# MARKDOWN.EXE",
+        };
         setFiles([fallbackFile]);
         setActiveFileId("1");
       } finally {
@@ -568,17 +587,22 @@ export default function MarkdownPlayground() {
                 size={14}
                 className="cursor-pointer opacity-60 hover:opacity-100 file-menu-trigger"
                 onClick={(e) => {
-                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                  setActiveMenu(activeMenu?.id === f.id ? null : { id: f.id, rect });
+                  const rect = (
+                    e.currentTarget as HTMLElement
+                  ).getBoundingClientRect();
+                  setActiveMenu(
+                    activeMenu?.id === f.id ? null : { id: f.id, rect },
+                  );
                 }}
               />
               {activeMenu?.id === f.id && (
-                <div 
-                  className="fixed bg-black border border-accent p-2 z-[9999] flex flex-col gap-2 w-32 shadow-[0_0_20px_rgba(0,255,136,0.3)] file-menu-content" 
-                  style={{ 
-                    top: `${activeMenu.rect.bottom + 8}px`, 
+                <div
+                  className="fixed bg-black border border-accent p-2 z-[9999] flex flex-col gap-2 w-32 shadow-[0_0_20px_rgba(0,255,136,0.3)] file-menu-content"
+                  style={{
+                    top: `${activeMenu.rect.bottom + 8}px`,
                     left: `${activeMenu.rect.left}px`,
-                    clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)" 
+                    clipPath:
+                      "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)",
                   }}
                 >
                   <button
@@ -787,7 +811,7 @@ export default function MarkdownPlayground() {
                   <button
                     key={opt.id}
                     onClick={opt.fn}
-                    className="flex flex-col items-center gap-4 p-6 border border-accent/20 bg-accent/5 hover:bg-accent/10 hover:border-accent/60 group transition-all relative overflow-hidden"
+                    className="flex flex-col items-center gap-4 p-2 border border-accent/20 bg-accent/5 hover:bg-accent/10 hover:border-accent/60 group transition-all relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-8 h-8 bg-accent/10 -mr-4 -mt-4 rotate-45 group-hover:bg-accent/20 transition-all" />
                     <opt.icon className="w-10 h-10 text-accent group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(0,255,136,0.5)] transition-all" />
@@ -936,7 +960,8 @@ export default function MarkdownPlayground() {
               ref={editorParentRef}
               onScroll={handleEditorScroll}
               style={{
-                width: viewMode === "split" ? `${splitRatio}%` : "100%",
+                width:
+                  viewMode === "split" && !isMobile ? `${splitRatio}%` : "100%",
               }}
               className="border border-accent/20 bg-card/5 overflow-hidden relative group hover:border-accent/40 transition-colors flex flex-col h-full"
             >
@@ -991,7 +1016,7 @@ export default function MarkdownPlayground() {
               ref={previewRef}
               onScroll={handlePreviewScroll}
               style={{
-                width: viewMode === "split" ? `${100 - splitRatio}%` : "100%",
+                width: (viewMode === "split" && !isMobile) ? `${100 - splitRatio}%` : "100%",
               }}
               className="markdown-body p-6 bg-card/5 border border-border/20 font-mono overflow-auto relative h-full"
             >
