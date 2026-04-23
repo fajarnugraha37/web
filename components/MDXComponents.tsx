@@ -23,13 +23,13 @@ export const mdxComponents: any = {
   h2: (props: any) => (
     <h2
       {...props}
-      id={props.children.toString().toLowerCase().replace(/\s+/g, "-")}
+      id={props.children?.toString().toLowerCase().replace(/\s+/g, "-")}
     />
   ),
   h3: (props: any) => (
     <h3
       {...props}
-      id={props.children.toString().toLowerCase().replace(/\s+/g, "-")}
+      id={props.children?.toString().toLowerCase().replace(/\s+/g, "-")}
     />
   ),
   table: (props: any) => (

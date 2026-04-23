@@ -34,6 +34,15 @@ const LAB_NODES = [
     status: "✔",
     color: "text-accent-tertiary",
   },
+  {
+    id: "markdown",
+    name: "MARKDOWN.EXE",
+    description: "Live Markdown editor with split-pane preview and terminal aesthetics.",
+    icon: <Binary className="w-8 h-8" />,
+    path: "/labs/markdown",
+    status: "✔",
+    color: "text-accent",
+  },
 ];
 
 export default function LabsDashboard() {

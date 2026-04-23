@@ -40,6 +40,11 @@ const NAV_LINKS: NavLink[] = [
         label: "BLOG_NETWORK.EXE",
         accentClass: "hover:text-accent-tertiary",
       },
+      {
+        href: "/labs/markdown",
+        label: "MARKDOWN.EXE",
+        accentClass: "hover:text-accent",
+      },
     ],
   },
   { href: "/feed.xml", label: "/RSS Feed", accentClass: "hover:text-accent" },
