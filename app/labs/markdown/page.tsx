@@ -245,31 +245,40 @@ export default function MarkdownPlayground() {
   useEffect(() => {
     const savedFiles = localStorage.getItem("markdown-lab-files");
     const savedActiveId = localStorage.getItem("markdown-lab-active-id");
+    
+    const fetchDefaultContent = async () => {
+      try {
+        const res = await fetch("https://raw.githubusercontent.com/fajarnugraha37/web/refs/heads/main/README.md");
+        const text = await res.text();
+        const initialFile = { id: "1", name: "README.md", content: text };
+        setFiles([initialFile]);
+        setActiveFileId("1");
+      } catch (e) {
+        const fallbackFile = { id: "1", name: "untitled.md", content: "# MARKDOWN.EXE" };
+        setFiles([fallbackFile]);
+        setActiveFileId("1");
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
     if (savedFiles) {
       try {
         const parsed = JSON.parse(savedFiles);
-        setFiles(parsed);
-        if (savedActiveId) setActiveFileId(savedActiveId);
-        else if (parsed.length > 0) setActiveFileId(parsed[0].id);
+        if (parsed.length > 0) {
+          setFiles(parsed);
+          if (savedActiveId) setActiveFileId(savedActiveId);
+          else setActiveFileId(parsed[0].id);
+          setIsLoaded(true);
+        } else {
+          fetchDefaultContent();
+        }
       } catch (e) {
-        const initialFile = {
-          id: "1",
-          name: "untitled.md",
-          content: "# MARKDOWN.EXE",
-        };
-        setFiles([initialFile]);
-        setActiveFileId("1");
+        fetchDefaultContent();
       }
     } else {
-      const initialFile = {
-        id: "1",
-        name: "untitled.md",
-        content: "# MARKDOWN.EXE",
-      };
-      setFiles([initialFile]);
-      setActiveFileId("1");
+      fetchDefaultContent();
     }
-    setIsLoaded(true);
   }, []);
 
   // Save to localStorage
