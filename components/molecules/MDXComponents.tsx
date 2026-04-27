@@ -1,5 +1,6 @@
 import React from "react";
-import { CodeBlock } from "./CodeBlock";
+import { CodeBlock } from "@/components/atoms/CodeBlock";
+import { MermaidDiagram } from "./MermaidDiagram";
 
 export const mdxComponents: any = {
   pre: ({ children }: any) => {
@@ -7,10 +8,15 @@ export const mdxComponents: any = {
   },
   code: (props: any) => {
     const { children, className, ...rest } = props;
+    const codeString = Array.isArray(children)
+      ? children.join("")
+      : String(children);
+
+    if (className === "language-mermaid" || className === "mermaid") {
+      return <MermaidDiagram chart={codeString} />;
+    }
+
     if (className) {
-      const codeString = Array.isArray(children)
-        ? children.join("")
-        : String(children);
       return <CodeBlock code={codeString} className={className} {...rest} />;
     }
     return (

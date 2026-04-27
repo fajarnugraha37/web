@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { motion, AnimatePresence } from "motion/react";
+import { toast } from "@/components/atoms/Toast";
 
 mermaid.initialize({
   startOnLoad: false,
@@ -50,13 +51,13 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(chart);
-        alert("Diagram code copied to clipboard");
+        toast("DIAGRAM_SOURCE_COPIED", "success");
       } else {
         throw new Error("Clipboard API not available");
       }
     } catch (err) {
       console.error(err);
-      alert("Clipboard access denied. Please copy manually.");
+      toast("CLIPBOARD_ACCESS_DENIED", "error");
     }
   };
 
@@ -68,6 +69,7 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
     link.download = "diagram.svg";
     link.click();
     URL.revokeObjectURL(url);
+    toast("SVG_EXPORT_INITIATED", "info");
   };
 
   const handleDownloadPNG = () => {
@@ -76,38 +78,23 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
     if (!svgElement) return;
 
     const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
-    const viewBox = clonedSvg.getAttribute("viewBox");
-    let width = parseInt(clonedSvg.getAttribute("width") || "0", 10);
-    let height = parseInt(clonedSvg.getAttribute("height") || "0", 10);
-
-    if (!width || !height) {
-      const bbox = svgElement.getBoundingClientRect();
-      width = bbox.width || 800;
-      height = bbox.height || 600;
-    }
-
-    if (viewBox && (!width || !height)) {
-      const parts = viewBox.split(" ");
-      width = parseFloat(parts[2]);
-      height = parseFloat(parts[3]);
-    }
+    const bbox = svgElement.getBoundingClientRect();
+    const width = bbox.width || 800;
+    const height = bbox.height || 600;
 
     clonedSvg.setAttribute("width", width.toString());
     clonedSvg.setAttribute("height", height.toString());
-
-    // Use explicit namespace for XML serialization
     clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
     const svgData = new XMLSerializer().serializeToString(clonedSvg);
-    // Use Base64 encoding for the data URL to avoid SecurityError / Tainted Canvas
     const base64 = btoa(unescape(encodeURIComponent(svgData)));
     const dataUrl = `data:image/svg+xml;base64,${base64}`;
 
     const img = new Image();
-    img.crossOrigin = "anonymous"; // Try to avoid tainting
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = width * 2; // High resolution
+      canvas.width = width * 2;
       canvas.height = height * 2;
       const ctx = canvas.getContext("2d");
       if (ctx) {
@@ -121,17 +108,11 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
           link.href = pngUrl;
           link.download = "diagram.png";
           link.click();
+          toast("PNG_EXPORT_COMPLETE", "success");
         } catch (e) {
-          console.error("Canvas export failed", e);
-          alert(
-            "Export failed. Browser policy blocked PNG generation from SVG. Try SVG download instead.",
-          );
+          toast("PNG_EXPORT_FAILED", "error");
         }
       }
-    };
-    img.onerror = (err) => {
-      console.error("Image loading failed", err);
-      alert("Failed to process diagram for PNG. Try SVG download instead.");
     };
     img.src = dataUrl;
   };
@@ -157,7 +138,6 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
             className="relative w-full max-w-6xl h-[80vh] flex flex-col items-center justify-center bg-card rounded-xl border border-accent/30 shadow-[0_0_50px_rgba(var(--accent-rgb),0.2)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
             <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-background/50 backdrop-blur-md border-b border-border/50 z-20">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
@@ -168,74 +148,37 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
 
               <div className="flex items-center gap-2">
                 <div className="flex bg-background/80 border border-border rounded-md p-0.5">
-                  <button
-                    onClick={handleCopy}
-                    className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
-                    title="Copy Raw"
-                  >
+                  <button onClick={handleCopy} className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group" title="Copy Raw">
                     <Copy className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    onClick={handleDownloadSVG}
-                    className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group"
-                    title="Save SVG"
-                  >
+                  <button onClick={handleDownloadSVG} className="p-2 hover:bg-accent hover:text-black rounded-md transition-all group" title="Save SVG">
                     <Download className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <button
-                  onClick={closeZoom}
-                  className="p-2 bg-accent/10 border border-accent/20 rounded-md hover:bg-accent hover:text-black transition-all"
-                >
+                <button onClick={closeZoom} className="p-2 bg-accent/10 border border-accent/20 rounded-md hover:bg-accent hover:text-black transition-all">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            <TransformWrapper
-              initialScale={1}
-              centerOnInit={true}
-              minScale={0.1}
-              maxScale={8}
-            >
+            <TransformWrapper initialScale={1} centerOnInit={true} minScale={0.1} maxScale={8}>
               {({ zoomIn, zoomOut, resetTransform }) => (
                 <>
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 bg-background/90 backdrop-blur-md border border-accent/30 rounded-full p-1.5 shadow-2xl">
-                    <button
-                      onClick={() => zoomIn()}
-                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                    >
+                    <button onClick={() => zoomIn()} className="p-3 hover:bg-accent hover:text-black rounded-full transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
-                    <button
-                      onClick={() => zoomOut()}
-                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                    >
+                    <button onClick={() => zoomOut()} className="p-3 hover:bg-accent hover:text-black rounded-full transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
-                    <button
-                      onClick={() => resetTransform()}
-                      className="p-3 hover:bg-accent hover:text-black rounded-full transition-all"
-                    >
+                    <button onClick={() => resetTransform()} className="p-3 hover:bg-accent hover:text-black rounded-full transition-all">
                       <RotateCcw className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing pt-16">
-                    <TransformComponent
-                      wrapperStyle={{ width: "100%", height: "100%" }}
-                      contentStyle={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <div
-                        className="p-12 md:p-24 flex items-center justify-center"
-                        dangerouslySetInnerHTML={{ __html: svgCode }}
-                      />
+                    <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div className="p-12 md:p-24 flex items-center justify-center" dangerouslySetInnerHTML={{ __html: svgCode }} />
                     </TransformComponent>
                   </div>
                 </>
@@ -250,44 +193,14 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
   return (
     <>
       <div className="relative group my-8 p-4 border border-border/50 rounded-lg bg-card/30 overflow-x-auto">
-        {/* Actions - Always visible on mobile, hover on desktop */}
         <div className="absolute top-2 right-2 flex gap-1.5 z-10 bg-background/90 p-1 rounded-md backdrop-blur-md border border-border shadow-lg opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all">
-          <button
-            onClick={() => setIsZoomed(true)}
-            className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors"
-            aria-label="Zoom"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleCopy}
-            className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors"
-            aria-label="Copy code"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleDownloadSVG}
-            className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors"
-            aria-label="Download SVG"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleDownloadPNG}
-            className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors"
-            aria-label="Download PNG"
-          >
-            <ImageIcon className="w-4 h-4" />
-          </button>
+          <button onClick={() => setIsZoomed(true)} className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors" aria-label="Zoom"><ZoomIn className="w-4 h-4" /></button>
+          <button onClick={handleCopy} className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors" aria-label="Copy code"><Copy className="w-4 h-4" /></button>
+          <button onClick={handleDownloadSVG} className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors" aria-label="Download SVG"><Download className="w-4 h-4" /></button>
+          <button onClick={handleDownloadPNG} className="p-2 hover:bg-accent hover:text-black rounded-md transition-colors" aria-label="Download PNG"><ImageIcon className="w-4 h-4" /></button>
         </div>
-        <div
-          ref={containerRef}
-          className="flex justify-center items-center min-w-full"
-          dangerouslySetInnerHTML={{ __html: svgCode }}
-        />
+        <div ref={containerRef} className="flex justify-center items-center min-w-full" dangerouslySetInnerHTML={{ __html: svgCode }} />
       </div>
-
       {mounted && createPortal(modalContent, document.body)}
     </>
   );

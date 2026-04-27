@@ -34,18 +34,16 @@ export function ScrollToTop() {
           initial={{ opacity: 0, scale: 0.5, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0.5, x: 20 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex flex-col items-center group"
+          className="fixed bottom-24 right-6 z-[45] group flex flex-col items-center"
           aria-label="Scroll to top"
         >
-          {/* Cyber-styled button */}
-          <div className="relative p-3 bg-card border border-accent/50 text-accent shadow-[0_0_15px_rgba(0,255,136,0.2)] cyber-chamfer-sm transition-all group-hover:border-accent group-hover:shadow-[0_0_25px_rgba(0,255,136,0.4)]">
-            <ArrowUp className="w-5 h-5" />
+          <div className="relative p-3 bg-background/80 border border-accent/50 backdrop-blur-md cyber-chamfer-sm group-hover:border-accent group-hover:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all">
+            <ArrowUp className="w-5 h-5 text-accent group-hover:animate-bounce" />
             
-            {/* Animated border scanline */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-accent/50 animate-[shimmer_2s_infinite]" />
+            {/* Corner accents */}
+            <div className="absolute top-0 left-0 w-1 h-1 bg-accent" />
+            <div className="absolute bottom-0 right-0 w-1 h-1 bg-accent" />
           </div>
           
           {/* Bottom tag */}

@@ -1,54 +1,37 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import MiniSearch from "minisearch";
-import { Search, X, Command, Sparkles } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { Search, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 
-interface SearchResult {
-  id: string;
-  title: string;
-  tags: string[];
-  description: string;
+interface SearchPaletteProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
 }
 
-export const SearchPalette = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [miniSearch, setMiniSearch] = useState<MiniSearch | null>(null);
-
-  // Use useMemo to handle results derived from query/index, avoiding useEffect setState sync
-  const results = useMemo(() => {
-    if (miniSearch && query) {
-      return miniSearch.search(query, { fuzzy: 0.2 }) as unknown as SearchResult[];
-    }
-    return [];
-  }, [query, miniSearch]);
+export const SearchPalette = ({ isOpen, setIsOpen }: SearchPaletteProps) => {
+  const { query, setQuery, results } = useSearchIndex();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchIndex = async () => {
-      const res = await fetch("/search-index.json");
-      const data = await res.json();
-      const ms = new MiniSearch({
-        fields: ["title", "tags", "description"],
-        storeFields: ["title", "tags", "description"],
-      });
-      ms.addAll(data);
-      setMiniSearch(ms);
-    };
-    fetchIndex();
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        setIsOpen(!isOpen);
       }
       if (e.key === "Escape") setIsOpen(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen, setIsOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -63,26 +46,21 @@ export const SearchPalette = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex justify-center pt-[15vh] px-4 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          >
+          /* MODAL WRAPPER: Centers the search box. No backdrop here, it's handled by Header. */
+          <div className="fixed inset-0 z-[100] flex justify-center pt-[15vh] px-4 pointer-events-none">
             <motion.div
-              initial={{ scale: 0.95, y: -20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: -20 }}
-              className="w-full max-w-lg bg-card border border-accent/30 shadow-2xl rounded-xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.95, y: -20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: -20, opacity: 0 }}
+              className="relative w-full max-w-lg bg-card border border-accent/30 shadow-2xl rounded-xl overflow-hidden h-fit pointer-events-auto"
+              onClick={(e) => e.stopPropagation()} // Prevents clicks inside from bubbling to parent
             >
               <div className="flex items-center gap-3 p-4 border-b border-border">
                 <Search className="w-5 h-5 text-accent" />
                 <input
-                  autoFocus
+                  ref={inputRef}
                   placeholder="QUERY_KNOWLEDGE_BASE..."
-                  className="flex-1 bg-transparent border-none outline-none font-mono text-sm placeholder:opacity-50"
+                  className="flex-1 bg-transparent border-none outline-none font-mono text-sm placeholder:opacity-50 text-foreground"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -119,7 +97,7 @@ export const SearchPalette = () => {
                 ESC to DISCONNECT
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>

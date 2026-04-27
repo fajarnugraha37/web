@@ -2,11 +2,10 @@ import { getBlogData, getAllBlogSlugs } from "@/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { PageTransition } from "@/components/PageTransition";
-import * as motion from "motion/react-client";
+import { PageTransition } from "@/components/atoms/PageTransition";
 import type { Metadata } from "next";
-import { mdxComponents } from "@/components/MDXComponents";
-import { BlogActions } from "@/components/BlogActions";
+import { mdxComponents } from "@/components/molecules/MDXComponents";
+import { BlogActions } from "@/components/molecules/BlogActions";
 import remarkMath from "remark-math";
 import remarkEmoji from "remark-emoji";
 import remarkGfm from "remark-gfm";
@@ -14,8 +13,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeRaw from "rehype-raw";
 import "katex/dist/katex.min.css";
-import { TocNav } from "@/components/TocNav";
-
+import { TocNav } from "@/components/molecules/TocNav";
 import relations from "@/public/relations.json";
 
 export async function generateStaticParams() {
@@ -49,7 +47,6 @@ export async function generateMetadata({
   };
 }
 
-// Hierarchical heading extractor
 export function getHeadings(title: string, content: string) {
   const headingRegex = /^(#{1,3})\s+(.+)$/gm;
   const headings: {
@@ -111,7 +108,6 @@ export default async function BlogPost({
           </aside>
 
           <main className="min-w-0">
-            {/* Sticky HUD */}
             <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-xl border-b border-accent/20 shadow-[0_15px_35px_rgba(0,0,0,0.9)] -mx-4 md:-mx-10 mb-12 px-4 md:px-10 py-4 flex items-center justify-between gap-4">
               <Link
                 href="/blogs"
@@ -122,27 +118,19 @@ export default async function BlogPost({
                 </div>
                 <span className="sm:inline">DISCONNECT</span>
               </Link>
-              <time className="text-accent-secondary font-mono text-[9px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5 tracking-tighter shadow-[0_0_10px_rgba(var(--accent-secondary-rgb),0.1)]">
+              <time className="text-accent-secondary font-mono text-[9px] bg-accent-secondary/5 border border-accent-secondary/20 px-2 py-0.5 tracking-tighter">
                 [ TS: {postData.date} ]
               </time>
-
-              {/* Visual HUD accent line */}
               <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
             </div>
 
-            <h1
-              id={headings[0].id}
-              className="text-2xl md:text-4xl font-black font-sans text-foreground leading-tight tracking-tighter mb-6"
-            >
+            <h1 id={headings[0].id} className="text-2xl md:text-4xl font-black font-sans text-foreground leading-tight tracking-tighter mb-6">
               {postData.title}
             </h1>
 
             <div className="flex flex-wrap gap-2 mb-2 lg:mb-8">
               {postData.tags.map((t: string) => (
-                <span
-                  key={t}
-                  className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors"
-                >
+                <span key={t} className="text-[10px] md:text-xs uppercase font-mono tracking-[0.15em] text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 cyber-chamfer-sm hover:bg-accent-tertiary/20 transition-colors">
                   #{t}
                 </span>
               ))}
@@ -154,11 +142,7 @@ export default async function BlogPost({
                 <span className="text-accent/50">&bull;</span>
                 <span>{postData.stats.wordCount} WORDS</span>
               </div>
-              <BlogActions
-                title={postData.title}
-                slug={postData.slug}
-                content={postData.content}
-              />
+              <BlogActions title={postData.title} slug={postData.slug} content={postData.content} />
             </div>
 
             <div className="markdown-body p-6 md:p-10 bg-card/5 border border-border/20 text-foreground/90 font-mono relative overflow-x-auto mb-16">
@@ -176,7 +160,6 @@ export default async function BlogPost({
               </div>
             </div>
 
-            {/* Footer matching main branch style */}
             <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest pb-20">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-2">
@@ -192,6 +175,7 @@ export default async function BlogPost({
               </div>
             </div>
           </main>
+
           <aside className="hidden lg:block relative">
             <div className="sticky top-24">
               <h3 className="font-mono text-accent-secondary text-xs uppercase tracking-widest mb-6 border-b border-border pb-2">
@@ -199,11 +183,7 @@ export default async function BlogPost({
               </h3>
               <div className="space-y-6">
                 {relatedPosts.map((post) => (
-                  <Link
-                    href={`/blogs/${post.slug}`}
-                    key={post.slug}
-                    className="block group"
-                  >
+                  <Link href={`/blogs/${post.slug}`} key={post.slug} className="block group">
                     <div className="bg-card/30 border border-border p-4 hover:border-accent-secondary transition-all">
                       <h4 className="text-sm font-bold text-foreground mb-1 group-hover:text-accent-secondary truncate">
                         {post.title}
@@ -219,7 +199,6 @@ export default async function BlogPost({
           </aside>
         </article>
 
-        {/* Ambient Room Glows from main branch */}
         <div className="fixed inset-0 pointer-events-none -z-10">
           <div className="absolute top-0 right-0 w-[50vw] h-[50vh] bg-accent/5 blur-[150px] rounded-full" />
           <div className="absolute bottom-0 left-0 w-[50vw] h-[50vh] bg-accent-secondary/5 blur-[150px] rounded-full" />

@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { PGlite } from "@electric-sql/pglite";
 import { SEED_SQL } from "@/lib/pg-seed";
-
-export type DbStatus = "initializing" | "ready" | "error" | "volatile";
+import { DbStatus } from "@/types";
 
 export interface PGliteHook {
   db: PGlite | null;
@@ -13,7 +12,7 @@ export interface PGliteHook {
   exec: (sql: string) => Promise<any>;
 }
 
-export function usePglite() {
+export function usePglite(): PGliteHook {
   const [db, setDb] = useState<PGlite | null>(null);
   const [status, setStatus] = useState<DbStatus>("initializing");
   const [error, setError] = useState<string | null>(null);
@@ -26,21 +25,19 @@ export function usePglite() {
     async function initDb() {
       let pg: PGlite | null = null;
       try {
-        // Try IndexedDB first
         try {
           pg = new PGlite("idb://sysop-db");
           await pg.waitReady;
           setStatus("ready");
         } catch (storageErr: any) {
           console.warn("Storage restricted, falling back to memory:", storageErr);
-          pg = new PGlite(); // Memory fallback
+          pg = new PGlite(); 
           await pg.waitReady;
           setStatus("volatile");
         }
 
         if (!pg) throw new Error("Failed to initialize database engine");
 
-        // Atomic seeding check
         try {
           const check = await pg.query(
             "SELECT 1 FROM information_schema.tables WHERE table_name = 'system_control';"

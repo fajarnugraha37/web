@@ -15,15 +15,20 @@ const buttonVariants = cva(
           "border-2 border-accent-secondary text-accent-secondary hover:bg-accent-secondary hover:text-black glow-btn-secondary",
         outline:
           "border border-border bg-transparent hover:border-accent hover:text-accent glow-btn",
-        ghost: "hover:bg-accent/10 hover:text-accent",
+        ghost: "hover:bg-accent/10 hover:text-accent border-transparent",
         glitch:
           "bg-accent text-black hover:brightness-110",
+        neutral: 
+          "border border-border bg-card/60 hover:border-accent hover:text-accent text-muted-foreground",
       },
       size: {
         default: "h-11 px-8 py-2",
+        xs: "h-7 px-2 text-[10px]",
         sm: "h-9 px-4 text-xs",
         lg: "h-14 px-10 text-base",
         icon: "h-11 w-11",
+        "icon-sm": "h-8 w-8",
+        "icon-xs": "h-6 w-6",
       },
     },
     defaultVariants: {

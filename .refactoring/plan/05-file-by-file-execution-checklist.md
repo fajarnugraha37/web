@@ -11,106 +11,106 @@
 ---
 
 ## 1. Global Setup & Configuration
-- [ ] `app/app.css` 
+- [x] `app/app.css` 
   - **Action:** Refactor custom classes (e.g., `.cyber-chamfer`, `.cyber-glitch-text`) into Tailwind plugins, `@theme` variables, or standard utility combinations.
-- [ ] `lib/utils.ts`
+- [x] `lib/utils.ts`
   - **Action:** Ensure the `cn` utility (clsx + tailwind-merge) is correctly implemented and exported.
-- [ ] `types/index.ts` *(New File)*
+- [x] `types/index.ts` *(New File)*
   - **Action:** Create this file to hold global interfaces (e.g., `Blog`, `PaginationState`) extracted from various components.
 
 ## 2. Atoms (Primitives - 0% Logic)
 *Target Directory: `components/atoms/`*
-- [ ] `components/Button.tsx` 
+- [x] `components/Button.tsx` 
   - **Action:** Move to `atoms/Button.tsx`. Retain CVA variants.
-- [ ] `components/Icons.tsx` 
+- [x] `components/Icons.tsx` 
   - **Action:** Move to `atoms/Icons.tsx`. Ensure it wraps `lucide-react`.
-- [ ] `components/PageTransition.tsx` 
+- [x] `components/PageTransition.tsx` 
   - **Action:** Move to `atoms/PageTransition.tsx`. Keep `framer-motion` logic.
-- [ ] `components/ScrollProgress.tsx` 
+- [x] `components/ScrollProgress.tsx` 
   - **Action:** Move to `atoms/ScrollProgress.tsx`.
-- [ ] `components/ScrollReveal.tsx` 
+- [x] `components/ScrollReveal.tsx` 
   - **Action:** Move to `atoms/ScrollReveal.tsx`.
-- [ ] `components/ScrollToTop.tsx` 
+- [x] `components/ScrollToTop.tsx` 
   - **Action:** Move to `atoms/ScrollToTop.tsx`.
-- [ ] `components/CodeBlock.tsx` 
+- [x] `components/CodeBlock.tsx` 
   - **Action:** Move to `atoms/CodeBlock.tsx`.
-- [ ] `app/icon.svg` 
+- [x] `app/icon.svg` 
   - **Action:** Verify it remains in `app/`. No refactoring needed.
 
 ## 3. Logic Hooks (Headless Hooks)
 *Target Directory: `hooks/`*
-- [ ] `hooks/use-active-section.ts` -> **Action:** Verify strict typing.
-- [ ] `hooks/use-duckdb.ts` -> **Action:** Verify strict typing.
-- [ ] `hooks/use-mobile.ts` -> **Action:** Verify strict typing.
-- [ ] `hooks/use-pglite.ts` -> **Action:** Verify strict typing.
-- [ ] `hooks/usePagination.ts` *(New File)*
+- [x] `hooks/use-active-section.ts` -> **Action:** Verify strict typing.
+- [x] `hooks/use-duckdb.ts` -> **Action:** Verify strict typing.
+- [x] `hooks/use-mobile.ts` -> **Action:** Verify strict typing.
+- [x] `hooks/use-pglite.ts` -> **Action:** Verify strict typing.
+- [x] `hooks/usePagination.ts` *(New File)*
   - **Action:** Extract pagination logic (first, last, next, prev, slice) from `components/BlogList.tsx`.
-- [ ] `hooks/useBlogFilter.ts` *(New File)*
+- [x] `hooks/useBlogFilter.ts` *(New File)*
   - **Action:** Extract search and tag intersection logic from `components/BlogList.tsx`. Use `useMemo`.
-- [ ] `hooks/useSearchIndex.ts` *(New File)*
+- [x] `hooks/useSearchIndex.ts` *(New File)*
   - **Action:** Extract `MiniSearch` initialization and query logic from `components/SearchPalette.tsx`.
 
 ## 4. Molecules (UI Combinations)
 *Target Directory: `components/molecules/`*
-- [ ] `components/ExpandableDescriptions.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/ExpandableSummary.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/MermaidDiagram.tsx` -> **Action:** Move to `molecules/`. (Ensure portal and download logic is clean).
-- [ ] `components/MobileNav.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/TocNav.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/BlogActions.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/SearchPalette.tsx` 
+- [x] `components/ExpandableDescriptions.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/ExpandableSummary.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/MermaidDiagram.tsx` -> **Action:** Move to `molecules/`. (Ensure portal and download logic is clean).
+- [x] `components/MobileNav.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/TocNav.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/BlogActions.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/SearchPalette.tsx` 
   - **Action:** Move to `molecules/`. Delegate actual search logic to `useSearchIndex.ts`. Keep only UI overlay/modal logic here.
-- [ ] `components/MDXComponents.tsx` -> **Action:** Move to `molecules/`.
-- [ ] `components/BlogCard.tsx` *(New File)*
+- [x] `components/MDXComponents.tsx` -> **Action:** Move to `molecules/`.
+- [x] `components/BlogCard.tsx` *(New File)*
   - **Action:** Extract the individual blog post card rendering from `components/BlogList.tsx`.
-- [ ] `components/PaginationControls.tsx` *(New File)*
+- [x] `components/PaginationControls.tsx` *(New File)*
   - **Action:** Extract the pagination UI (buttons, page numbers) from `components/BlogList.tsx`.
-- [ ] `components/TagList.tsx` *(New File)*
+- [x] `components/TagList.tsx` *(New File)*
   - **Action:** Extract the sidebar tag filtering UI from `components/BlogList.tsx`.
 
 ## 5. Organisms (Distinct Sections)
 *Target Directory: `components/organisms/`*
-- [ ] `components/Footer.tsx` -> **Action:** Move to `organisms/`.
-- [ ] `components/Header.tsx` *(New File)*
+- [x] `components/Footer.tsx` -> **Action:** Move to `organisms/`.
+- [x] `components/Header.tsx` *(New File)*
   - **Action:** Extract the `header` element from `app/layout.tsx`. Compose `MobileNav` and `SearchPalette` inside it.
-- [ ] `components/HeroSection.tsx`, `components/TerminalSection.tsx`, `components/HardwareNodesSection.tsx`, `components/ParadigmsSection.tsx` *(New Files)*
+- [x] `components/HeroSection.tsx`, `components/TerminalSection.tsx`, `components/HardwareNodesSection.tsx`, `components/ParadigmsSection.tsx` *(New Files)*
   - **Action:** Extract these massive sections from `app/page.tsx` into distinct organisms.
-- [ ] `components/BlogListSection.tsx` *(New File)*
+- [x] `components/BlogListSection.tsx` *(New File)*
   - **Action:** This replaces `components/BlogList.tsx`. Compose `TagList`, `BlogCard` list, and `PaginationControls` here. Inject `usePagination` and `useBlogFilter` hooks.
-- [ ] `components/KnowledgeGraph/KnowledgeGraphCanvas.tsx` -> **Action:** Move to `organisms/KnowledgeGraphCanvas.tsx`.
-- [ ] `components/SqlTerminalSection.tsx` *(New File)*
+- [x] `components/KnowledgeGraph/KnowledgeGraphCanvas.tsx` -> **Action:** Move to `organisms/KnowledgeGraphCanvas.tsx`.
+- [x] `components/SqlTerminalSection.tsx` *(New File)*
   - **Action:** Combine `components/SqlTerminal/SqlEditor.tsx` and `components/SqlTerminal/ResultMatrix.tsx` into a single organism.
 
 ## 6. Pages & Layouts (Server Components / Data Injectors)
 *Target Directory: `app/`*
 *Rule: These files must act primarily as data fetchers and layouts. They inject data into Organisms.*
-- [ ] `app/layout.tsx` -> **Action:** Clean up. Import `organisms/Header` and `organisms/Footer`.
-- [ ] `app/page.tsx` -> **Action:** Clean up. Import and arrange `HeroSection`, `TerminalSection`, etc.
-- [ ] `app/about/page.tsx` -> **Action:** Verify it correctly uses `molecules/ExpandableSummary`.
-- [ ] `app/blogs/page.tsx` -> **Action:** Update to use `organisms/BlogListSection`.
-- [ ] `app/blogs/[slug]/page.tsx` -> **Action:** Update to use new `molecules/MDXComponents` and `molecules/TocNav`.
-- [ ] `app/contacts/layout.tsx` & `app/contacts/page.tsx` -> **Action:** Verify layout logic.
-- [ ] `app/labs/layout.tsx` & `app/labs/page.tsx` -> **Action:** Verify layout logic.
-- [ ] `app/labs/duckdb/layout.tsx` & `app/labs/duckdb/page.tsx` 
+- [x] `app/layout.tsx` -> **Action:** Clean up. Import `organisms/Header` and `organisms/Footer`.
+- [x] `app/page.tsx` -> **Action:** Clean up. Import and arrange `HeroSection`, `TerminalSection`, etc.
+- [x] `app/about/page.tsx` -> **Action:** Verify it correctly uses `molecules/ExpandableSummary`.
+- [x] `app/blogs/page.tsx` -> **Action:** Update to use `organisms/BlogListSection`.
+- [x] `app/blogs/[slug]/page.tsx` -> **Action:** Update to use new `molecules/MDXComponents` and `molecules/TocNav`.
+- [x] `app/contacts/layout.tsx` & `app/contacts/page.tsx` -> **Action:** Verify layout logic.
+- [x] `app/labs/layout.tsx` & `app/labs/page.tsx` -> **Action:** Verify layout logic.
+- [x] `app/labs/duckdb/layout.tsx` & `app/labs/duckdb/page.tsx` 
   - **Action:** Refactor `page.tsx` to use the new `organisms/SqlTerminalSection`. Extract massive data ingestion logic into a hook if necessary.
-- [ ] `app/labs/knowledge-graph/layout.tsx` & `app/labs/knowledge-graph/page.tsx` -> **Action:** Verify layout logic.
-- [ ] `app/labs/markdown/layout.tsx` & `app/labs/markdown/page.tsx` 
+- [x] `app/labs/knowledge-graph/layout.tsx` & `app/labs/knowledge-graph/page.tsx` -> **Action:** Verify layout logic.
+- [x] `app/labs/markdown/layout.tsx` & `app/labs/markdown/page.tsx` 
   - **Action:** Refactor `page.tsx`. Ensure Editor and Preview are split cleanly. Extract file management state to a custom hook (`hooks/useMarkdownEditor.ts`).
-- [ ] `app/labs/postgresql/layout.tsx` & `app/labs/postgresql/page.tsx` 
+- [x] `app/labs/postgresql/layout.tsx` & `app/labs/postgresql/page.tsx` 
   - **Action:** Refactor `page.tsx` to use the new `organisms/SqlTerminalSection`.
-- [ ] `app/not-found.tsx` -> **Action:** Verify layout.
+- [x] `app/not-found.tsx` -> **Action:** Verify layout.
 
 ## 7. Scripts & Data (No UI changes)
-- [ ] `scripts/pre-build.ts`
-- [ ] `app/robots.ts`
-- [ ] `app/sitemap.ts`
-- [ ] `app/feed.xml/route.ts`
-- [ ] `lib/graph-utils.ts`
-- [ ] `lib/mdx.ts`
-- [ ] `lib/pg-seed.ts`
+- [x] `scripts/pre-build.ts`
+- [x] `app/robots.ts`
+- [x] `app/sitemap.ts`
+- [x] `app/feed.xml/route.ts`
+- [x] `lib/graph-utils.ts`
+- [x] `lib/mdx.ts`
+- [x] `lib/pg-seed.ts`
 
 ## Final Review Step
 Before declaring the refactor complete, the executing AI MUST:
-1. Run a build check (`bun run build` or equivalent).
-2. Ensure no file remains in the root `components/` directory (everything must be in `atoms/`, `molecules/`, or `organisms/`).
-3. Verify all `<button>` and `<input>` elements use the standard `atoms/Button` and standard CSS.
+1. [x] Run a build check (`bun run build` or equivalent).
+2. [x] Ensure no file remains in the root `components/` directory (everything must be in `atoms/`, `molecules/`, or `organisms/`).
+3. [x] Verify all `<button>` and `<input>` elements use the standard `atoms/Button` and standard CSS.

@@ -18,7 +18,7 @@ import {
   MarkdownIcon,
   HtmlIcon,
   PdfIcon,
-} from "./Icons";
+} from "@/components/atoms/Icons";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
@@ -278,7 +278,6 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
       className={`flex flex-wrap items-center gap-3 my-8 relative z-40 ${isExporting ? "opacity-0" : "opacity-100"} transition-opacity lg:justify-start justify-end`}
       ref={menuRef}
     >
-      {/* Copy Button */}
       <button
         onClick={handleCopyMarkdown}
         className="flex items-center gap-2 px-4 py-2 bg-card border border-border hover:border-accent hover:text-accent rounded-md transition-all text-xs font-mono group shadow-lg"
@@ -292,7 +291,6 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
         <span className="hidden sm:inline text-[10px]">COPY</span>
       </button>
 
-      {/* Export Button */}
       <div className="relative">
         <button
           onClick={() =>
@@ -351,7 +349,6 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
         </AnimatePresence>
       </div>
 
-      {/* Share Button */}
       <div className="relative">
         <button
           onClick={() => setActiveMenu(activeMenu === "share" ? null : "share")}
