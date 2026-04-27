@@ -8,16 +8,15 @@ interface AnimatedNumberProps {
   precision?: number;
   suffix?: string;
   className?: string;
+  onComplete?: () => void;
 }
 
 /**
  * Atom: Digit
- * Animates a single digit with a high-velocity roulette effect.
- * Features momentary blur to simulate speed.
  */
 function Digit({ char, isFast }: { char: string; isFast: boolean }) {
   return (
-    <div className="inline-block relative h-[1em] overflow-hidden align-bottom">
+    <div className="inline-block relative h-[1em] overflow-hidden align-bottom text-inherit">
       <AnimatePresence mode="popLayout">
         <motion.span
           key={char}
@@ -38,13 +37,13 @@ function Digit({ char, isFast }: { char: string; isFast: boolean }) {
 }
 
 /**
- * Atom: AnimatedNumber (Cyberpunk Edition)
- * Simulates a system diagnostic boot-up from ~25% to 100.00%.
+ * Atom: AnimatedNumber (Cyberpunk Readiness Edition)
  */
 export function AnimatedNumber({
   precision = 2,
   suffix = "",
   className = "",
+  onComplete,
 }: AnimatedNumberProps) {
   const [mounted, setMounted] = useState(false);
   const [currentValue, setCurrentValue] = useState(0);
@@ -55,44 +54,42 @@ export function AnimatedNumber({
 
   useEffect(() => {
     setMounted(true);
-    // 1. Initial Random Start (20-30)
     const startVal = 20 + Math.random() * 10;
     setCurrentValue(startVal);
 
-    // 2. Boot-up Sequence logic
     let current = startVal;
     const target = 100;
     
     const step = () => {
       const remaining = target - current;
       
-      // Speed up as we get closer to target, then snap
-      let increment = 0.3 + Math.random() * 2;
-      if (remaining < 10) increment = 0.05 + Math.random() * 0.1; // Slow down for precision at end
+      // Cyberpunk velocity curve
+      let increment = 0.3 + Math.random() * 2.5;
+      if (remaining < 15) increment = 0.05 + Math.random() * 0.15;
       
       current += increment;
-      setIsFast(increment > 0.5);
+      setIsFast(increment > 0.6);
 
       if (current >= target) {
         setCurrentValue(target);
         setIsComplete(true);
         setIsFast(false);
         if (timerRef.current) clearInterval(timerRef.current);
+        if (onComplete) onComplete();
       } else {
         setCurrentValue(current);
       }
     };
 
-    timerRef.current = setInterval(step, 40);
+    timerRef.current = setInterval(step, 10); // 45 for slow
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [onComplete]);
 
-  // Static shell for SSR
   if (!mounted) {
-    return <span className={className}>25.00{suffix}</span>;
+    return <span className={className}>20.00{suffix}</span>;
   }
 
   const formatted = currentValue.toFixed(precision);
@@ -100,14 +97,15 @@ export function AnimatedNumber({
 
   return (
     <div className={cn(
-      "transition-all duration-500",
-      isComplete ? "text-accent scale-110 drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]" : className
+      "transition-all duration-700",
+      isComplete ? "text-accent scale-105" : "text-accent-tertiary",
+      className
     )}>
       <motion.div 
         className="inline-flex items-baseline leading-none font-mono font-bold"
         animate={isComplete ? { 
-          x: [0, -2, 2, 0], 
-          transition: { duration: 0.2 } 
+          x: [0, -1, 1, 0], 
+          transition: { duration: 0.3 } 
         } : {}}
       >
         {chars.map((char, i) => (
@@ -121,11 +119,11 @@ export function AnimatedNumber({
         
         {isComplete && (
           <motion.span 
-            initial={{ opacity: 0, x: 5 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="ml-2 text-[8px] tracking-[0.2em] bg-accent/20 px-1 border border-accent/50 text-accent uppercase"
+            initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            className="ml-3 text-[9px] tracking-[0.3em] bg-accent/20 px-2 py-0.5 border border-accent/50 text-accent uppercase font-black shadow-[0_0_10px_rgba(0,255,136,0.3)]"
           >
-            Saturated
+            READY
           </motion.span>
         )}
       </motion.div>
