@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/atoms/Button";
 import { ScrollReveal } from "@/components/atoms/ScrollReveal";
+import { AnimatedNumber } from "@/components/atoms/AnimatedNumber";
 
 export function HeroSection() {
   return (
@@ -64,8 +65,11 @@ export function HeroSection() {
             </div>
 
             <div className="mt-4 flex items-center gap-4 text-xs font-bold font-sans">
-              <span className="text-muted-foreground gap-2">LOAD:</span>
-              <span className="text-accent-tertiary">42.42%</span>
+              <span className="text-muted-foreground gap-2 uppercase tracking-widest opacity-70">Core_Load:</span>
+              <AnimatedNumber 
+                suffix="%" 
+                className="text-accent-tertiary font-mono text-sm" 
+              />
             </div>
           </div>
         </ScrollReveal>
