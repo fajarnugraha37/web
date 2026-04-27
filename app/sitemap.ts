@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogs = getSortedBlogsData();
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io/web";
+    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io";
 
   const blogUrls = blogs.map((blog) => ({
     url: `${baseUrl}/blogs/${blog.slug}`,

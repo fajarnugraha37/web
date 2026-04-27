@@ -39,7 +39,7 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
   const url =
     typeof window !== "undefined"
       ? window.location.href
-      : `https://fajarnugraha37.github.io/web/blogs/${slug}`;
+      : `https://fajarnugraha37.github.io/blogs/${slug}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

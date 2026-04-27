@@ -53,7 +53,7 @@ jobs:
         run: bun run build
         env:
           PAGES_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
-          NEXT_PUBLIC_BASE_URL: https://fajarnugraha37.github.io/web
+          NEXT_PUBLIC_BASE_URL: https://fajarnugraha37.github.io
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

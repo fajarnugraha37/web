@@ -20,7 +20,7 @@ export default async function Home() {
       "Team Lead Software Engineer",
       "Solution Architect",
     ],
-    url: "https://fajarnugraha37.github.io/web",
+    url: "https://fajarnugraha37.github.io",
     sameAs: [
       "https://github.com/fajarnugraha37",
       "https://www.linkedin.com/in/fajar-abdi-nugraha-81b26618a/",

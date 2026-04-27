@@ -33,4 +33,4 @@ The `useDuckDb` hook provides a React interface to the DuckDB WASM analytical da
 ## Potential Issues
 *   **Initialization:** The logic for proxying worker scripts via a Blob URL is a workaround for specific browser/CORS environments and may be fragile if dependencies change.
 *   **Memory:** DuckDB WASM operates in the browser's memory. Large dataset handling is limited by browser tab memory limits.
-*   **Coupling:** Tied to a specific path structure (`/web/duckdb`) for WASM assets.
+*   **Coupling:** Tied to a specific path structure (`/duckdb`) for WASM assets.

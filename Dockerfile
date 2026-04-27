@@ -18,8 +18,8 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the static export output to serve under /web
-COPY --from=builder /app/out /usr/share/nginx/html/web
+# Copy the static export output to serve under /
+COPY --from=builder /app/out /usr/share/nginx/html
 
 EXPOSE 80
 

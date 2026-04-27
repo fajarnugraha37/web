@@ -148,7 +148,7 @@ const Node = ({
               </div>
 
               <a
-                href={`/web/blogs/${node.id}`}
+                href={`/blogs/${node.id}`}
                 target="_blank"
                 className={`flex items-center justify-center gap-3 w-full py-3 ${isSelected ? "bg-[#00f0ff] text-black" : "bg-[#fcee0a] text-black"} text-[11px] font-black font-mono uppercase hover:brightness-125 transition-all group`}
                 style={{

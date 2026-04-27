@@ -10,7 +10,7 @@ export interface SearchResult {
   description: string;
 }
 
-export function useSearchIndex(indexPath: string = "/web/search-index.json") {
+export function useSearchIndex(indexPath: string = "/search-index.json") {
   const [query, setQuery] = useState("");
   const [miniSearch, setMiniSearch] = useState<MiniSearch | null>(null);
 

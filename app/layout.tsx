@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Fajar Abdi Nugraha" }],
   creator: "Fajar Abdi Nugraha",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io/web",
+    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io",
   ),
   openGraph: {
     type: "profile",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: "Fajar Abdi Nugraha - SYS//OP",
     images: [
       {
-        url: "/web/icon.svg",
+        url: "/icon.svg",
         width: 1200,
         height: 630,
         alt: "Fajar Abdi Nugraha - Software Engineer",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     title: "Fajar Abdi Nugraha | Software Engineer & Solution Architect",
     description:
       "Portfolio of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Microservices, Cloud Services, and Modern Web Development.",
-    images: ["/web/icon.svg"],
+    images: ["/icon.svg"],
   },
   alternates: {
     types: {
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/web/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
   },
 };
 

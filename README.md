@@ -1,6 +1,6 @@
 # SYS//OP: The Personal Website
 
-[![DEPLOY_STATUS](https://img.shields.io/github/actions/workflow/status/fajarnugraha37/web/deploy.yml?style=flat-square&color=00ff88&label=UPLINK)](https://github.com/fajarnugraha37/web/actions)
+[![DEPLOY_STATUS](https://img.shields.io/github/actions/workflow/status/fajarnugraha37/fajarnugraha37.github.io/deploy.yml?style=flat-square&color=00ff88&label=UPLINK)](https://github.com/fajarnugraha37/fajarnugraha37.github.io/actions)
 [![LICENSE](https://img.shields.io/badge/LICENSE-MIT-00ff88?style=flat-square)](LICENSE)
 
 > "Because you need a multi-layer WASM laboratory just to render a blog post. Allegedly."

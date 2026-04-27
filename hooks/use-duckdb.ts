@@ -17,7 +17,7 @@ export function useDuckDb() {
     async function init() {
       try {
         const origin = window.location.origin;
-        const basePath = "/web/duckdb"; 
+        const basePath = "/duckdb"; 
         
         const bundle = {
           mainModule: `${origin}${basePath}/duckdb-eh.wasm`,

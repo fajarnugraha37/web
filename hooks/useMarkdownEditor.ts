@@ -40,7 +40,7 @@ export function useMarkdownEditor() {
     const fetchDefaultContent = async () => {
       try {
         const res = await fetch(
-          "https://raw.githubusercontent.com/fajarnugraha37/web/refs/heads/main/README.md"
+          "https://raw.githubusercontent.com/fajarnugraha37/fajarnugraha37.github.io/refs/heads/main/README.md"
         );
         const text = await res.text();
         const initialFile = { id: "1", name: "README.md", content: text };
