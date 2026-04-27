@@ -51,6 +51,7 @@ export const MermaidDiagram = ({ chart }: { chart: string }) => {
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(chart);
+        // FIXED: Using themed toast instead of native browser popup
         toast("DIAGRAM_SOURCE_COPIED", "success");
       } else {
         throw new Error("Clipboard API not available");

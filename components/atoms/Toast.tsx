@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Terminal, Check, AlertCircle, Info, X } from "lucide-react";
+import { Terminal, Check, AlertCircle, Info, X } from "lucide-center"; // Fixed icon library import if needed
+import { Check as CheckIcon, Info as InfoIcon, AlertCircle as AlertIcon, X as XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ToastType = "info" | "success" | "error" | "warning";
@@ -22,22 +23,22 @@ const Toast = ({ id, message, type, onClose }: ToastProps) => {
 
   const variants = {
     info: {
-      icon: <Info className="w-4 h-4" />,
+      icon: <InfoIcon className="w-4 h-4" />,
       color: "text-accent border-accent/50 bg-accent/5",
       glow: "shadow-[0_0_15px_rgba(0,255,136,0.3)]",
     },
     success: {
-      icon: <Check className="w-4 h-4" />,
+      icon: <CheckIcon className="w-4 h-4" />,
       color: "text-green-400 border-green-500/50 bg-green-500/5",
       glow: "shadow-[0_0_15px_rgba(74,222,128,0.3)]",
     },
     error: {
-      icon: <X className="w-4 h-4" />,
+      icon: <XIcon className="w-4 h-4" />,
       color: "text-destructive border-destructive/50 bg-destructive/5",
       glow: "shadow-[0_0_15px_rgba(239,68,68,0.3)]",
     },
     warning: {
-      icon: <AlertCircle className="w-4 h-4" />,
+      icon: <AlertIcon className="w-4 h-4" />,
       color: "text-accent-tertiary border-accent-tertiary/50 bg-accent-tertiary/5",
       glow: "shadow-[0_0_15px_rgba(255,215,0,0.3)]",
     },
@@ -49,7 +50,7 @@ const Toast = ({ id, message, type, onClose }: ToastProps) => {
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: 20, scale: 0.9 }}
       className={cn(
-        "pointer-events-auto flex items-center gap-4 px-4 py-3 border cyber-chamfer-sm backdrop-blur-md min-w-[280px] max-w-md",
+        "pointer-events-auto flex items-center gap-4 px-4 py-3 border cyber-chamfer-sm backdrop-blur-md min-w-[280px] max-w-md relative",
         variants.color,
         variants.glow
       )}
@@ -65,8 +66,9 @@ const Toast = ({ id, message, type, onClose }: ToastProps) => {
         onClick={() => onClose(id)}
         className="flex-shrink-0 hover:brightness-150 transition-all p-1"
       >
-        <X className="w-3 h-3 opacity-50" />
+        <XIcon className="w-3 h-3 opacity-50" />
       </button>
+      <div className="absolute bottom-0 left-0 h-0.5 bg-current opacity-30 w-full" />
       <div className="absolute bottom-0 left-0 h-0.5 bg-current animate-[shimmer_5s_linear_forwards] w-full" />
     </motion.div>
   );

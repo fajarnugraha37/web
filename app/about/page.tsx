@@ -1,23 +1,21 @@
+"use client";
+
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { ExpandableSummary } from "@/components/molecules/ExpandableSummary";
 import { ExpandableDescriptions } from "@/components/molecules/ExpandableDescriptions";
-import type { Metadata } from "next";
+import { ScrollReveal } from "@/components/atoms/ScrollReveal";
+import { 
+  Terminal, 
+  Cpu, 
+  Database, 
+  Binary, 
+  Activity, 
+  Zap,
+  Globe
+} from "lucide-react";
+import React from "react";
 
-export const metadata: Metadata = {
-  title:
-    "Profile | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
-  description:
-    "Career logs and technical background of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Cloud, and Java/Node.js.",
-  openGraph: {
-    title:
-      "Profile | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
-    description:
-      "Career logs and technical background of Fajar Abdi Nugraha, a Team Lead Software Engineer and Solution Architect specializing in GovTech, Cloud, and Java/Node.js.",
-    type: "profile",
-    url: "/about",
-  },
-};
-
+// --- DATA PROTECTION ZONE: DO NOT ALTER STRINGS ---
 const CAREER_DATA = [
   {
     year: "Jun 2025 - March 2026",
@@ -134,119 +132,200 @@ const EDUCATION_DATA = [
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen">
-      {/* Background and Overlays */}
+      {/* --- HUD & AMBIENCE LAYERS (CENTRALIZED VIA TAILWIND DESIGN TOKENS) --- */}
       <div className="fixed inset-0 bg-background -z-10" />
       <div className="fixed inset-0 cyber-grid-bg opacity-20 -z-10 pointer-events-none" />
       <div className="fixed inset-0 not-found-scanlines opacity-30 pointer-events-none z-50" />
+      
+      {/* Glow Orbs - Using design tokens for theme consistency */}
+      <div className="fixed top-[-10%] -left-[10%] w-[40vw] h-[40vw] bg-accent/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed bottom-[-10%] -right-[10%] w-[40vw] h-[40vw] bg-accent-secondary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <PageTransition>
-        <div className="max-w-4xl mx-auto py-12 px-6">
-          <header className="mb-16 border-b border-border pb-8 relative overflow-hidden">
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic cyber-glitch-text" data-text="ABOUT_IDENTITY">
-              ABOUT<span className="text-accent">_IDENTITY</span>
-            </h1>
-            <p className="text-muted-foreground font-mono text-sm mt-2 uppercase tracking-[0.3em]">
-              // Accessing professional fragments...
-            </p>
+        <div className="max-w-4xl mx-auto py-12 px-6 relative z-10">
+          
+          {/* --- HEADER (ORGANISM-LEVEL COMPOSITION) --- */}
+          <header className="mb-20 relative group">
+            <div className="absolute -left-4 top-0 w-1 h-full bg-accent/30 group-hover:bg-accent transition-colors" />
+            <ScrollReveal direction="right">
+              <div className="inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 font-mono text-[10px] text-accent mb-4 cyber-chamfer-reverse">
+                <Activity className="w-3 h-3 animate-pulse" />
+                SECURE_DATA_STREAM // IDENTITY_QUERY
+              </div>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase italic cyber-glitch-text leading-none" data-text="ABOUT_IDENTITY">
+                ABOUT<span className="text-accent">_IDENTITY</span>
+              </h1>
+              <div className="flex items-center gap-4 mt-4">
+                <p className="text-muted-foreground font-mono text-sm uppercase tracking-[0.3em]">
+                  // Decrypting professional fragments...
+                </p>
+                <div className="h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
+              </div>
+            </ScrollReveal>
           </header>
 
-          {/* Section 1: Executive Summary */}
-          <section className="mb-20">
-            <h2 className="text-xs font-bold font-mono text-accent mb-6 tracking-[0.5em] uppercase flex items-center gap-4">
-              <span className="h-px flex-1 bg-accent/30" />
-              SUMMARY.LOG
-            </h2>
-            <ExpandableSummary>
-              <div className="font-mono text-sm md:text-base leading-relaxed space-y-4 text-foreground/90">
-                <p>
-                  Lead Software Engineer working on a GovTech microservices platform (Singapore). I keep production alive, delivery predictable, and plans honest. Heavily involved in ensuring plans match reality (capacity vs commitment), not just optimism.
-                </p>
-                <p>
-                  I'm adaptive and tend to place myself where I can create the most impact. Sometimes that means being the firefighter, jumping into issues, unblocking delivery, and doing the hard triage when things go sideways. But systems that rely on heroes are already broken.
-                </p>
-                <p>
-                  I handle solutioning, yearly planning, resource management, speed up development, risk assessment, and research spikes, as well as being the technical point of contact for stakeholders. If there are cost-benefit considerations, I'll draw it, quantify it, and make it explicit, no hidden complexity, no wishful thinking.
-                </p>
-                <p>
-                  Work closely across BA, QA, Infra and PMTs because shipping software is a team sport, not a solo speedrun and “ship it” without “safely” is just shipping problems.
-                </p>
-                <p>
-                  I strongly believe in a documentation-based approach and clear engineering guidelines, because heroics don't scale. I like boring production, docs that don't lie, honest plans, and systems that don't require heroic measures to operate.
-                </p>
-              </div>
-            </ExpandableSummary>
-          </section>
-
-          {/* Section 2: Career Logs */}
-          <section className="mb-20">
-            <h2 className="text-xs font-bold font-mono text-accent-secondary mb-12 tracking-[0.5em] uppercase flex items-center gap-4">
-              <span className="h-px flex-1 bg-accent-secondary/30" />
-              CAREER_HISTORY.EXE
-            </h2>
+          <div className="space-y-24">
             
-            <div className="space-y-12">
-              {CAREER_DATA.map((job, i) => (
-                <div key={i} className="relative pl-8 md:pl-12 border-l border-border/50 pb-12 last:pb-0 group">
-                  {/* Timeline Node */}
-                  <div className="absolute left-[-5px] top-0 w-2 h-2 bg-accent-secondary rounded-full group-hover:scale-150 transition-transform shadow-[0_0_10px_rgba(255,0,127,0.5)]" />
-                    
-                  <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-4">
-                    <h3 className="text-xl md:text-2xl font-black text-foreground group-hover:text-accent-secondary transition-colors uppercase">
-                      {job.role}
-                    </h3>
-                    <span className="text-xs font-mono text-muted-foreground bg-muted/20 px-2 py-0.5 border border-border/50">
-                      [{job.year}]
-                    </span>
+            {/* --- SECTION 1: SUMMARY (MOLECULE COMPOSITION) --- */}
+            <section id="summary">
+              <ScrollReveal direction="up">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="p-2 bg-accent/10 border border-accent/30 text-accent">
+                    <Terminal className="w-5 h-5" />
                   </div>
-
-                  <div className="text-xs font-mono text-accent-secondary font-bold mb-6 tracking-widest uppercase">
-                    &gt; {job.company}
-                  </div>
-
-                  <ExpandableDescriptions descriptions={job.descriptions} />
-
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {job.tech.map((t) => (
-                      <span key={t} className="text-[10px] font-mono bg-card border border-border px-2 py-0.5 text-muted-foreground uppercase">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+                  <h2 className="text-xs font-bold font-mono text-accent tracking-[0.4em] uppercase">
+                    SUMMARY.LOG
+                  </h2>
+                  <div className="h-px flex-1 bg-accent/10" />
                 </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Section 3: Education */}
-          <section className="mb-12">
-            <h2 className="text-xs font-bold font-mono text-accent-tertiary mb-12 tracking-[0.5em] uppercase flex items-center gap-4">
-              <span className="h-px flex-1 bg-accent-tertiary/30" />
-              ACADEMIC_RECORD.ARCHIVE
-            </h2>
-
-            <div className="space-y-8">
-              {EDUCATION_DATA.map((edu, i) => (
-                <div key={i} className="p-6 bg-card/30 border border-border cyber-chamfer group hover:border-accent-tertiary transition-all">
-                  <div className="flex flex-col md:flex-row justify-between mb-2">
-                    <h3 className="text-lg font-bold text-foreground uppercase group-hover:text-accent-tertiary transition-colors">
-                      {edu.school}
-                    </h3>
-                    <span className="text-xs font-mono text-accent-tertiary">
-                      {edu.year}
-                    </span>
-                  </div>
-                  <div className="text-sm font-mono text-foreground/80 mb-2">
-                    {edu.degree}
-                  </div>
-                  <p className="text-xs font-mono text-muted-foreground">
-                    // {edu.location}
-                    <br />
-                    // {edu.description}
-                  </p>
+                
+                <div className="relative group">
+                  {/* Decorative Corner Accents */}
+                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-accent/40 pointer-events-none group-hover:border-accent transition-colors" />
+                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-accent/40 pointer-events-none group-hover:border-accent transition-colors" />
+                  
+                  <ExpandableSummary>
+                    <div className="font-mono text-sm md:text-base leading-relaxed space-y-6 text-foreground/90 py-2">
+                      <p>
+                        Lead Software Engineer working on a GovTech microservices platform (Singapore). I keep production alive, delivery predictable, and plans honest. Heavily involved in ensuring plans match reality (capacity vs commitment), not just optimism.
+                      </p>
+                      <p>
+                        I'm adaptive and tend to place myself where I can create the most impact. Sometimes that means being the firefighter, jumping into issues, unblocking delivery, and doing the hard triage when things go sideways. But systems that rely on heroes are already broken.
+                      </p>
+                      <p>
+                        I handle solutioning, yearly planning, resource management, speed up development, risk assessment, and research spikes, as well as being the technical point of contact for stakeholders. If there are cost-benefit considerations, I'll draw it, quantify it, and make it explicit, no hidden complexity, no wishful thinking.
+                      </p>
+                      <p>
+                        Work closely across BA, QA, Infra and PMTs because shipping software is a team sport, not a solo speedrun and “ship it” without “safely” is just shipping problems.
+                      </p>
+                      <p>
+                        I strongly believe in a documentation-based approach and clear engineering guidelines, because heroics don't scale. I like boring production, docs that don't lie, honest plans, and systems that don't require heroic measures to operate.
+                      </p>
+                    </div>
+                  </ExpandableSummary>
                 </div>
-              ))}
-            </div>
-          </section>
+              </ScrollReveal>
+            </section>
+
+            {/* --- SECTION 2: CAREER (MOLECULE REPETITION) --- */}
+            <section id="career">
+              <ScrollReveal direction="up">
+                <div className="flex items-center gap-4 mb-12">
+                  <div className="p-2 bg-accent-secondary/10 border border-accent-secondary/30 text-accent-secondary">
+                    <Cpu className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-xs font-bold font-mono text-accent-secondary tracking-[0.4em] uppercase">
+                    CAREER_HISTORY.EXE
+                  </h2>
+                  <div className="h-px flex-1 bg-accent-secondary/10" />
+                </div>
+
+                <div className="space-y-16">
+                  {CAREER_DATA.map((job, i) => (
+                    <div key={i} className="relative pl-10 md:pl-16 border-l-2 border-border/30 pb-2 group">
+                      {/* Interactive Node */}
+                      <div className="absolute left-[-11px] top-0 z-20">
+                        <div className="relative w-5 h-5 bg-background border-2 border-accent-secondary rotate-45 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:bg-accent-secondary group-hover:shadow-[0_0_15px_#ff00ff]">
+                          <div className="absolute inset-0 bg-accent-secondary/20 animate-pulse" />
+                        </div>
+                      </div>
+
+                      <div className="absolute left-[-2px] top-0 w-0.5 h-full bg-gradient-to-b from-accent-secondary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      <div className="relative">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                          <div>
+                            <h3 className="text-2xl md:text-3xl font-black text-foreground group-hover:text-accent-secondary transition-all duration-300 uppercase leading-none tracking-tighter">
+                              {job.role}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-3 font-mono text-xs font-bold text-accent-secondary tracking-widest">
+                              <span className="p-1 bg-accent-secondary/10 border border-accent-secondary/20">
+                                <Database className="w-3 h-3" />
+                              </span>
+                              {job.company}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-start md:items-end gap-1">
+                            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest opacity-50">Timestamp</span>
+                            <span className="text-xs font-mono text-foreground bg-muted/30 px-3 py-1 border border-border/50 cyber-chamfer-sm">
+                              [{job.year}]
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-card/20 p-4 border border-border/30 backdrop-blur-sm cyber-chamfer transition-all group-hover:border-accent-secondary/40">
+                          <ExpandableDescriptions descriptions={job.descriptions} />
+                        </div>
+
+                        <div className="mt-8 flex flex-wrap gap-2">
+                          {job.tech.map((t) => (
+                            <span 
+                              key={t} 
+                              className="text-[9px] font-mono font-bold bg-background/50 border border-border/40 px-2 py-1 text-muted-foreground uppercase tracking-tighter hover:border-accent-secondary/50 hover:text-accent-secondary transition-all cursor-default"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollReveal>
+            </section>
+
+            {/* --- SECTION 3: EDUCATION --- */}
+            <section id="education">
+              <ScrollReveal direction="up">
+                <div className="flex items-center gap-4 mb-12">
+                  <div className="p-2 bg-accent-tertiary/10 border border-accent-tertiary/30 text-accent-tertiary">
+                    <Binary className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-xs font-bold font-mono text-accent-tertiary tracking-[0.4em] uppercase">
+                    ACADEMIC_RECORD.ARCHIVE
+                  </h2>
+                  <div className="h-px flex-1 bg-accent-tertiary/10" />
+                </div>
+
+                <div className="grid grid-cols-1 gap-8">
+                  {EDUCATION_DATA.map((edu, i) => (
+                    <div key={i} className="group relative p-8 bg-card/30 border border-border cyber-chamfer hover:border-accent-tertiary transition-all duration-500 overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <Binary className="w-24 h-24 text-accent-tertiary" />
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-accent-tertiary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                      <div className="relative z-10">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground uppercase group-hover:text-accent-tertiary transition-colors tracking-tight">
+                              {edu.school}
+                            </h3>
+                            <div className="text-xs font-mono text-accent-tertiary font-bold uppercase mt-2 tracking-widest flex items-center gap-2">
+                              <Zap className="w-3 h-3" />
+                              {edu.degree}
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-mono text-accent-tertiary bg-accent-tertiary/10 border border-accent-tertiary/30 px-3 py-1 shadow-[0_0_10px_rgba(255,215,0,0.15)]">
+                            {edu.year}
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground uppercase tracking-widest border-b border-border/20 pb-2">
+                            <Globe className="w-3 h-3" /> {edu.location}
+                          </div>
+                          <p className="text-xs md:text-sm font-mono text-foreground/70 leading-relaxed italic border-l-2 border-accent-tertiary/20 pl-4 py-1">
+                            // {edu.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollReveal>
+            </section>
+          </div>
         </div>
       </PageTransition>
     </div>
