@@ -1,7 +1,7 @@
-﻿import { getSortedBlogsData } from "@/lib/mdx";
-import { BlogList } from "@/components/BlogList";
-import { PageTransition } from "@/components/PageTransition";
-import type { Metadata } from "next";
+import { getSortedBlogsData } from "@/lib/mdx";
+import { BlogListSection } from "@/components/organisms/BlogListSection";
+import { PageTransition } from "@/components/atoms/PageTransition";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Logs | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
@@ -17,24 +17,21 @@ export const metadata: Metadata = {
 };
 
 export default function BlogsPage() {
-  const blogs = getSortedBlogsData();
+  const allBlogs = getSortedBlogsData();
 
   return (
     <PageTransition>
-      <div className="py-12 md:py-20">
-        <div className="mb-12">
-          <div className="inline-block border border-border bg-card px-3 py-1 text-xs font-mono mb-4 text-accent-secondary">
-            <span className="animate-blink mr-2">&gt;</span> DIRECTORY_INDEX
-          </div>
-          <h1
-            className="text-4xl md:text-6xl font-black uppercase tracking-widest text-foreground cyber-glitch-text"
-            data-text="SYSTEM_LOGS"
-          >
-            SYSTEM_LOGS
+      <div className="py-8 md:py-12">
+        <header className="mb-12 border-b border-border pb-8">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic">
+            Neural<span className="text-accent">_Logs</span>
           </h1>
-        </div>
+          <p className="text-muted-foreground font-mono text-sm mt-2 uppercase tracking-widest">
+            // Decrypting archived knowledge fragments...
+          </p>
+        </header>
 
-        <BlogList blogs={blogs} />
+        <BlogListSection blogs={allBlogs} />
       </div>
     </PageTransition>
   );

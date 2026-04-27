@@ -5,13 +5,13 @@ export interface GraphNode extends ForceNode {
   title: string;
   tags: string[];
   description: string;
-  val: number; // For node sizing
+  val: number;
 }
 
 export interface GraphLink extends ForceLink<GraphNode> {
   source: string;
   target: string;
-  value: number; // Similarity score
+  value: number;
 }
 
 export interface GraphData {
@@ -28,7 +28,7 @@ export function transformDataToGraph(
     title: item.title,
     tags: item.tags,
     description: item.description,
-    val: 1, // Default size
+    val: 1,
   }));
 
   const links: GraphLink[] = [];
@@ -36,14 +36,9 @@ export function transformDataToGraph(
 
   Object.entries(relations).forEach(([source, targets]) => {
     targets.forEach((target) => {
-      // Create a unique key for the pair to avoid duplicate edges in undirected graph
       const pairKey = [source, target.slug].sort().join("|");
       if (!seenPairs.has(pairKey)) {
-        links.push({
-          source,
-          target: target.slug,
-          value: target.score,
-        });
+        links.push({ source, target: target.slug, value: target.score });
         seenPairs.add(pairKey);
       }
     });

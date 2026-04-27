@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import * as duckdb from "@duckdb/duckdb-wasm";
-
-export type DuckDBStatus = "initializing" | "ready" | "error" | "executing";
+import { DbStatus, QueryResult } from "@/types";
 
 export function useDuckDb() {
-  const [status, setStatus] = useState<DuckDBStatus>("initializing");
+  const [status, setStatus] = useState<DbStatus>("initializing");
   const [error, setError] = useState<string | null>(null);
   const dbRef = useRef<duckdb.AsyncDuckDB | null>(null);
   const connRef = useRef<duckdb.AsyncDuckDBConnection | null>(null);
@@ -17,26 +16,17 @@ export function useDuckDb() {
 
     async function init() {
       try {
-        // Use locally hosted bundles with absolute URLs for Blob worker compatibility
         const origin = window.location.origin;
-        const basePath = "/web/duckdb"; // Adjusting for the /web Next.js basePath
+        const basePath = "/web/duckdb"; 
         
-        // Use the 'EH' (Exception Handling) bundle. 
-        // This natively catches C++ exceptions (like Network/CORS errors) instead of crashing with Aborted()
         const bundle = {
           mainModule: `${origin}${basePath}/duckdb-eh.wasm`,
           mainWorker: `${origin}${basePath}/duckdb-browser-eh.worker.js`,
         };
         
-        if (!bundle.mainWorker) {
-            throw new Error("DuckDB EH worker path not found in bundle");
-        }
-
-        // Fetch and proxy worker to bypass cross-origin restrictions
         const workerResponse = await fetch(bundle.mainWorker);
         let workerScript = await workerResponse.text();
         
-        // Strip source mapping to avoid 404s
         workerScript = workerScript.replace(/\/\/# sourceMappingURL=.*/, "");
         
         proxyUrl = URL.createObjectURL(
@@ -74,7 +64,7 @@ export function useDuckDb() {
     };
   }, []);
 
-  const exec = useCallback(async (query: string) => {
+  const exec = useCallback(async (query: string): Promise<QueryResult> => {
     if (!connRef.current) throw new Error("DuckDB not initialized");
     setStatus("executing");
     try {

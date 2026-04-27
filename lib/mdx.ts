@@ -1,14 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-
-type BlogMetadata = {
-  title: string;
-  date: string;
-  tags: string[];
-  description: string;
-  slug: string;
-};
+import { BlogMetadata, Blog, ContentStats } from "@/types";
 
 const blogsDirectory = path.join(process.cwd(), "content", "blogs");
 
@@ -23,43 +16,28 @@ export function getSortedBlogsData(): BlogMetadata[] {
       const slug = fileName.replace(/\.mdx$/, "");
       const fullPath = path.join(blogsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, "utf8");
-
-      const matterResult = matter(fileContents);
+      const { data } = matter(fileContents);
 
       return {
         slug,
-        title: matterResult.data.title,
-        date: matterResult.data.date,
-        tags: matterResult.data.tags || [],
-        description: matterResult.data.description || "",
+        title: data.title,
+        date: data.date,
+        tags: data.tags || [],
+        description: data.description || "",
       };
     });
 
-  return allBlogsData.sort((a, b) => {
-    if (a.date < b.date) {
-      return 1;
-    } else {
-      return -1;
-    }
-  });
+  return allBlogsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 export function getAllBlogSlugs() {
-  if (!fs.existsSync(blogsDirectory)) {
-    return [];
-  }
-  const fileNames = fs.readdirSync(blogsDirectory);
-  return fileNames
-    .filter((fileName) => fileName.endsWith(".mdx"))
-    .map((fileName) => {
-      return {
-        slug: fileName.replace(/\.mdx$/, ""),
-      };
-    });
+  if (!fs.existsSync(blogsDirectory)) return [];
+  return fs.readdirSync(blogsDirectory)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => ({ slug: f.replace(/\.mdx$/, "") }));
 }
 
-export function calculateContentStats(rawContent: string) {
-  // Basic markdown stripping for accurate word counts
+export function calculateContentStats(rawContent: string): ContentStats {
   const cleanText = rawContent
     .replace(/```[\s\S]*?```/g, "")
     .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
@@ -70,20 +48,19 @@ export function calculateContentStats(rawContent: string) {
   return { charCount, wordCount, readingTime };
 }
 
-export async function getBlogData(slug: string) {
+export async function getBlogData(slug: string): Promise<Blog> {
   const fullPath = path.join(blogsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
-
-  const matterResult = matter(fileContents);
-  const stats = calculateContentStats(matterResult.content);
+  const { data, content } = matter(fileContents);
+  const stats = calculateContentStats(content);
 
   return {
     slug,
-    content: matterResult.content,
-    title: matterResult.data.title,
-    date: matterResult.data.date,
-    tags: matterResult.data.tags || [],
-    description: matterResult.data.description || "",
+    content,
+    title: data.title,
+    date: data.date,
+    tags: data.tags || [],
+    description: data.description || "",
     stats,
   };
 }
