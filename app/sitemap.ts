@@ -13,6 +13,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(blog.date),
   }));
 
+  const labPaths = [
+    "/labs",
+    "/labs/postgresql",
+    "/labs/duckdb",
+    "/labs/knowledge-graph",
+    "/labs/markdown",
+  ];
+
+  const labUrls = labPaths.map((path) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: new Date(),
+  }));
+
   return [
     {
       url: baseUrl,
@@ -30,6 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/blogs`,
       lastModified: new Date(),
     },
+    ...labUrls,
     ...blogUrls,
   ];
 }

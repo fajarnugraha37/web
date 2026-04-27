@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 type Props = {
   descriptions: string[];
@@ -8,48 +9,50 @@ type Props = {
 
 /**
  * Renders a list of career description bullet points.
- * Collapsed: shows only the first description, truncated to 1 line.
- * Expanded: smooth height transition via .expandable-panel + --expand-height CSS var.
+ * Uses framer-motion for smooth height transition.
  */
 export function ExpandableDescriptions({ descriptions }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const fullRef = useRef<HTMLDivElement | null>(null);
-  const [fullHeight, setFullHeight] = useState(0);
-
-  useEffect(() => {
-    if (fullRef.current) {
-      setFullHeight(fullRef.current.scrollHeight);
-    }
-  }, [descriptions]);
 
   if (descriptions.length === 0) return null;
 
   return (
     <div className="mb-4">
-      {/* Collapsed: single-line preview of the first description */}
-      {!expanded && (
-        <p className="font-mono text-sm leading-relaxed text-foreground/80 line-clamp-1">
-          {descriptions[0]}
-        </p>
-      )}
-
-      {/* Expanded panel — overflow/transition in CSS, height via custom prop */}
-      <div
-        className="expandable-panel"
-        data-expanded={expanded ? "true" : "false"}
-        style={{ "--expand-height": `${fullHeight}px` } as React.CSSProperties}
-      >
-        <div ref={fullRef} className="pt-1">
-          {descriptions.map((desc, i) => (
-            <p
-              key={i}
-              className="font-mono text-sm leading-relaxed mb-3 text-foreground/80 flex gap-2"
+      <div className="relative">
+        <AnimatePresence mode="wait">
+          {!expanded ? (
+            <motion.p
+              key="collapsed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="font-mono text-sm leading-relaxed text-foreground/80 line-clamp-1"
             >
-              <span className="text-accent shrink-0 mt-0.5">&gt;</span>
-              <span>{desc}</span>
-            </p>
-          ))}
-        </div>
+              {descriptions[0]}
+            </motion.p>
+          ) : (
+            <motion.div
+              key="expanded"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pt-1">
+                {descriptions.map((desc, i) => (
+                  <p
+                    key={i}
+                    className="font-mono text-sm leading-relaxed mb-3 text-foreground/80 flex gap-2"
+                  >
+                    <span className="text-accent shrink-0 mt-0.5">&gt;</span>
+                    <span>{desc}</span>
+                  </p>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Toggle */}

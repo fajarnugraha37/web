@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -42,8 +43,10 @@ export function ScrollReveal({
         delay: delay,
         ease: [0.21, 0.47, 0.32, 0.98], // Cyberpunk-style snappy ease
       }}
-      style={{ width }}
-      className={className}
+      className={cn(
+        width === "fit-content" ? "w-fit" : "w-full",
+        className
+      )}
     >
       {children}
     </motion.div>

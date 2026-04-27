@@ -1,41 +1,42 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 /**
  * Wraps the Executive Summary block.
- * Collapsed: shows ~3 lines via .expandable-summary-panel max-height.
- * Expanded: grows to --expand-height CSS custom property value.
+ * Uses framer-motion for smooth height transition instead of CSS variables.
  */
 export function ExpandableSummary({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(false);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setHeight(contentRef.current.scrollHeight);
-    }
-  }, []);
 
   return (
     <div className="bg-card/40 border-l-4 border-accent p-6 md:p-8 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-      {/* Collapsible body — overflow/transition in CSS, dynamic height via custom prop */}
-      <div
-        className="expandable-summary-panel"
-        data-expanded={expanded ? "true" : "false"}
-        // CSS variable is not a style declaration; it feeds the CSS class rule above
-        style={{ "--expand-height": `${height}px` } as React.CSSProperties}
-      >
-        <div ref={contentRef}>{children}</div>
+      <div className="relative">
+        <motion.div
+          initial={false}
+          animate={{ 
+            height: expanded ? "auto" : "4.8rem",
+            transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+          }}
+          className="overflow-hidden"
+        >
+          {children}
+        </motion.div>
 
-        {/* Fade mask — inside the clipped box so it never covers the button */}
-        {!expanded && (
-          <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-[#12121a] to-transparent pointer-events-none" />
-        )}
+        {/* Fade mask */}
+        <AnimatePresence>
+          {!expanded && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-[#0a0a0f] to-transparent pointer-events-none" 
+            />
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Toggle button — outside the clipped area */}
       <button
         type="button"
         id="summary-expand-btn"
