@@ -56,28 +56,21 @@ const NAV_LINKS: NavLink[] = [
   },
 ];
 
-export function MobileNav() {
-  const [open, setOpen] = useState(false);
+interface MobileNavProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+export function MobileNav({ isOpen, setIsOpen }: MobileNavProps) {
   const [expandedLabs, setExpandedLabs] = useState(false);
   const pathname = usePathname();
 
   const handleClose = useCallback(() => {
-    setOpen(false);
+    setIsOpen(false);
     setExpandedLabs(false);
-  }, []);
+  }, [setIsOpen]);
 
-  // Close menu when resizing to desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && open) {
-        handleClose();
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [open, handleClose]);
-
-  // Handle navigation updates via effect - using a ref to track if this is the initial load
+  // Handle navigation updates via effect - close menu when route changes
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -93,47 +86,38 @@ export function MobileNav() {
       <button
         id="mobile-nav-toggle"
         type="button"
-        aria-label={open ? "Close navigation menu" : "Open navigation menu"}
-        aria-expanded={open ? "true" : "false"}
-        onClick={() => setOpen((v) => !v)}
+        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={isOpen ? "true" : "false"}
+        onClick={() => setIsOpen(!isOpen)}
         className="relative z-50 flex flex-col justify-center items-center w-10 h-10 gap-1.5 border border-border bg-card/60 cyber-chamfer-sm hover:border-accent transition-colors"
       >
         <span
           className={`block w-5 h-px bg-accent transition-all duration-300 origin-center ${
-            open ? "rotate-45 translate-y-[7px]" : ""
+            isOpen ? "rotate-45 translate-y-[7px]" : ""
           }`}
         />
         <span
           className={`block w-5 h-px bg-accent transition-all duration-300 ${
-            open ? "opacity-0 scale-x-0" : ""
+            isOpen ? "opacity-0 scale-x-0" : ""
           }`}
         />
         <span
           className={`block w-5 h-px bg-accent transition-all duration-300 origin-center ${
-            open ? "-rotate-45 -translate-y-[7px]" : ""
+            isOpen ? "-rotate-45 -translate-y-[7px]" : ""
           }`}
         />
       </button>
-
-      {/* Backdrop - Full screen to catch clicks outside */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-background/40 backdrop-blur-sm z-30"
-          onClick={handleClose}
-          aria-hidden="true"
-        />
-      )}
 
       {/* Dropdown menu */}
       <nav
         aria-label="Mobile navigation"
         className={`fixed top-16 right-0 w-full z-40 transition-all duration-300 ease-in-out ${
-          open
+          isOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
       >
-        <div className="border-b border-border bg-background/95 backdrop-blur-md shadow-2xl max-h-[80vh] overflow-y-auto">
+        <div className="border-b border-border bg-background/95 backdrop-blur-md shadow-2xl max-h-[80vh] overflow-y-auto relative">
           {/* Grid scanline decoration */}
           <div className="absolute inset-0 cyber-grid-bg opacity-20 pointer-events-none" />
 

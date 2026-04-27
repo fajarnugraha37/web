@@ -24,10 +24,10 @@ export default function BlogsPage() {
       <div className="py-8 md:py-12">
         <header className="mb-12 border-b border-border pb-8">
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic">
-            Neural<span className="text-accent">_Logs</span>
+            <span className="text-accent">Logs</span>
           </h1>
           <p className="text-muted-foreground font-mono text-sm mt-2 uppercase tracking-widest">
-            // Decrypting archived knowledge fragments...
+            // Archived knowledge fragments...
           </p>
         </header>
 

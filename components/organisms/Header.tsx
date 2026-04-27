@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SearchPalette } from "@/components/molecules/SearchPalette";
 import { MobileNav } from "@/components/molecules/MobileNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -23,7 +24,23 @@ const LAB_LINKS = [
 
 export function Header() {
   const pathname = usePathname();
+  const isMobile = useIsMobile();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // DRY: Use isMobile to auto-close nav when scaling to desktop
+  useEffect(() => {
+    if (!isMobile && isMobileNavOpen) {
+      setIsMobileNavOpen(false);
+    }
+  }, [isMobile, isMobileNavOpen]);
+
+  const closeAll = () => {
+    setIsSearchOpen(false);
+    setIsMobileNavOpen(false);
+  };
+
+  const isAnyMenuOpen = isSearchOpen || isMobileNavOpen;
 
   return (
     <>
@@ -93,16 +110,16 @@ export function Header() {
             >
               Contact.exe
             </Link>
-            <MobileNav />
+            <MobileNav isOpen={isMobileNavOpen} setIsOpen={setIsMobileNavOpen} />
           </div>
         </div>
       </header>
 
-      {/* Global Search Backdrop - Lowered z-index to z-[30] so it sits below Header (z-40) and Search (z-100) */}
-      {isSearchOpen && (
+      {/* Global Backdrop - Sit ABOVE content but BELOW search/mobile menus */}
+      {isAnyMenuOpen && (
         <div 
-          className="fixed inset-0 z-[30] bg-background/40 backdrop-blur-[2px] transition-all"
-          onClick={() => setIsSearchOpen(false)}
+          className="fixed inset-0 z-[30] bg-black/40 backdrop-blur-[2px] transition-all cursor-pointer"
+          onClick={closeAll}
         />
       )}
     </>

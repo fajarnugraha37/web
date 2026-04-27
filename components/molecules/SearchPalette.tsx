@@ -59,7 +59,7 @@ export const SearchPalette = ({ isOpen, setIsOpen }: SearchPaletteProps) => {
                 <Search className="w-5 h-5 text-accent" />
                 <input
                   ref={inputRef}
-                  placeholder="QUERY_KNOWLEDGE_BASE..."
+                  placeholder="QUERY LOGS..."
                   className="flex-1 bg-transparent border-none outline-none font-mono text-sm placeholder:opacity-50 text-foreground"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
