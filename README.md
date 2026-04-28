@@ -46,6 +46,13 @@ The site isn't just text; it's a series of experimental laboratories:
 - **Exporters:** Static HTML and PDF Report generation integrated.
 - **Security:** DOMPurify sanitization. High-fidelity, zero-trust.
 
+### 4. MEDIA PROCESSOR.EXE (FFmpeg WASM)
+
+- High-performance client-side media transcoding and signal processing.
+- Features Video to GIF generation with 2-pass palette optimization.
+- Audio extraction, video compression, and fast-seeking segment trimming.
+- Fully multithreaded operations running entirely in the browser. Zero server uploads.
+
 ---
 
 ## SYSTEM_STRUCTURE
@@ -59,10 +66,10 @@ Adheres to strict **Atomic Design** principles for UI scalability:
   /molecules  # Functional Blocks (BlogCard, Search, Tabs)
   /organisms  # Orchestrated Sections (Header, Hero, LabContent)
 /content      # Encrypted Archives (MDX Blogs)
-/hooks        # Headless Logic (useMarkdown, useTerminal, useMobile)
-/labs         # Experimental Chambers (SQL, MD, DuckDB)
+/hooks        # Headless Logic (useMarkdown, useTerminal, useFFmpegCore)
+/labs         # Experimental Chambers (SQL, MD, DuckDB, FFmpeg)
 /lib          # Core Utilities & Static Data
-/public       # Static Assets & Datasets
+/public       # Static Assets, Datasets & Web Workers (coi-serviceworker)
 /types        # Global API Contracts (Strongly Typed)
 ```
 

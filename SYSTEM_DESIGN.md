@@ -65,11 +65,11 @@ Extracted logic layer to ensure UI components remain clean:
 - `useBlogFilter`: Complex intersection logic for tags and search.
 - `useMarkdownEditor` & `useMarkdownActions`: Orchestrates real-time editor speed, VIM mode, and multi-format exports.
 - `useTerminal` & `usePgliteActions` / `useDuckDbActions`: Handles system terminal simulation and WASM database operations.
-
+- `useFFmpegCore` & `useFFmpegLabActions`: Manages multithreaded FFmpeg WASM lifecycle, memory-safe file operations (Clean Slate Strategy), and dynamic media processing logic.
 
 ### Data Flow
 - **Server-Side:** Pages (`app/**/page.tsx`) fetch MDX data and prepare SEO/JSON-LD.
-- **Client-Side:** Data is injected into Organisms. Heavy computation (SQL/Analytics) is performed in WASM-based local nodes (PGlite, DuckDB).
+- **Client-Side:** Data is injected into Organisms. Heavy computation (SQL/Analytics/Transcoding) is performed in WASM-based local nodes (PGlite, DuckDB, FFmpeg-MT).
 
 ---
 
@@ -79,7 +79,9 @@ Extracted logic layer to ensure UI components remain clean:
 - **Parent Prop Method:** Centralized backdrop control in `Header.tsx` ensures reliable click-outside detection for mobile navigation.
 - **React Portals:** Used for floating context menus (e.g., Markdown Lab) to prevent overflow clipping by parent containers.
 
-### Performance
+### Performance & Memory Management
 - **0% Logic in Render:** Prevents expensive calculations during UI updates.
 - **SSG-Safe Animations:** `AnimatedNumber` and `PageTransition` use hydration checks to prevent mismatch errors.
 - **DRY Breakpoints:** No redundant resize observers; all mobile logic uses a single source of truth.
+- **WASM Clean Slate Strategy:** Input files are deleted from virtual memory immediately after FFmpeg execution, before output reading, to prevent Out-Of-Memory (OOM) crashes during heavy transcoding.
+- **Dynamic Multithreading:** FFmpeg node dynamically scales worker threads based on `navigator.hardwareConcurrency` to maximize processing speed without starving the main thread. Cross-Origin Isolation is maintained via a local `coi-serviceworker`.
