@@ -1,0 +1,85 @@
+/* --- Theme Overrides & Global Ambiance --- */
+
+@layer base {
+  /* Sunset Theme (Initialization/Booting) */
+  .theme-sunset {
+    --color-background: #0a0a0f;
+    --color-foreground: #f0e6e6;
+    --color-card: #160a22;
+    --color-muted: #241136;
+    --color-muted-foreground: #a695b5;
+    --color-accent: #ff7300;
+    --color-accent-secondary: #ff007f;
+    --color-accent-tertiary: #ffd700;
+    --color-border: #381a4a;
+    --color-input: #160a22;
+    --color-ring: #ff7300;
+    --color-destructive: #ff3333;
+
+    --shadow-neon: 0 0 5px #ff7300, 0 0 10px #ff730040;
+    --shadow-neon-sm: 0 0 3px #ff7300, 0 0 6px #ff730030;
+    --shadow-neon-lg: 0 0 10px #ff7300, 0 0 20px #ff730060, 0 0 40px #ff730030;
+    --shadow-neon-secondary: 0 0 5px #ff007f, 0 0 20px #ff007f60;
+    --shadow-neon-tertiary: 0 0 5px #ffd700, 0 0 20px #ffd70060;
+  }
+
+  .theme-sunset .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(255, 115, 0, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 115, 0, 0.1) 1px, transparent 1px);
+    opacity: 0.15;
+  }
+
+  .theme-sunset .cyber-glitch-text::before {
+    text-shadow: -1px 0 #ff007f;
+  }
+
+  .theme-sunset .cyber-glitch-text::after {
+    text-shadow: -1px 0 #ffd700;
+  }
+
+  .theme-sunset .neon-text {
+    text-shadow: 0 0 10px rgba(255, 115, 0, 0.6);
+  }
+
+  /* Morning Theme (Communication/Light Blue) */
+  .theme-morning {
+    --color-background: #0a0a0f;
+    --color-foreground: #f8fafc;
+    --color-card: #1e293b;
+    --color-muted: #334155;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #38bdf8;
+    --color-accent-secondary: #fb923c;
+    --color-accent-tertiary: #fcd34d;
+    --color-border: #475569;
+    --color-input: #1e293b;
+    --color-ring: #38bdf8;
+    --color-destructive: #ef4444;
+
+    --shadow-neon: 0 0 5px #38bdf8, 0 0 10px #38bdf840;
+    --shadow-neon-sm: 0 0 3px #38bdf8, 0 0 6px #38bdf830;
+    --shadow-neon-lg: 0 0 10px #38bdf8, 0 0 20px #38bdf860, 0 0 40px #38bdf830;
+    --shadow-neon-secondary: 0 0 5px #fb923c, 0 0 20px #fb923c60;
+    --shadow-neon-tertiary: 0 0 5px #fcd34d, 0 0 20px #fcd34d60;
+  }
+
+  .theme-morning .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+    opacity: 0.2;
+  }
+
+  .theme-morning .cyber-glitch-text::before {
+    text-shadow: -1px 0 #fb923c;
+  }
+
+  .theme-morning .cyber-glitch-text::after {
+    text-shadow: -1px 0 #fcd34d;
+  }
+
+  .theme-morning .neon-text {
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  }
+}
