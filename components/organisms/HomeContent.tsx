@@ -7,10 +7,10 @@ import { ParadigmsSection } from "@/components/organisms/ParadigmsSection";
 import { RecentTransmissionsSection } from "@/components/organisms/RecentTransmissionsSection";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Blog } from "@/types";
+import { BlogMetadata } from "@/types";
 
 interface HomeContentProps {
-  recentBlogs: Blog[];
+  recentBlogs: BlogMetadata[];
   jsonLd: any;
 }
 
