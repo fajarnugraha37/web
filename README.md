@@ -109,6 +109,10 @@ bun run build
 
 The system auto-deploys via GitHub Actions to Pages upon every push to `main`.
 
+**GitHub Pages & WASM Multithreading (The COOP/COEP):**
+GitHub Pages does not natively support setting custom `Cross-Origin-Opener-Policy` (COOP) and `Cross-Origin-Embedder-Policy` (COEP) HTTP headers. These headers are strictly required by browsers to enable `SharedArrayBuffer`, which FFmpeg-WASM needs for multithreading.
+To bypass this limitation, this project uses the [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) library. A local service worker (`public/coi-serviceworker.js`) intercepts the initial page load and injects the necessary security headers into the browser's response, allowing full multithreading capabilities on a static host.
+
 **The Docker Routine:**
 
 ```bash
