@@ -22,7 +22,7 @@ export function useFFmpegCore() {
 
     try {
       setStatus("loading");
-      const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+      
       const ffmpeg = new FFmpeg();
       
       ffmpeg.on("log", ({ message }) => {
@@ -33,9 +33,14 @@ export function useFFmpegCore() {
         setProgress(Math.round(progress * 100));
       });
 
+      const baseURL = window.location.origin + "/ffmpeg";
+
+      // Use Blob URLs for MT mode. This is required by Emscripten to spawn pthread workers correctly 
+      // without violating cross-origin constraints within the worker context.
       await ffmpeg.load({
         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
         wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+        workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, "text/javascript"),
       });
 
       ffmpegRef.current = ffmpeg;
@@ -43,12 +48,13 @@ export function useFFmpegCore() {
       toast("FFMPEG_ENGINE_ONLINE", "success");
       return true;
     } catch (err) {
-      console.error("FFmpeg load failed", err);
+      console.error("FFmpeg load failed:", err);
       setStatus("error");
       toast("FFMPEG_LOAD_FAILED", "error");
+      setLogs(prev => [...prev, `[ERROR] Kernel failed to boot: ${err instanceof Error ? err.message : String(err)}`]);
       return false;
     }
-  }, []);
+  }, []); // Empty dependency array ensures stable function identity
 
   const exec = useCallback(async (args: string[]) => {
     if (!ffmpegRef.current) {
@@ -60,7 +66,16 @@ export function useFFmpegCore() {
     try {
       setStatus("processing");
       setProgress(0);
-      await ffmpeg.exec(args);
+      const ret = await ffmpeg.exec(args);
+      
+      if (ret !== 0) {
+        console.error(`FFmpeg exited with code ${ret}`);
+        setLogs(prev => [...prev, `[ERROR] Process terminated with exit code ${ret}. Possible memory exhaustion (OOM) or invalid parameters.`]);
+        setStatus("error");
+        toast("FFMPEG_EXECUTION_ERROR", "error");
+        return false;
+      }
+      
       setStatus("ready");
       return true;
     } catch (err) {

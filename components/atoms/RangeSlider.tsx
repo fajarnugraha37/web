@@ -36,6 +36,13 @@ export function RangeSlider({
     onChange([minVal, nextVal]);
   };
 
+  const formatTime = (s: number) => {
+    const hrs = Math.floor(s / 3600).toString().padStart(2, '0');
+    const mins = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+    const secs = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${hrs}:${mins}:${secs}`;
+  };
+
   return (
     <div className="w-full space-y-4">
       {label && (
@@ -44,7 +51,7 @@ export function RangeSlider({
             {label}
           </span>
           <span className="text-[10px] font-mono font-bold text-accent-secondary">
-            {minVal}s - {maxVal}s
+            {formatTime(minVal)} - {formatTime(maxVal)}
           </span>
         </div>
       )}

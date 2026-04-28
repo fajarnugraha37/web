@@ -24,14 +24,14 @@ export function TerminalLogViewer({ logs, className }: TerminalLogViewerProps) {
   }, [logs]);
 
   return (
-    <div className={cn("border border-border/30 bg-black/40 cyber-chamfer-sm overflow-hidden", className)}>
+    <div className={cn("flex flex-col border border-border/30 bg-black/60 cyber-chamfer-sm overflow-hidden", className)}>
       {/* Terminal Header */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/20 border-b border-border/20">
+      <div className="flex items-center gap-2 px-3 py-2 bg-muted/20 border-b border-border/20 shrink-0">
         <Terminal className="w-3 h-3 text-accent" />
         <span className="text-[9px] font-mono font-black tracking-widest text-muted-foreground uppercase">
-          # SYSTEM_KERNEL_LOGS
+          # SYSTEM LOGS
         </span>
-        <div className="ml-auto flex gap-1">
+        <div className="ml-auto flex gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-accent/20" />
           <div className="w-1.5 h-1.5 rounded-full bg-accent/40" />
           <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
@@ -41,24 +41,26 @@ export function TerminalLogViewer({ logs, className }: TerminalLogViewerProps) {
       {/* Log Stream */}
       <div 
         ref={scrollRef}
-        className="p-3 h-32 md:h-48 overflow-y-auto font-mono text-[9px] md:text-[10px] space-y-1 scrollbar-hide"
+        className="flex-grow p-4 overflow-y-auto font-mono text-[9px] md:text-[10px] space-y-1.5 scrollbar-hide relative z-10 min-h-[200px] max-h-[300px] lg:max-h-[400px]"
       >
         {logs.length > 0 ? (
           logs.map((log, i) => (
-            <div key={i} className="flex gap-2 text-muted-foreground break-all">
-              <span className="text-accent opacity-50 shrink-0">[{i.toString().padStart(4, '0')}]</span>
-              <span className="text-foreground/80">{log}</span>
+            <div key={i} className="flex gap-3 text-muted-foreground group">
+              <span className="text-accent/40 shrink-0 font-bold">[{i.toString().padStart(4, '0')}]</span>
+              <span className="text-foreground/90 group-hover:text-accent transition-colors leading-relaxed">{log}</span>
             </div>
           ))
         ) : (
-          <div className="text-muted-foreground italic animate-pulse">
+          <div className="text-muted-foreground/50 italic animate-pulse flex items-center gap-2">
+            <span className="inline-block w-1.5 h-3 bg-accent/50 animate-blink" />
             # WAITING_FOR_KERNEL_SIGNAL...
           </div>
         )}
       </div>
 
-      {/* Grid Overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[length:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+      {/* Grid & Scanline Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.05] bg-[length:20px_20px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,#fff_2px,#fff_4px)]" />
     </div>
   );
 }

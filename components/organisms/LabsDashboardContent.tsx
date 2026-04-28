@@ -26,7 +26,7 @@ const LAB_NODES = [
   },
   {
     id: "knowledge-graph",
-    name: "NEURAL MAPPING.EXE",
+    name: "BLOG NETWORKS.EXE",
     description: "Interactive 3D visualization of semantic relationships within the blog archive.",
     icon: <Binary className="w-8 h-8" />,
     path: "/labs/knowledge-graph",
@@ -35,7 +35,7 @@ const LAB_NODES = [
   },
   {
     id: "markdown",
-    name: "MARKDOWN.EXE",
+    name: "MARKDOWN PLAYGROUND.EXE",
     description: "Live Markdown editor with split-pane preview and terminal aesthetics.",
     icon: <FileText className="w-8 h-8" />,
     path: "/labs/markdown",
@@ -44,7 +44,7 @@ const LAB_NODES = [
   },
   {
     id: "ffmpeg",
-    name: "MEDIA_PROCESSOR.EXE",
+    name: "MEDIA PROCESSOR.EXE",
     description: "High-performance client-side media transcoding and signal processing using FFmpeg WASM.",
     icon: <Film className="w-8 h-8" />,
     path: "/labs/ffmpeg",

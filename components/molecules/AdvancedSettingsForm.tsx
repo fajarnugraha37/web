@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Sliders, Info } from "lucide-react";
 import { RangeSlider } from "@/components/atoms/RangeSlider";
 import { FFmpegMode } from "@/hooks/useFFmpegLabActions";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 interface AdvancedSettingsFormProps {
   mode: FFmpegMode;
   trimValue: [number, number];
+  duration: number;
   onTrimChange: (value: [number, number]) => void;
   className?: string;
 }
@@ -20,10 +21,19 @@ interface AdvancedSettingsFormProps {
 export function AdvancedSettingsForm({
   mode,
   trimValue,
+  duration,
   onTrimChange,
   className
 }: AdvancedSettingsFormProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const showTrim = mode === 'TRIM' || mode === 'GIF' || mode === 'AUDIO';
+
+  // Auto-open when a file with a duration is loaded
+  useEffect(() => {
+    if (duration > 0) {
+      setIsOpen(true);
+    }
+  }, [duration]);
 
   return (
     <div className={cn("border border-border/20 bg-black/20 overflow-hidden", className)}>
@@ -42,19 +52,19 @@ export function AdvancedSettingsForm({
 
       {isOpen && (
         <div className="p-4 border-t border-border/10 space-y-6">
-          {/* Mode Specific: TRIM */}
-          {mode === 'TRIM' && (
+          {/* Mode Specific: TRIM / GIF / AUDIO */}
+          {showTrim && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-accent-secondary">
                 <Info className="w-3 h-3" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">TRIM_SELECTOR_ACTIVE</span>
+                <span className="text-[9px] font-mono uppercase tracking-widest">SEGMENT_SELECTOR_ACTIVE</span>
               </div>
               <RangeSlider
                 min={0}
-                max={120} // Assuming max 2 min for lab
+                max={duration || 120} 
                 value={trimValue}
                 onChange={onTrimChange}
-                label="SEGMENT_RANGE"
+                label="SELECTION_RANGE"
               />
             </div>
           )}

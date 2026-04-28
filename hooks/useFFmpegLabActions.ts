@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { fetchFile } from "@ffmpeg/util";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/components/atoms/Toast";
@@ -28,77 +28,148 @@ export function useFFmpegLabActions({
 }: FFmpegActionsProps) {
   const isMobile = useIsMobile();
   const [inputFile, setInputFile] = useState<File | null>(null);
-  const [outputUrl, setOutputUrl] = useState<string | null>(null);
+  const [outputUrls, setOutputUrls] = useState<Record<FFmpegMode, string | null>>({
+    GIF: null,
+    COMPRESS: null,
+    TRIM: null,
+    AUDIO: null,
+    CUSTOM: null,
+  });
   const [mode, setMode] = useState<FFmpegMode>('COMPRESS');
 
-  // Trimming state
+  // Trimming & Metadata state
+  const [duration, setDuration] = useState(0);
   const [trimStart, setTrimStart] = useState("00:00:00");
   const [trimDuration, setTrimDuration] = useState("10");
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleModeChange = useCallback((newMode: FFmpegMode) => {
+    setMode(newMode);
+  }, []);
+
+  const handleFileSelect = useCallback(async (file: File) => {
     // Mobile Limit: 100MB
     const limit = isMobile ? 100 * 1024 * 1024 : 500 * 1024 * 1024;
     if (file.size > limit) {
       toast(`FILE_TOO_LARGE: MAX ${isMobile ? '100MB' : '500MB'}`, "error");
       return;
     }
+
     setInputFile(file);
-    setOutputUrl(null);
+    setOutputUrls({
+      GIF: null,
+      COMPRESS: null,
+      TRIM: null,
+      AUDIO: null,
+      CUSTOM: null,
+    });
     toast("FILE_LOADED", "success");
+
+    // Extract Metadata (Duration)
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      setDuration(Math.floor(video.duration));
+      setTrimDuration(Math.floor(video.duration).toString());
+      URL.revokeObjectURL(video.src);
+    };
+    video.src = URL.createObjectURL(file);
   }, [isMobile]);
 
   const process = useCallback(async () => {
-    if (!inputFile || status === "processing") return;
+    if (!inputFile || (status !== "ready" && status !== "idle")) {
+       toast("ENGINE_NOT_READY_OR_NO_INPUT", "error");
+       return;
+    }
+
+    const inputName = "input.mp4";
+    const timestamp = new Date().getTime();
+    const sanitizedBaseName = inputFile.name.split('.')[0].replace(/\s+/g, '_');
+    const operationName = mode.toLowerCase();
+    
+    let extension = "mp4";
+    if (mode === 'GIF') extension = "gif";
+    if (mode === 'AUDIO') extension = "mp3";
+    
+    const outputFileName = `${sanitizedBaseName}_${operationName}_${timestamp}.${extension}`;
+    const virtualOutputName = `output.${extension}`;
 
     try {
-      const inputName = "input.mp4"; // Simplified naming as per plan
-      let outputName = "output.mp4";
-      let args: string[] = [];
-
-      // Write input file to memory
+      // 1. Write input file
       await writeFile(inputName, await fetchFile(inputFile));
 
+      let success = false;
       switch (mode) {
         case 'GIF':
-          outputName = "output.gif";
-          args = ["-i", inputName, "-vf", "fps=15,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", outputName];
+          // High-Efficiency Single-Pass GIF (240p, 8fps)
+          const gifArgs = [
+            "-i", inputName, 
+            "-ss", trimStart, 
+            "-t", trimDuration, 
+            "-vf", "fps=8,scale=240:-1:flags=lanczos", 
+            "-f", "gif",
+            "-threads", "4",
+            "-y",
+            virtualOutputName
+          ];
+          success = await exec(gifArgs);
           break;
+
         case 'AUDIO':
-          outputName = "output.mp3";
-          args = ["-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", outputName];
+          const audioArgs = ["-i", inputName, "-ss", trimStart, "-t", trimDuration, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", "4", "-y", virtualOutputName];
+          success = await exec(audioArgs);
           break;
+
         case 'TRIM':
-          // ss and t BEFORE input for fast seeking
-          args = ["-ss", trimStart, "-t", trimDuration, "-i", inputName, "-c", "copy", outputName];
+          const trimArgs = ["-i", inputName, "-ss", trimStart, "-t", trimDuration, "-c", "copy", "-threads", "4", "-y", virtualOutputName];
+          success = await exec(trimArgs);
           break;
+
         case 'COMPRESS':
         default:
-          args = ["-i", inputName, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", outputName];
+          const compArgs = ["-i", inputName, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-threads", "4", "-y", virtualOutputName];
+          success = await exec(compArgs);
           break;
       }
-
-      const success = await exec(args);
+      
       if (success) {
-        const data = await readFile(outputName);
-        const url = URL.createObjectURL(new Blob([data.buffer], { type: mode === 'GIF' ? 'image/gif' : mode === 'AUDIO' ? 'audio/mpeg' : 'video/mp4' }));
-        setOutputUrl(url);
-        toast("TRANSCODE_COMPLETE", "success");
-      }
+        // [STRATEGY: CLEAN SLATE] 
+        // Delete input file IMMEDIATELY after execution to free up WASM Heap for the readFile operation.
+        await deleteFile(inputName).catch(() => {});
 
-      // Cleanup
-      await deleteFile(inputName);
-      await deleteFile(outputName);
+        try {
+          // 3. Read output
+          const data = await readFile(virtualOutputName);
+          if (data) {
+            const blobType = mode === 'GIF' ? 'image/gif' : mode === 'AUDIO' ? 'audio/mpeg' : 'video/mp4';
+            const url = URL.createObjectURL(new Blob([data.buffer], { type: blobType }));
+            setOutputUrls(prev => ({ ...prev, [mode]: url }));
+            toast("TRANSCODE_COMPLETE", "success");
+            return { url, filename: outputFileName };
+          }
+        } catch (readErr) {
+          console.error("Failed to read output file:", readErr);
+          toast("OUTPUT_READ_ERROR", "error");
+        }
+      }
     } catch (err) {
-      console.error("Transcoding failed", err);
+      console.error("Transcoding pipeline failed:", err);
       toast("TRANSCODE_FAILED", "error");
+    } finally {
+      // 4. Defensive Cleanup of output only (input was handled above)
+      try {
+        await deleteFile(virtualOutputName).catch(() => {});
+      } catch (e) {
+        // Silently ignore cleanup errors
+      }
     }
   }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile]);
 
   return {
     inputFile,
-    outputUrl,
+    outputUrl: outputUrls[mode],
     mode,
-    setMode,
+    setMode: handleModeChange,
+    duration,
     trimStart,
     setTrimStart,
     trimDuration,

@@ -16,10 +16,11 @@ const NAV_LINKS = [
 ];
 
 const LAB_LINKS = [
-  { href: "/labs/postgresql", label: "SQL_LAB.EXE", hoverClass: "hover:text-accent" },
-  { href: "/labs/duckdb", label: "TELEMETRY_ANALYTICS.EXE", hoverClass: "hover:text-accent-secondary" },
-  { href: "/labs/knowledge-graph", label: "NEURAL_MAPPING.EXE", hoverClass: "hover:text-accent-tertiary" },
-  { href: "/labs/markdown", label: "MARKDOWN.EXE", hoverClass: "hover:text-accent" },
+  { href: "/labs/postgresql", label: "SQL LAB.EXE", hoverClass: "hover:text-accent" },
+  { href: "/labs/duckdb", label: "TELEMETRY ANALYTICS.EXE", hoverClass: "hover:text-accent-secondary" },
+  { href: "/labs/knowledge-graph", label: "BLOG NETWORKS.EXE", hoverClass: "hover:text-accent-tertiary" },
+  { href: "/labs/markdown", label: "MARKDOWN PLAYGROUND.EXE", hoverClass: "hover:text-accent" },
+  { href: "/labs/ffmpeg", label: "MEDIA PROCESSOR.EXE", hoverClass: "hover:text-accent-secondary" },
 ];
 
 export function Header() {
@@ -92,7 +93,7 @@ export function Header() {
                           </Link>
                         ))}
                         <div className="mt-2 pt-2 border-t border-border/50 text-[8px] px-3 text-muted-foreground italic">
-                          Hardware accelerated nodes
+                          Labolatory
                         </div>
                       </div>
                     </div>

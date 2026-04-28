@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface FfmpegControlPanelProps {
   status: string;
   progress: number;
-  onProcess: () => void;
+  onProcess: () => Promise<any>;
   onReset?: () => void;
   outputUrl: string | null;
   className?: string;
@@ -28,7 +28,14 @@ export function FfmpegControlPanel({
   className
 }: FfmpegControlPanelProps) {
   const isProcessing = status === "processing";
-  const isReady = status === "ready" || status === "idle";
+  const [downloadName, setDownloadName] = React.useState("output");
+
+  const handleExecute = async () => {
+    const result = await onProcess();
+    if (result?.filename) {
+      setDownloadName(result.filename);
+    }
+  };
 
   return (
     <div className={cn("space-y-6 p-6 border border-border/30 bg-card/20 cyber-chamfer", className)}>
@@ -36,10 +43,10 @@ export function FfmpegControlPanel({
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex flex-col">
           <span className="text-[10px] font-mono font-black tracking-widest text-muted-foreground uppercase">
-            # TASK_EXECUTION_UNIT
+            # TASK EXECUTION UNIT
           </span>
           <h2 className="text-xl font-black tracking-tighter uppercase">
-            {outputUrl ? "UPLINK_READY" : isProcessing ? "ENCODING_SIGNAL" : "WAITING_FOR_COMMAND"}
+            {outputUrl ? "UPLINK READY" : isProcessing ? "ENCODING SIGNAL" : "WAITING FOR COMMAND"}
           </h2>
         </div>
 
@@ -47,17 +54,17 @@ export function FfmpegControlPanel({
           {outputUrl && (
             <a 
               href={outputUrl} 
-              download="output" 
+              download={downloadName} 
               className="flex items-center gap-2 px-4 py-2 bg-accent text-black font-mono text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all cyber-chamfer-sm"
             >
               <Download className="w-3 h-3" />
-              RETRIEVE_FILE
+              RETRIEVE FILE
             </a>
           )}
           
           <Button
-            onClick={onProcess}
-            disabled={isProcessing || status === "loading"}
+            onClick={handleExecute}
+            disabled={isProcessing || status === "loading" || status === "error"}
             variant="default"
             className="px-6"
           >
@@ -69,7 +76,7 @@ export function FfmpegControlPanel({
             ) : (
               <span className="flex items-center gap-2">
                 <Play className="w-3 h-3" />
-                EXECUTE_NODE
+                EXECUTE
               </span>
             )}
           </Button>

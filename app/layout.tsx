@@ -94,6 +94,8 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-background text-foreground selection:bg-accent selection:text-black">
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/coi-serviceworker.js" async></script>
         <ToastProvider />
         <ScrollProgress />
         <ScrollToTop />

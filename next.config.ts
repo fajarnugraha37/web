@@ -16,7 +16,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ['motion'],
   headers: async () => [
     {
-      source: '/labs/ffmpeg/:path*',
+      // source: '/labs/ffmpeg/:path*',
+      source: '/(.*)', // Apply to all routes
       headers: [
         {
           key: 'Cross-Origin-Embedder-Policy',
