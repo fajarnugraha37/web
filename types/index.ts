@@ -26,6 +26,13 @@ export interface Blog extends BlogMetadata {
   stats: ContentStats;
 }
 
+export interface TocHeading {
+  level: number;
+  text: string;
+  id: string;
+  children: TocHeading[];
+}
+
 // --- Professional & Academic ---
 
 export interface Experience {

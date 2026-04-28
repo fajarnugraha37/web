@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { BlogMetadata, Blog, ContentStats } from "@/types";
+import { BlogMetadata, Blog, ContentStats, TocHeading } from "@/types";
 
 const blogsDirectory = path.join(process.cwd(), "content", "blogs");
 
@@ -46,6 +46,37 @@ export function calculateContentStats(rawContent: string): ContentStats {
   const wordCount = words.length === 1 && words[0] === "" ? 0 : words.length;
   const readingTime = Math.ceil(wordCount / 200);
   return { charCount, wordCount, readingTime };
+}
+
+/**
+ * Utility: getHeadings
+ * Extracts h1-h3 headings from MDX content for TOC generation.
+ */
+export function getHeadings(title: string, content: string): TocHeading[] {
+  const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+  const headings: TocHeading[] = [
+    {
+      level: 1,
+      text: title,
+      id: title.toLowerCase().replace(/\s+/g, "-"),
+      children: [],
+    },
+  ];
+
+  const contentWithoutCode = content.replace(/```[\s\S]*?```/g, "");
+  let match;
+  while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
+    const level = match[1].length;
+    const text = match[2];
+    const id = text.toLowerCase().replace(/\s+/g, "-");
+
+    if (level === 2) {
+      headings.push({ level, text, id, children: [] });
+    } else if (level === 3 && headings.length > 0) {
+      headings[headings.length - 1].children.push({ level, text, id, children: [] });
+    }
+  }
+  return headings;
 }
 
 export async function getBlogData(slug: string): Promise<Blog> {
