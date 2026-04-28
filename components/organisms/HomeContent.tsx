@@ -1,7 +1,7 @@
 "use client";
 
 import { HeroSection } from "@/components/organisms/HeroSection";
-import { TerminalSection } from "@/components/organisms/TerminalSection";
+import { StaticTerminalSection } from "@/components/organisms/StaticTerminalSection";
 import { HardwareNodesSection } from "@/components/organisms/HardwareNodesSection";
 import { ParadigmsSection } from "@/components/organisms/ParadigmsSection";
 import { RecentTransmissionsSection } from "@/components/organisms/RecentTransmissionsSection";
@@ -46,7 +46,7 @@ export function HomeContent({ recentBlogs, jsonLd }: HomeContentProps) {
           <HeroSection onBootComplete={() => setIsBooted(true)} />
         </div>
         <div className="lg:col-span-5">
-          <TerminalSection />
+          <StaticTerminalSection />
         </div>
       </div>
 
