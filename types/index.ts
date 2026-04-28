@@ -26,6 +26,24 @@ export interface Blog extends BlogMetadata {
   stats: ContentStats;
 }
 
+// --- Professional & Academic ---
+
+export interface Experience {
+  year: string;
+  company: string;
+  role: string;
+  descriptions: string[];
+  tech: string[];
+}
+
+export interface Education {
+  year: string;
+  degree: string;
+  school: string;
+  location: string;
+  description: string;
+}
+
 // --- Database & Labs ---
 
 export type DbStatus = "initializing" | "ready" | "error" | "volatile" | "executing";
