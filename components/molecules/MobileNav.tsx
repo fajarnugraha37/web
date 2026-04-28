@@ -27,23 +27,28 @@ const NAV_LINKS: NavLink[] = [
     children: [
       {
         href: "/labs/postgresql",
-        label: "SQL_LAB.EXE",
+        label: "SQL LAB.EXE",
         accentClass: "hover:text-accent",
       },
       {
         href: "/labs/duckdb",
-        label: "TELEMETRY_ANALYTICS.EXE",
+        label: "TELEMETRY ANALYTICS.EXE",
         accentClass: "hover:text-accent-secondary",
       },
       {
         href: "/labs/knowledge-graph",
-        label: "BLOG_NETWORK.EXE",
+        label: "BLOG NETWORKS.EXE",
         accentClass: "hover:text-accent-tertiary",
       },
       {
         href: "/labs/markdown",
-        label: "MARKDOWN.EXE",
+        label: "MARKDOWN PLAYGROUND.EXE",
         accentClass: "hover:text-accent",
+      },
+      {
+        href: "/labs/ffmpeg",
+        label: "MEDIA PROCESSOR.EXE",
+        accentClass: "hover:text-accent-secondary",
       },
     ],
   },

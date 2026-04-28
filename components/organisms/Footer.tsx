@@ -143,7 +143,7 @@ export function Footer() {
           {/* Socials */}
           <div className="space-y-4">
             <h3 className="font-sans text-sm font-bold tracking-widest text-foreground uppercase border-b border-border/50 pb-2 inline-block">
-              /Active_Nodes
+              /laboratory
             </h3>
             <ul className="space-y-2 text-sm font-mono flex flex-col">
               <li>
@@ -152,7 +152,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  SQL_LAB.EXE
+                  SQL LAB.EXE
                 </Link>
               </li>
               <li>
@@ -161,7 +161,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-accent-secondary transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary" />
-                  TELEMETRY_ANALYTICS.EXE
+                  TELEMETRY ANALYTICS.EXE
                 </Link>
               </li>
               <li>
@@ -170,7 +170,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-accent-tertiary transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-tertiary" />
-                  NEURAL_MAPPING.EXE
+                  BLOG NETWORKS.EXE
                 </Link>
               </li>
               <li>
@@ -179,7 +179,16 @@ export function Footer() {
                   className="text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                  MARKDOWN.EXE
+                  MARKDOWN PLAYGROUND.EXE
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/labs/ffmpeg"
+                  className="text-muted-foreground hover:text-accent-secondary transition-colors flex items-center gap-2 group w-fit"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary" />
+                  MEDIA PROCESSOR.EXE
                 </Link>
               </li>
             </ul>

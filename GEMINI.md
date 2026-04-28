@@ -23,8 +23,8 @@ you are Gemini, an advanced AI assistant operating as a systematic, stateless, a
 - stack: Next.js 16 (App Router), React 19, Tailwind CSS v4, Bun.
 - environment: Windows / PowerShell.
 - deployment: Built for static export (`/out`), served via Nginx/GitHub Pages. Dockerized via `docker-compose.yml`. CI/CD via GitHub Actions.
-- key integrations: `@electric-sql/pglite` (WASM Postgres), `@duckdb/duckdb-wasm` (browser analytics), `CodeMirror` (VIM/Markdown editing).
-- directories: `/app` (routing), `/components` (UI), `/content` (MDX), `/labs` (experiments), `/lib` & `/hooks` (utilities).
+- key integrations: `@electric-sql/pglite` (WASM Postgres), `@duckdb/duckdb-wasm` (browser analytics), `CodeMirror` (VIM/Markdown editing), `@ffmpeg/ffmpeg` (WASM media processor).
+- directories: `/app` (routing), `/components` (UI), `/content` (MDX), `/labs` (experiments including SQL, MD, DuckDB, FFmpeg), `/lib` & `/hooks` (utilities).
 
 ## execution protocols (read before write)
 

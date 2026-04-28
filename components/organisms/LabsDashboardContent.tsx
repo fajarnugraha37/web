@@ -3,7 +3,7 @@
 import React from "react";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { LabNodeCard } from "@/components/molecules/LabNodeCard";
-import { Database, BarChart3, Binary, FileText } from "lucide-react";
+import { Database, BarChart3, Binary, FileText, Film } from "lucide-react";
 
 const LAB_NODES = [
   {
@@ -26,7 +26,7 @@ const LAB_NODES = [
   },
   {
     id: "knowledge-graph",
-    name: "NEURAL MAPPING.EXE",
+    name: "BLOG NETWORKS.EXE",
     description: "Interactive 3D visualization of semantic relationships within the blog archive.",
     icon: <Binary className="w-8 h-8" />,
     path: "/labs/knowledge-graph",
@@ -35,12 +35,21 @@ const LAB_NODES = [
   },
   {
     id: "markdown",
-    name: "MARKDOWN.EXE",
+    name: "MARKDOWN PLAYGROUND.EXE",
     description: "Live Markdown editor with split-pane preview and terminal aesthetics.",
     icon: <FileText className="w-8 h-8" />,
     path: "/labs/markdown",
     status: "READY",
     color: "text-accent",
+  },
+  {
+    id: "ffmpeg",
+    name: "MEDIA PROCESSOR.EXE",
+    description: "High-performance client-side media transcoding and signal processing using FFmpeg WASM.",
+    icon: <Film className="w-8 h-8" />,
+    path: "/labs/ffmpeg",
+    status: "STANDBY",
+    color: "text-accent-secondary",
   },
 ];
 

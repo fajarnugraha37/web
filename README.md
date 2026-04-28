@@ -46,6 +46,13 @@ The site isn't just text; it's a series of experimental laboratories:
 - **Exporters:** Static HTML and PDF Report generation integrated.
 - **Security:** DOMPurify sanitization. High-fidelity, zero-trust.
 
+### 4. MEDIA PROCESSOR.EXE (FFmpeg WASM)
+
+- High-performance client-side media transcoding and signal processing.
+- Features Video to GIF generation with 2-pass palette optimization.
+- Audio extraction, video compression, and fast-seeking segment trimming.
+- Fully multithreaded operations running entirely in the browser. Zero server uploads.
+
 ---
 
 ## SYSTEM_STRUCTURE
@@ -59,10 +66,10 @@ Adheres to strict **Atomic Design** principles for UI scalability:
   /molecules  # Functional Blocks (BlogCard, Search, Tabs)
   /organisms  # Orchestrated Sections (Header, Hero, LabContent)
 /content      # Encrypted Archives (MDX Blogs)
-/hooks        # Headless Logic (useMarkdown, useTerminal, useMobile)
-/labs         # Experimental Chambers (SQL, MD, DuckDB)
+/hooks        # Headless Logic (useMarkdown, useTerminal, useFFmpegCore)
+/labs         # Experimental Chambers (SQL, MD, DuckDB, FFmpeg)
 /lib          # Core Utilities & Static Data
-/public       # Static Assets & Datasets
+/public       # Static Assets, Datasets & Web Workers (coi-serviceworker)
 /types        # Global API Contracts (Strongly Typed)
 ```
 
@@ -101,6 +108,10 @@ bun run build
 ## DEPLOYMENT_PROTOCOLS
 
 The system auto-deploys via GitHub Actions to Pages upon every push to `main`.
+
+**GitHub Pages & WASM Multithreading (The COOP/COEP):**
+GitHub Pages does not natively support setting custom `Cross-Origin-Opener-Policy` (COOP) and `Cross-Origin-Embedder-Policy` (COEP) HTTP headers. These headers are strictly required by browsers to enable `SharedArrayBuffer`, which FFmpeg-WASM needs for multithreading.
+To bypass this limitation, this project uses the [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) library. A local service worker (`public/coi-serviceworker.js`) intercepts the initial page load and injects the necessary security headers into the browser's response, allowing full multithreading capabilities on a static host.
 
 **The Docker Routine:**
 
