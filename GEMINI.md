@@ -36,8 +36,11 @@ to prevent context overwriting and unintentional simplification, you MUST adhere
 
 ## engineering standards
 
-- modularity & dry (anti-giant files): strictly avoid monolithic files or "god functions." break complex UI and logic into small, single-responsibility modules.
-- refactor proactively: giant files cause context loss and feature deletion bugs. if a file grows too large, refactor it immediately.
-- no diy (do it yourself): rely on actively maintained 3rd-party libraries instead of custom implementations. deprecated libraries are strictly prohibited.
-- error handling: no silent failures. never swallow errors. use structured logging with relevant context.
-- ui boundaries: defensively handle empty states, loading states, and massive payloads (e.g., use virtualized lists or infinite scrolling for large datasets).
+- **Atomic Design:** UI must follow strict hierarchy: Atoms (primitives), Molecules (functional groups), Organisms (orchestrated sections).
+- **Headless Logic:** 100% of business/data logic must reside in custom hooks (`/hooks`). Components must be purely declarative.
+- **Explicit Data Separation:** Data constants and static records must reside in `/lib/data` or `/content`, never hardcoded in UI components.
+- **Dry Breakpoints:** Mobile-specific logic MUST use the `useIsMobile` hook. Manual resize listeners are strictly prohibited.
+- **Modularity & DRY (Anti-Giant Files):** Strictly avoid monolithic files or "god functions." Break complex UI into single-responsibility modules.
+- **No DIY (Do It Yourself):** Rely on actively maintained 3rd-party libraries. Deprecated or unmaintained libraries are strictly prohibited.
+- **No Silent Failures:** Never swallow errors. Use structured logging and clear terminal-style error messages.
+- **UI Boundaries:** Defensively handle empty states, loading states, and massive payloads (e.g., using React Portals for floating menus).

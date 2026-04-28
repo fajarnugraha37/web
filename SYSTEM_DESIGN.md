@@ -45,9 +45,15 @@ Utilizes Tailwind CSS v4 with custom `@theme` tokens:
 - **Colors:** `accent` (Neon Green), `accent-secondary` (Magenta), `accent-tertiary` (Yellow/Orange).
 - **Effects:** `.cyber-chamfer` (angled corners), `.cyber-glitch-text` (RGB split animation), `.cyber-grid-bg` (retro-digital background).
 
+### Modular CSS Strategy
+To maintain a lean payload and high maintainability, the styling is decoupled into:
+- **`app.css`**: Core Tailwind directives, base reset, and global utility classes.
+- **`themes.css`**: Centralized theme overrides (`theme-sunset`, `theme-morning`) and dynamic color tokens.
+- **`markdown.css`**: Specialized engine for MDX/Technical content rendering (prose, code blocks, alerts).
+
 ### Dynamic Theme Orchestration
 - **Boot-up Sequence:** The application starts in `theme-sunset` (Orange/Magenta) and transitions to "Operational" (Neon Green) upon reaching 100% load readiness in the `HeroSection`.
-- **Background Liberation:** `RootLayout` allows backgrounds to bleed full-width, while content is constrained to `max-w-7xl` at the organism/page level.
+- **Background Liberation:** `RootLayout` allows backgrounds to bleed full-width by removing `max-width` constraints from the `main` tag, delegating content centering to individual organisms.
 
 ---
 
@@ -55,10 +61,11 @@ Utilizes Tailwind CSS v4 with custom `@theme` tokens:
 
 ### Headless Hooks
 Extracted logic layer to ensure UI components remain clean:
-- `useIsMobile`: Centralized breakpoint detection (replaces manual resize listeners).
-- `useBlogFilter`: Handles complex intersection logic for tags and search.
-- `useMarkdownEditor`: Orchestrates real-time preview and VIM mode logic.
-- `usePagination`: Generic array slicing and navigation management.
+- `useIsMobile`: Centralized breakpoint detection.
+- `useBlogFilter`: Complex intersection logic for tags and search.
+- `useMarkdownEditor` & `useMarkdownActions`: Orchestrates real-time editor speed, VIM mode, and multi-format exports.
+- `useTerminal` & `usePgliteActions` / `useDuckDbActions`: Handles system terminal simulation and WASM database operations.
+
 
 ### Data Flow
 - **Server-Side:** Pages (`app/**/page.tsx`) fetch MDX data and prepare SEO/JSON-LD.

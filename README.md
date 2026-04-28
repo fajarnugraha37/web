@@ -50,14 +50,20 @@ The site isn't just text; it's a series of experimental laboratories:
 
 ## SYSTEM_STRUCTURE
 
+Adheres to strict **Atomic Design** principles for UI scalability:
+
 ```bash
-/app          # The UI Matrix (App Router)
-/components   # Modular Hardware (UI Components)
+/app          # The Routing Matrix (App Router 16)
+/components   # Modular Hardware
+  /atoms      # Primitives (Button, Toast, AnimatedNumber)
+  /molecules  # Functional Blocks (BlogCard, Search, Tabs)
+  /organisms  # Orchestrated Sections (Header, Hero, LabContent)
 /content      # Encrypted Archives (MDX Blogs)
-/hooks        # Neural Links (React Hooks)
+/hooks        # Headless Logic (useMarkdown, useTerminal, useMobile)
 /labs         # Experimental Chambers (SQL, MD, DuckDB)
-/lib          # Core Utilities (The glue)
+/lib          # Core Utilities & Static Data
 /public       # Static Assets & Datasets
+/types        # Global API Contracts (Strongly Typed)
 ```
 
 ---
