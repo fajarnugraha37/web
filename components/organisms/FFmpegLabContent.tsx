@@ -46,6 +46,10 @@ export function FFmpegLabContent() {
     setTrimDuration,
     gifQuality,
     setGifQuality,
+    resolution,
+    setResolution,
+    preset,
+    setPreset,
     handleFileSelect,
     process,
   } = useFFmpegLabActions({
@@ -168,6 +172,10 @@ export function FFmpegLabContent() {
                 onTrimChange={handleTrimChange}
                 gifQuality={gifQuality}
                 setGifQuality={setGifQuality}
+                resolution={resolution}
+                setResolution={setResolution}
+                preset={preset}
+                setPreset={setPreset}
               />
             </div>
           </div>

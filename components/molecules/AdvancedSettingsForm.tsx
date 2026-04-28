@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Sliders, Info } from "lucide-react";
 import { RangeSlider } from "@/components/atoms/RangeSlider";
-import { FFmpegMode } from "@/hooks/useFFmpegLabActions";
+import { FFmpegMode, VideoResolution, EncoderPreset } from "@/hooks/useFFmpegLabActions";
 import { cn } from "@/lib/utils";
 
 interface AdvancedSettingsFormProps {
@@ -13,6 +13,10 @@ interface AdvancedSettingsFormProps {
   onTrimChange: (value: [number, number]) => void;
   gifQuality: 'HIGH' | 'PERFORMANCE';
   setGifQuality: (quality: 'HIGH' | 'PERFORMANCE') => void;
+  resolution: VideoResolution;
+  setResolution: (res: VideoResolution) => void;
+  preset: EncoderPreset;
+  setPreset: (preset: EncoderPreset) => void;
   className?: string;
 }
 
@@ -27,6 +31,10 @@ export function AdvancedSettingsForm({
   onTrimChange,
   gifQuality,
   setGifQuality,
+  resolution,
+  setResolution,
+  preset,
+  setPreset,
   className
 }: AdvancedSettingsFormProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,37 +83,66 @@ export function AdvancedSettingsForm({
 
           {/* Mode Specific: GIF */}
           {mode === 'GIF' && (
-            <div className="space-y-1.5">
-              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">GIF_RENDER_QUALITY</label>
-              <select disabled
-                value={gifQuality}
-                onChange={(e) => setGifQuality(e.target.value as 'HIGH' | 'PERFORMANCE')}
-                className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm"
-              >
-                <option value="PERFORMANCE" selected>PERFORMANCE (240P, 8FPS, 1-PASS)</option>
-                <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS PALETTEGEN)</option>
-              </select>
+            <div className="space-y-1.5 group">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1 flex justify-between">
+                <span>GIF_RENDER_QUALITY</span>
+                <span className="text-accent-secondary opacity-0 group-hover:opacity-100 transition-opacity">// HIGH_FIDELITY</span>
+              </label>
+              <div className="relative">
+                <select 
+                  disabled
+                  value={gifQuality}
+                  onChange={(e) => setGifQuality(e.target.value as 'HIGH' | 'PERFORMANCE')}
+                  className="w-full bg-black/60 border border-accent-secondary/30 p-2.5 text-[10px] font-mono uppercase outline-none focus:border-accent-secondary focus:shadow-[0_0_10px_rgba(255,0,127,0.2)] transition-all appearance-none cursor-pointer cyber-chamfer-sm"
+                >
+                  <option value="PERFORMANCE" selected>PERFORMANCE (240P, 8FPS, 1-PASS)</option>
+                  <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS)</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-accent-secondary/50 text-[8px]">▼</div>
+              </div>
             </div>
           )}
 
           {/* General Overrides */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">OUTPUT_RESOLUTION</label>
-              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
-                <option>ORIGINAL_SOURCE</option>
-                <option>1080P_FHD</option>
-                <option>720P_HD</option>
-                <option>480P_SD</option>
-              </select>
+            <div className="space-y-1.5 group">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1 flex justify-between">
+                <span>RESOLUTION</span>
+                <span className="text-accent opacity-0 group-hover:opacity-100 transition-opacity">#SCALE</span>
+              </label>
+              <div className="relative">
+                <select 
+                  value={resolution}
+                  onChange={(e) => setResolution(e.target.value as VideoResolution)}
+                  className="w-full bg-black/60 border border-border/30 p-2.5 text-[10px] font-mono uppercase outline-none focus:border-accent focus:shadow-[0_0_10px_rgba(0,255,136,0.2)] transition-all appearance-none cursor-pointer cyber-chamfer-sm"
+                >
+                  <option value="ORIGINAL">ORIGINAL_SOURCE</option>
+                  <option value="1080P">1080P_FHD</option>
+                  <option value="720P">720P_HD</option>
+                  <option value="480P">480P_SD</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-accent/50 text-[8px]">▼</div>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">ENCODER_PRESET</label>
-              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
-                <option>FAST_RECOVERY</option>
-                <option>BALANCED_NODE</option>
-                <option>MAX_COMPRESSION</option>
-              </select>
+
+            <div className="space-y-1.5 group">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1 flex justify-between">
+                <span>ENCODER</span>
+                <span className="text-accent-tertiary opacity-0 group-hover:opacity-100 transition-opacity">#SPEED</span>
+              </label>
+              <div className="relative">
+                <select 
+                  value={preset}
+                  onChange={(e) => setPreset(e.target.value as EncoderPreset)}
+                  className="w-full bg-black/60 border border-border/30 p-2.5 text-[10px] font-mono uppercase outline-none focus:border-accent-tertiary focus:shadow-[0_0_10px_rgba(255,214,0,0.2)] transition-all appearance-none cursor-pointer cyber-chamfer-sm"
+                >
+                  <option value="ultrafast">ULTRA_FAST (SPEED)</option>
+                  <option value="faster">FAST_RECOVERY</option>
+                  <option value="medium">BALANCED_NODE</option>
+                  <option value="slower">MAX_COMPRESSION</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-accent-tertiary/50 text-[8px]">▼</div>
+              </div>
             </div>
           </div>
 

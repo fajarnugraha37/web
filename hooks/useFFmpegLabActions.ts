@@ -6,6 +6,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/components/atoms/Toast";
 
 export type FFmpegMode = 'GIF' | 'COMPRESS' | 'TRIM' | 'AUDIO' | 'CUSTOM';
+export type VideoResolution = 'ORIGINAL' | '1080P' | '720P' | '480P';
+export type EncoderPreset = 'ultrafast' | 'faster' | 'medium' | 'slower';
 
 interface FFmpegActionsProps {
   status: string;
@@ -30,6 +32,12 @@ export function useFFmpegLabActions({
 }: FFmpegActionsProps) {
   const isMobile = useIsMobile();
   const [inputFile, setInputFile] = useState<File | null>(null);
+  
+  // Advanced Settings State
+  const [resolution, setResolution] = useState<VideoResolution>('ORIGINAL');
+  const [preset, setPreset] = useState<EncoderPreset>('faster');
+  const [gifQuality, setGifQuality] = useState<'HIGH' | 'PERFORMANCE'>('PERFORMANCE');
+
   const [outputUrls, setOutputUrls] = useState<Record<FFmpegMode, string | null>>({
     GIF: null,
     COMPRESS: null,
@@ -45,7 +53,16 @@ export function useFFmpegLabActions({
     CUSTOM: null,
   });
   const [mode, setMode] = useState<FFmpegMode>('COMPRESS');
-  const [gifQuality, setGifQuality] = useState<'HIGH' | 'PERFORMANCE'>('PERFORMANCE');
+
+  // Helper to map resolution to FFmpeg scale filter
+  const getScaleFilter = useCallback(() => {
+    switch (resolution) {
+      case '1080P': return "scale=1920:-2";
+      case '720P': return "scale=1280:-2";
+      case '480P': return "scale=854:-2";
+      default: return null;
+    }
+  }, [resolution]);
 
   // Trimming & Metadata state
   const [duration, setDuration] = useState(0);
@@ -66,6 +83,13 @@ export function useFFmpegLabActions({
 
     setInputFile(file);
     setOutputUrls({
+      GIF: null,
+      COMPRESS: null,
+      TRIM: null,
+      AUDIO: null,
+      CUSTOM: null,
+    });
+    setOutputNames({
       GIF: null,
       COMPRESS: null,
       TRIM: null,
@@ -112,6 +136,8 @@ export function useFFmpegLabActions({
         ? Math.min(4, navigator.hardwareConcurrency).toString() 
         : "2";
 
+      const scaleFilter = getScaleFilter();
+
       let success = false;
       switch (mode) {
         case 'GIF':
@@ -137,7 +163,6 @@ export function useFFmpegLabActions({
             
             if (pass1Success) {
               // Pass 2: Generate GIF using the palette
-              // Use -filter_complex and explicitly map [0:v] and [1:v] to avoid stream confusion.
               const pass2Args = [
                 "-ss", trimStart, 
                 "-t", trimDuration, 
@@ -145,7 +170,7 @@ export function useFFmpegLabActions({
                 "-i", paletteName, 
                 "-filter_complex", "[0:v]fps=15,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse", 
                 "-f", "gif",
-                "-threads", maxThreads, 
+                "-threads", "1", 
                 "-y", virtualOutputName
               ];
               console.log("[DEBUG] Pass 2 Args:", pass2Args.join(" "));
@@ -181,7 +206,18 @@ export function useFFmpegLabActions({
           break;
 
         case 'TRIM':
-          const trimArgs = ["-ss", trimStart, "-t", trimDuration, "-i", inputName, "-c", "copy", "-threads", maxThreads, "-y", virtualOutputName];
+          const trimVf = scaleFilter ? [scaleFilter] : [];
+          const trimArgs = [
+            "-i", inputName, 
+            "-ss", trimStart, 
+            "-t", trimDuration, 
+            ...(trimVf.length ? ["-vf", trimVf.join(",")] : []),
+            "-c:v", "libx264", 
+            "-crf", "23",
+            "-preset", preset,
+            "-threads", maxThreads, 
+            "-y", virtualOutputName
+          ];
           console.log("[DEBUG] Trim Args:", trimArgs.join(" "));
           addLog(`[EXEC] FFmpeg Trim: ${trimArgs.join(" ")}`);
           success = await exec(trimArgs);
@@ -189,7 +225,16 @@ export function useFFmpegLabActions({
 
         case 'COMPRESS':
         default:
-          const compArgs = ["-i", inputName, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-threads", maxThreads, "-y", virtualOutputName];
+          const compVf = scaleFilter ? [scaleFilter] : [];
+          const compArgs = [
+            "-i", inputName, 
+            ...(compVf.length ? ["-vf", compVf.join(",")] : []),
+            "-vcodec", "libx264", 
+            "-crf", "28", 
+            "-preset", preset, 
+            "-threads", maxThreads, 
+            "-y", virtualOutputName
+          ];
           console.log("[DEBUG] Compress Args:", compArgs.join(" "));
           addLog(`[EXEC] FFmpeg Compress: ${compArgs.join(" ")}`);
           success = await exec(compArgs);
@@ -228,7 +273,7 @@ export function useFFmpegLabActions({
         // Silently ignore cleanup errors
       }
     }
-  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality]);
+  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality, resolution, preset, getScaleFilter]);
 
   return {
     inputFile,
@@ -243,6 +288,10 @@ export function useFFmpegLabActions({
     setTrimDuration,
     gifQuality,
     setGifQuality,
+    resolution,
+    setResolution,
+    preset,
+    setPreset,
     handleFileSelect,
     process,
   };
