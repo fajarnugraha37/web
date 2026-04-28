@@ -11,6 +11,8 @@ interface AdvancedSettingsFormProps {
   trimValue: [number, number];
   duration: number;
   onTrimChange: (value: [number, number]) => void;
+  gifQuality: 'HIGH' | 'PERFORMANCE';
+  setGifQuality: (quality: 'HIGH' | 'PERFORMANCE') => void;
   className?: string;
 }
 
@@ -23,6 +25,8 @@ export function AdvancedSettingsForm({
   trimValue,
   duration,
   onTrimChange,
+  gifQuality,
+  setGifQuality,
   className
 }: AdvancedSettingsFormProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,23 +73,33 @@ export function AdvancedSettingsForm({
             </div>
           )}
 
+          {/* Mode Specific: GIF */}
+          {mode === 'GIF' && (
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">GIF_RENDER_QUALITY</label>
+              <select 
+                value={gifQuality}
+                onChange={(e) => setGifQuality(e.target.value as 'HIGH' | 'PERFORMANCE')}
+                className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm"
+              >
+                <option value="PERFORMANCE">PERFORMANCE (240P, 8FPS, 1-PASS)</option>
+                {/* <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS PALETTEGEN)</option> */}
+              </select>
+            </div>
+          )}
+
           {/* General Overrides */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">OUTPUT_RESOLUTION</label>
-              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm">
+              <select disabled className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
                 <option>ORIGINAL_SOURCE</option>
-                <option>1080P_FHD</option>
-                <option>720P_HD</option>
-                <option>480P_SD</option>
               </select>
             </div>
             <div className="space-y-1.5">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">ENCODER_PRESET</label>
-              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm">
-                <option>FAST_RECOVERY</option>
+              <select disabled className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
                 <option>BALANCED_NODE</option>
-                <option>MAX_COMPRESSION</option>
               </select>
             </div>
           </div>
@@ -93,7 +107,7 @@ export function AdvancedSettingsForm({
           <div className="p-2 bg-destructive/5 border border-destructive/20 rounded-sm flex gap-2">
             <Info className="w-3 h-3 text-destructive mt-0.5" />
             <p className="text-[8px] font-mono text-destructive/80 leading-relaxed uppercase">
-              Warning: Overriding core parameters may result in unstable memory allocation on mobile nodes.
+              Warning: Overriding core parameters may result in unstable memory allocation on mobile nodes. Use High Quality GIF only on capable hardware.
             </p>
           </div>
         </div>

@@ -99,6 +99,14 @@ export function useFFmpegCore() {
     return await ffmpegRef.current?.deleteFile(name);
   }, []);
 
+  const addLog = useCallback((msg: string) => {
+    setLogs(prev => [...prev.slice(-99), msg]);
+  }, []);
+
+  const clearLogs = useCallback(() => {
+    setLogs([]);
+  }, []);
+
   return {
     status,
     progress,
@@ -108,5 +116,7 @@ export function useFFmpegCore() {
     writeFile,
     readFile,
     deleteFile,
+    addLog,
+    clearLogs,
   };
 }

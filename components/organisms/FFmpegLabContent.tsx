@@ -28,12 +28,15 @@ export function FFmpegLabContent() {
     exec,
     writeFile,
     readFile,
-    deleteFile
+    deleteFile,
+    addLog,
+    clearLogs
   } = useFFmpegCore();
 
   const {
     inputFile,
     outputUrl,
+    outputName,
     mode,
     setMode,
     duration,
@@ -41,6 +44,8 @@ export function FFmpegLabContent() {
     setTrimStart,
     trimDuration,
     setTrimDuration,
+    gifQuality,
+    setGifQuality,
     handleFileSelect,
     process,
   } = useFFmpegLabActions({
@@ -48,7 +53,8 @@ export function FFmpegLabContent() {
     writeFile,
     readFile,
     exec,
-    deleteFile
+    deleteFile,
+    addLog
   });
 
   // Load FFmpeg on mount
@@ -160,6 +166,8 @@ export function FFmpegLabContent() {
                 duration={duration}
                 trimValue={getTrimValue()} 
                 onTrimChange={handleTrimChange}
+                gifQuality={gifQuality}
+                setGifQuality={setGifQuality}
               />
             </div>
           </div>
@@ -171,6 +179,7 @@ export function FFmpegLabContent() {
               progress={progress}
               onProcess={process}
               outputUrl={outputUrl}
+              outputName={outputName}
             />
 
             {/* Output or Error Display */}
@@ -204,7 +213,7 @@ export function FFmpegLabContent() {
                 </div>
               )}
 
-              <TerminalLogViewer logs={logs} className="flex-grow" />
+              <TerminalLogViewer logs={logs} onClear={clearLogs} className="flex-grow" />
             </div>
           </div>
         </div>

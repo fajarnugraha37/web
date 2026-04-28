@@ -13,6 +13,7 @@ interface FFmpegActionsProps {
   readFile: (name: string) => Promise<any>;
   exec: (args: string[]) => Promise<any>;
   deleteFile: (name: string) => Promise<any>;
+  addLog: (msg: string) => void;
 }
 
 /**
@@ -24,7 +25,8 @@ export function useFFmpegLabActions({
   writeFile,
   readFile,
   exec,
-  deleteFile
+  deleteFile,
+  addLog
 }: FFmpegActionsProps) {
   const isMobile = useIsMobile();
   const [inputFile, setInputFile] = useState<File | null>(null);
@@ -35,7 +37,15 @@ export function useFFmpegLabActions({
     AUDIO: null,
     CUSTOM: null,
   });
+  const [outputNames, setOutputNames] = useState<Record<FFmpegMode, string | null>>({
+    GIF: null,
+    COMPRESS: null,
+    TRIM: null,
+    AUDIO: null,
+    CUSTOM: null,
+  });
   const [mode, setMode] = useState<FFmpegMode>('COMPRESS');
+  const [gifQuality, setGifQuality] = useState<'HIGH' | 'PERFORMANCE'>('PERFORMANCE');
 
   // Trimming & Metadata state
   const [duration, setDuration] = useState(0);
@@ -97,36 +107,91 @@ export function useFFmpegLabActions({
       // 1. Write input file
       await writeFile(inputName, await fetchFile(inputFile));
 
+      // Determine optimal threads based on hardware concurrency (max 4 to avoid resource starvation)
+      const maxThreads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency 
+        ? Math.min(4, navigator.hardwareConcurrency).toString() 
+        : "2";
+
       let success = false;
       switch (mode) {
         case 'GIF':
-          // High-Efficiency Single-Pass GIF (240p, 8fps)
-          const gifArgs = [
-            "-i", inputName, 
-            "-ss", trimStart, 
-            "-t", trimDuration, 
-            "-vf", "fps=8,scale=240:-1:flags=lanczos", 
-            "-f", "gif",
-            "-threads", "4",
-            "-y",
-            virtualOutputName
-          ];
-          success = await exec(gifArgs);
+          if (gifQuality === 'HIGH') {
+            // High-Quality Sequential 2-Pass GIF (480p, 15fps)
+            const paletteName = `palette_${timestamp}.png`;
+            
+            // Pass 1: Generate palette
+            const pass1Args = [
+              "-ss", trimStart, 
+              "-t", trimDuration, 
+              "-i", inputName, 
+              "-vf", "fps=15,scale=480:-1:flags=lanczos,palettegen", 
+              "-frames:v", "1",
+              "-update", "1",
+              "-threads", maxThreads,
+              "-y", paletteName
+            ];
+            
+            console.log("[DEBUG] Pass 1 Args:", pass1Args.join(" "));
+            addLog(`[EXEC] FFmpeg Pass 1 (Palettegen): ${pass1Args.join(" ")}`);
+            const pass1Success = await exec(pass1Args);
+            
+            if (pass1Success) {
+              // Pass 2: Generate GIF using the palette
+              // Use -filter_complex and explicitly map [0:v] and [1:v] to avoid stream confusion.
+              const pass2Args = [
+                "-ss", trimStart, 
+                "-t", trimDuration, 
+                "-i", inputName, 
+                "-i", paletteName, 
+                "-filter_complex", "[0:v]fps=15,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse", 
+                "-f", "gif",
+                "-threads", maxThreads, 
+                "-y", virtualOutputName
+              ];
+              console.log("[DEBUG] Pass 2 Args:", pass2Args.join(" "));
+              addLog(`[EXEC] FFmpeg Pass 2 (Paletteuse): ${pass2Args.join(" ")}`);
+              success = await exec(pass2Args);
+            }
+            
+            // Cleanup palette
+            await deleteFile(paletteName).catch(() => {});
+          } else {
+            // High-Efficiency Single-Pass GIF (240p, 8fps)
+            const gifArgs = [
+              "-ss", trimStart, 
+              "-t", trimDuration, 
+              "-i", inputName, 
+              "-vf", "fps=8,scale=240:-1:flags=lanczos", 
+              "-f", "gif",
+              "-threads", maxThreads,
+              "-y",
+              virtualOutputName
+            ];
+            console.log("[DEBUG] Single-Pass GIF Args:", gifArgs.join(" "));
+            addLog(`[EXEC] FFmpeg Single-Pass GIF: ${gifArgs.join(" ")}`);
+            success = await exec(gifArgs);
+          }
           break;
 
         case 'AUDIO':
-          const audioArgs = ["-i", inputName, "-ss", trimStart, "-t", trimDuration, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", "4", "-y", virtualOutputName];
+          const audioArgs = ["-ss", trimStart, "-t", trimDuration, "-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", maxThreads, "-y", virtualOutputName];
+          console.log("[DEBUG] Audio Args:", audioArgs.join(" "));
+          addLog(`[EXEC] FFmpeg Audio: ${audioArgs.join(" ")}`);
           success = await exec(audioArgs);
           break;
 
         case 'TRIM':
-          const trimArgs = ["-i", inputName, "-ss", trimStart, "-t", trimDuration, "-c", "copy", "-threads", "4", "-y", virtualOutputName];
+          const trimArgs = ["-ss", trimStart, "-t", trimDuration, "-i", inputName, "-c", "copy", "-threads", maxThreads, "-y", virtualOutputName];
+          console.log("[DEBUG] Trim Args:", trimArgs.join(" "));
+          addLog(`[EXEC] FFmpeg Trim: ${trimArgs.join(" ")}`);
           success = await exec(trimArgs);
           break;
 
         case 'COMPRESS':
         default:
-          const compArgs = ["-i", inputName, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-threads", "4", "-y", virtualOutputName];
+          const compArgs = ["-i", inputName, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-threads", maxThreads, "-y", virtualOutputName];
+          console.log("[DEBUG] Compress Args:", compArgs.join(" "));
+          addLog(`[EXEC] FFmpeg Compress: ${compArgs.join(" ")}`);
           success = await exec(compArgs);
           break;
       }
@@ -143,6 +208,7 @@ export function useFFmpegLabActions({
             const blobType = mode === 'GIF' ? 'image/gif' : mode === 'AUDIO' ? 'audio/mpeg' : 'video/mp4';
             const url = URL.createObjectURL(new Blob([data.buffer], { type: blobType }));
             setOutputUrls(prev => ({ ...prev, [mode]: url }));
+            setOutputNames(prev => ({ ...prev, [mode]: outputFileName }));
             toast("TRANSCODE_COMPLETE", "success");
             return { url, filename: outputFileName };
           }
@@ -162,11 +228,12 @@ export function useFFmpegLabActions({
         // Silently ignore cleanup errors
       }
     }
-  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile]);
+  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality]);
 
   return {
     inputFile,
     outputUrl: outputUrls[mode],
+    outputName: outputNames[mode],
     mode,
     setMode: handleModeChange,
     duration,
@@ -174,6 +241,8 @@ export function useFFmpegLabActions({
     setTrimStart,
     trimDuration,
     setTrimDuration,
+    gifQuality,
+    setGifQuality,
     handleFileSelect,
     process,
   };

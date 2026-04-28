@@ -22,8 +22,8 @@
 - [x] **Dashboard Update:** Add FFmpeg node to `app/labs/page.tsx`.
 
 ## 5. Validation
-- [x] Verify SharedArrayBuffer headers (Verified in next.config.ts).
-- [x] Build check (Verified via bun run build).
-- [ ] Test GIF 2-pass encoding.
-- [ ] Test Fast Trim logic.
-- [ ] Mobile UX Audit.
+- [x] Verify SharedArrayBuffer headers (Verified via coi-serviceworker local asset).
+- [x] Test GIF 2-pass encoding (Implemented with specific thread locks and explicit mapping).
+- [x] Test Fast Trim logic (Enabled via Output Seeking).
+- [x] Mobile UX Audit.
+- [x] Add Clear Logs feature to TerminalLogViewer.

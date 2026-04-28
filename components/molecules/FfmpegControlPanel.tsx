@@ -12,6 +12,7 @@ interface FfmpegControlPanelProps {
   onProcess: () => Promise<any>;
   onReset?: () => void;
   outputUrl: string | null;
+  outputName?: string | null;
   className?: string;
 }
 
@@ -25,16 +26,13 @@ export function FfmpegControlPanel({
   onProcess,
   onReset,
   outputUrl,
+  outputName,
   className
 }: FfmpegControlPanelProps) {
   const isProcessing = status === "processing";
-  const [downloadName, setDownloadName] = React.useState("output");
 
   const handleExecute = async () => {
-    const result = await onProcess();
-    if (result?.filename) {
-      setDownloadName(result.filename);
-    }
+    await onProcess();
   };
 
   return (
@@ -54,7 +52,7 @@ export function FfmpegControlPanel({
           {outputUrl && (
             <a 
               href={outputUrl} 
-              download={downloadName} 
+              download={outputName || "output"} 
               className="flex items-center gap-2 px-4 py-2 bg-accent text-black font-mono text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all cyber-chamfer-sm"
             >
               <Download className="w-3 h-3" />
