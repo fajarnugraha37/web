@@ -1,7 +1,9 @@
+// @ts-ignore
+import "./app.css";
+// @ts-ignore
+import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
 import { Orbitron, Share_Tech_Mono, JetBrains_Mono } from "next/font/google";
-import "./app.css";
-import "katex/dist/katex.min.css";
 import { Header } from "@/components/organisms/Header";
 import { Footer } from "@/components/organisms/Footer";
 import { ScrollProgress } from "@/components/atoms/ScrollProgress";

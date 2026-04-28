@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Terminal, Check, AlertCircle, Info, X } from "lucide-center"; // Fixed icon library import if needed
 import { Check as CheckIcon, Info as InfoIcon, AlertCircle as AlertIcon, X as XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
