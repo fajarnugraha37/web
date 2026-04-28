@@ -77,13 +77,13 @@ export function AdvancedSettingsForm({
           {mode === 'GIF' && (
             <div className="space-y-1.5">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">GIF_RENDER_QUALITY</label>
-              <select 
+              <select disabled
                 value={gifQuality}
                 onChange={(e) => setGifQuality(e.target.value as 'HIGH' | 'PERFORMANCE')}
                 className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm"
               >
-                <option value="PERFORMANCE">PERFORMANCE (240P, 8FPS, 1-PASS)</option>
-                {/* <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS PALETTEGEN)</option> */}
+                <option value="PERFORMANCE" selected>PERFORMANCE (240P, 8FPS, 1-PASS)</option>
+                <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS PALETTEGEN)</option>
               </select>
             </div>
           )}
@@ -92,14 +92,19 @@ export function AdvancedSettingsForm({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">OUTPUT_RESOLUTION</label>
-              <select disabled className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
+              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
                 <option>ORIGINAL_SOURCE</option>
+                <option>1080P_FHD</option>
+                <option>720P_HD</option>
+                <option>480P_SD</option>
               </select>
             </div>
             <div className="space-y-1.5">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">ENCODER_PRESET</label>
-              <select disabled className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
+              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none opacity-50 cursor-not-allowed cyber-chamfer-sm">
+                <option>FAST_RECOVERY</option>
                 <option>BALANCED_NODE</option>
+                <option>MAX_COMPRESSION</option>
               </select>
             </div>
           </div>

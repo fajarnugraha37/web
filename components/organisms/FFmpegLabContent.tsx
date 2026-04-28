@@ -180,6 +180,7 @@ export function FFmpegLabContent() {
               onProcess={process}
               outputUrl={outputUrl}
               outputName={outputName}
+              hasInput={!!inputFile}
             />
 
             {/* Output or Error Display */}
