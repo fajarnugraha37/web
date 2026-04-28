@@ -3,7 +3,7 @@
 import React from "react";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { LabNodeCard } from "@/components/molecules/LabNodeCard";
-import { Database, BarChart3, Binary, FileText } from "lucide-react";
+import { Database, BarChart3, Binary, FileText, Film } from "lucide-react";
 
 const LAB_NODES = [
   {
@@ -41,6 +41,15 @@ const LAB_NODES = [
     path: "/labs/markdown",
     status: "READY",
     color: "text-accent",
+  },
+  {
+    id: "ffmpeg",
+    name: "MEDIA_PROCESSOR.EXE",
+    description: "High-performance client-side media transcoding and signal processing using FFmpeg WASM.",
+    icon: <Film className="w-8 h-8" />,
+    path: "/labs/ffmpeg",
+    status: "STANDBY",
+    color: "text-accent-secondary",
   },
 ];
 

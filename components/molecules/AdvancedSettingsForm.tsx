@@ -1,0 +1,93 @@
+"use client";
+
+import React, { useState } from "react";
+import { ChevronDown, ChevronRight, Sliders, Info } from "lucide-react";
+import { RangeSlider } from "@/components/atoms/RangeSlider";
+import { FFmpegMode } from "@/hooks/useFFmpegLabActions";
+import { cn } from "@/lib/utils";
+
+interface AdvancedSettingsFormProps {
+  mode: FFmpegMode;
+  trimValue: [number, number];
+  onTrimChange: (value: [number, number]) => void;
+  className?: string;
+}
+
+/**
+ * Molecule: AdvancedSettingsForm
+ * Collapsible form for overriding default transcode parameters.
+ */
+export function AdvancedSettingsForm({
+  mode,
+  trimValue,
+  onTrimChange,
+  className
+}: AdvancedSettingsFormProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={cn("border border-border/20 bg-black/20 overflow-hidden", className)}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-3 hover:bg-white/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Sliders className="w-3 h-3 text-muted-foreground" />
+          <span className="text-[10px] font-mono font-black tracking-[0.2em] text-muted-foreground uppercase">
+            # SYSTEM_OVERRIDES
+          </span>
+        </div>
+        {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+      </button>
+
+      {isOpen && (
+        <div className="p-4 border-t border-border/10 space-y-6">
+          {/* Mode Specific: TRIM */}
+          {mode === 'TRIM' && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-accent-secondary">
+                <Info className="w-3 h-3" />
+                <span className="text-[9px] font-mono uppercase tracking-widest">TRIM_SELECTOR_ACTIVE</span>
+              </div>
+              <RangeSlider
+                min={0}
+                max={120} // Assuming max 2 min for lab
+                value={trimValue}
+                onChange={onTrimChange}
+                label="SEGMENT_RANGE"
+              />
+            </div>
+          )}
+
+          {/* General Overrides */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">OUTPUT_RESOLUTION</label>
+              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm">
+                <option>ORIGINAL_SOURCE</option>
+                <option>1080P_FHD</option>
+                <option>720P_HD</option>
+                <option>480P_SD</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1">ENCODER_PRESET</label>
+              <select className="w-full bg-card/60 border border-border/30 p-2 text-[10px] font-mono uppercase outline-none focus:border-accent/50 transition-colors cyber-chamfer-sm">
+                <option>FAST_RECOVERY</option>
+                <option>BALANCED_NODE</option>
+                <option>MAX_COMPRESSION</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="p-2 bg-destructive/5 border border-destructive/20 rounded-sm flex gap-2">
+            <Info className="w-3 h-3 text-destructive mt-0.5" />
+            <p className="text-[8px] font-mono text-destructive/80 leading-relaxed uppercase">
+              Warning: Overriding core parameters may result in unstable memory allocation on mobile nodes.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

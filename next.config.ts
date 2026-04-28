@@ -14,6 +14,21 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   transpilePackages: ['motion'],
+  headers: async () => [
+    {
+      source: '/labs/ffmpeg/:path*',
+      headers: [
+        {
+          key: 'Cross-Origin-Embedder-Policy',
+          value: 'require-corp',
+        },
+        {
+          key: 'Cross-Origin-Opener-Policy',
+          value: 'same-origin',
+        },
+      ],
+    },
+  ],
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not modifyâ€”file watching is disabled to prevent flickering during agent edits.
