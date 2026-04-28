@@ -44,6 +44,12 @@ export interface Education {
   description: string;
 }
 
+export interface ContactLink {
+  name: string;
+  url: string;
+  desc: string;
+}
+
 // --- Database & Labs ---
 
 export type DbStatus = "initializing" | "ready" | "error" | "volatile" | "executing";

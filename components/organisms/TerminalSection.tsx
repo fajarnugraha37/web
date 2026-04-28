@@ -1,67 +1,91 @@
 "use client";
 
-import React from "react";
-import { ScrollReveal } from "@/components/atoms/ScrollReveal";
+import React, { useRef, useEffect } from "react";
+import { useTerminal } from "@/hooks/useTerminal";
+import { ContactLink } from "@/types";
 
-export function TerminalSection() {
+interface TerminalSectionProps {
+  links: ContactLink[];
+}
+
+/**
+ * Organism: TerminalSection
+ * Renders the interactive terminal with auto-scrolling and command execution.
+ */
+export function TerminalSection({ links }: TerminalSectionProps) {
+  const { output, input, setInput, onKeyDown } = useTerminal({ links });
+  const terminalContentRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll logic: scroll ONLY the terminal container
+  useEffect(() => {
+    if (terminalContentRef.current) {
+      terminalContentRef.current.scrollTo({
+        top: terminalContentRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [output]);
+
   return (
-    <div className="hidden lg:flex flex-col relative justify-center w-full max-w-lg mx-auto lg:max-w-none">
-      <ScrollReveal delay={0.4} direction="left">
-        <div className="bg-card border border-border p-1 relative shadow-[0_10px_40px_rgba(255,115,0,0.15)] cyber-chamfer">
-          {/* Terminal Header */}
-          <div className="flex items-center justify-between px-4 py-2 bg-muted mb-1 border-b border-border/50">
-            <div className="flex gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-destructive/70"></div>
-              <div className="w-2 h-2 rounded-full bg-accent-tertiary/70"></div>
-              <div className="w-2 h-2 rounded-full bg-accent/70"></div>
+    <section className="relative">
+      <div className="inline-flex items-center border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-bold mb-4 text-accent cyber-chamfer-reverse shadow-[0_0_10px_rgba(56,189,248,0.3)]">
+        <span className="animate-blink mr-2 text-accent-tertiary">&gt;</span>HOLO_TERM // SYS_OP
+      </div>
+      <div className="relative p-[1px] bg-gradient-to-br from-accent/50 via-accent-secondary/30 to-transparent shadow-[0_0_30px_rgba(56,189,248,0.15)] group hover:shadow-[0_0_40px_rgba(56,189,248,0.3)] transition-shadow duration-500">
+        <div className="bg-card/40 backdrop-blur-xl border border-transparent flex flex-col h-[400px] overflow-hidden relative">
+          <div className="bg-background/60 border-b border-accent/20 p-2 flex items-center justify-between z-20 backdrop-blur-sm">
+            <div className="flex space-x-2 px-2">
+              <div className="w-3 h-3 bg-destructive/80 shadow-[0_0_5px_#ef4444]" />
+              <div className="w-3 h-3 bg-accent-tertiary/80 shadow-[0_0_5px_#fde047]" />
+              <div className="w-3 h-3 bg-accent/80 shadow-[0_0_5px_#38bdf8]" />
             </div>
-            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-sans">
-              Terminal // dev_root
-            </span>
+            <div className="text-[10px] md:text-xs font-mono text-accent-secondary uppercase tracking-widest drop-shadow-[0_0_2px_#fb923c]">root@sys_op: ~/comms</div>
           </div>
-
-          {/* Terminal Content */}
-          <div className="p-4 md:p-6 space-y-4 text-xs md:text-sm font-mono text-foreground/80 overflow-x-hidden">
-            <div className="flex items-start gap-3">
-              <span className="text-accent">&gt;</span>
-              <p className="text-accent/90 break-all">
-                cat telemetry.json | grep engine
-              </p>
+          
+          <div 
+            ref={terminalContentRef}
+            className="p-4 md:p-6 font-mono text-xs md:text-sm leading-relaxed overflow-y-auto flex-1 z-20" 
+            onClick={() => document.getElementById("terminal-input")?.focus()}
+          >
+            <div className="text-accent-secondary mb-6 whitespace-pre font-bold">
+{`   _____ __  _______  __   ____  ____ 
+  / ___// / / / ___/ / /  / __ \\/ __ \\
+  \\__ \\/ /_/ /\\__ \\ / /  / / / / /_/ /
+ ___/ /\\__, /___/ // /__/ /_/ / ____/ 
+/____/ /____//____//____\\____/_/     `}
             </div>
-            <div className="pl-6 space-y-2 text-foreground/70">
-              <div className="flex justify-between border-b border-border pb-1">
-                <span>Language_Stack</span>
-                <span className="text-accent-secondary">
-                  Java, Node.js, Go, .NET, PHP
-                </span>
-              </div>
-              <div className="flex justify-between border-b border-border pb-1">
-                <span>Primary_Focus</span>
-                <span className="text-accent">
-                  Backend, Sometimes Frontend
-                </span>
-              </div>
+            <div className="space-y-2 mb-4 text-foreground/90">
+              {output.map((line, i) => (
+                <div 
+                  key={i} 
+                  className={
+                    line.startsWith("sys_op@") 
+                      ? "text-accent mt-4 font-bold" 
+                      : line.startsWith("Error:") 
+                        ? "text-destructive" 
+                        : "text-accent-tertiary"
+                  }
+                >
+                  {line}
+                </div>
+              ))}
             </div>
-
-            <div className="flex items-start gap-3 mt-4">
-              <span className="text-accent">&gt;</span>
-              <p className="text-accent/90 break-all">
-                ./mount_volumes.sh --force
-              </p>
-            </div>
-            <div className="pl-6">
-              <span className="text-muted-foreground animate-pulse">
-                Mounting virtual filesystems... [OK]
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-accent">&gt;</span>
-              <span className="w-2 h-4 md:h-5 bg-accent animate-pulse shadow-[0_0_5px_#ff7300]"></span>
+            <div className="flex items-center text-accent mt-4">
+              <span className="mr-2 font-bold">sys_op@terminal:~$</span>
+              <input 
+                id="terminal-input" 
+                type="text" 
+                value={input} 
+                onChange={(e) => setInput(e.target.value)} 
+                onKeyDown={onKeyDown} 
+                className="flex-1 bg-transparent outline-none border-none text-foreground caret-accent-secondary p-0 focus:ring-0" 
+                autoComplete="off" 
+                spellCheck="false" 
+              />
             </div>
           </div>
         </div>
-      </ScrollReveal>
-    </div>
+      </div>
+    </section>
   );
 }
