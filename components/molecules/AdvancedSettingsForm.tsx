@@ -95,7 +95,7 @@ export function AdvancedSettingsForm({
                   onChange={(e) => setGifQuality(e.target.value as 'HIGH' | 'PERFORMANCE')}
                   className="w-full bg-black/60 border border-accent-secondary/30 p-2.5 text-[10px] font-mono uppercase outline-none focus:border-accent-secondary focus:shadow-[0_0_10px_rgba(255,0,127,0.2)] transition-all appearance-none cursor-pointer cyber-chamfer-sm"
                 >
-                  <option value="PERFORMANCE" selected>PERFORMANCE (240P, 8FPS, 1-PASS)</option>
+                  <option value="PERFORMANCE">PERFORMANCE (240P, 8FPS, 1-PASS)</option>
                   <option value="HIGH">HIGH_QUALITY (480P, 15FPS, 2-PASS)</option>
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-accent-secondary/50 text-[8px]">▼</div>

@@ -144,12 +144,13 @@ export function useFFmpegLabActions({
           if (gifQuality === 'HIGH') {
             // High-Quality Sequential 2-Pass GIF (480p, 15fps)
             const paletteName = `palette_${timestamp}.png`;
-            
+
             // Pass 1: Generate palette
             const pass1Args = [
-              "-ss", trimStart, 
-              "-t", trimDuration, 
-              "-i", inputName, 
+              "-loglevel", "debug",
+              "-ss", trimStart,
+              "-t", trimDuration,
+              "-i", inputName,
               "-vf", "fps=15,scale=480:-1:flags=lanczos,palettegen", 
               "-frames:v", "1",
               "-update", "1",
@@ -169,13 +170,13 @@ export function useFFmpegLabActions({
                 "-i", inputName, 
                 "-i", paletteName, 
                 "-filter_complex", "[0:v]fps=15,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse", 
-                "-f", "gif",
-                "-threads", "1", 
+              "-f", "gif",
+              "-threads", "1",
                 "-y", virtualOutputName
-              ];
+            ];
               console.log("[DEBUG] Pass 2 Args:", pass2Args.join(" "));
               addLog(`[EXEC] FFmpeg Pass 2 (Paletteuse): ${pass2Args.join(" ")}`);
-              success = await exec(pass2Args);
+            success = await exec(pass2Args);
             }
             
             // Cleanup palette
@@ -183,6 +184,7 @@ export function useFFmpegLabActions({
           } else {
             // High-Efficiency Single-Pass GIF (240p, 8fps)
             const gifArgs = [
+              "-loglevel", "debug",
               "-ss", trimStart, 
               "-t", trimDuration, 
               "-i", inputName, 
@@ -199,7 +201,7 @@ export function useFFmpegLabActions({
           break;
 
         case 'AUDIO':
-          const audioArgs = ["-ss", trimStart, "-t", trimDuration, "-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", maxThreads, "-y", virtualOutputName];
+          const audioArgs = ["-loglevel", "debug", "-ss", trimStart, "-t", trimDuration, "-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", maxThreads, "-y", virtualOutputName];
           console.log("[DEBUG] Audio Args:", audioArgs.join(" "));
           addLog(`[EXEC] FFmpeg Audio: ${audioArgs.join(" ")}`);
           success = await exec(audioArgs);
@@ -208,6 +210,7 @@ export function useFFmpegLabActions({
         case 'TRIM':
           const trimVf = scaleFilter ? [scaleFilter] : [];
           const trimArgs = [
+            "-loglevel", "debug",
             "-i", inputName, 
             "-ss", trimStart, 
             "-t", trimDuration, 
@@ -227,6 +230,7 @@ export function useFFmpegLabActions({
         default:
           const compVf = scaleFilter ? [scaleFilter] : [];
           const compArgs = [
+            "-loglevel", "debug",
             "-i", inputName, 
             ...(compVf.length ? ["-vf", compVf.join(",")] : []),
             "-vcodec", "libx264", 
@@ -242,6 +246,7 @@ export function useFFmpegLabActions({
       }
       
       if (success) {
+        console.log('[FFMPEG] execution success: ', success);
         // [STRATEGY: CLEAN SLATE] 
         // Delete input file IMMEDIATELY after execution to free up WASM Heap for the readFile operation.
         await deleteFile(inputName).catch(() => {});
@@ -261,6 +266,8 @@ export function useFFmpegLabActions({
           console.error("Failed to read output file:", readErr);
           toast("OUTPUT_READ_ERROR", "error");
         }
+      } else {
+        console.log('[FFMPEG] execution failed: ', success);
       }
     } catch (err) {
       console.error("Transcoding pipeline failed:", err);
@@ -271,8 +278,10 @@ export function useFFmpegLabActions({
         await deleteFile(virtualOutputName).catch(() => {});
       } catch (e) {
         // Silently ignore cleanup errors
+        console.error('[FFMPEG] CLEANUP FILE FAILED: ', e);
       }
     }
+    console.log('[FFMPEG] process done');
   }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality, resolution, preset, getScaleFilter]);
 
   return {
