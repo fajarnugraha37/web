@@ -33,7 +33,7 @@ This guide breaks down the implementation into atomic, verifiable phases, suitab
    - Manage `src` and `tgt` languages via Next.js `useRouter` and `useSearchParams`.
 
 ## Phase 4: UI Components (Atoms & Molecules)
-Follow Atomic Design principles. Create these in `components/atoms/` and `components/molecules/`:
+Follow Atomic Design principles and ensure **Zero-Logic Render** (purely declarative components). Create these in `components/atoms/` and `components/molecules/`:
 1. **`LanguageSelect`:** Dropdown component.
 2. **`TranslationProgress`:** Determinate linear progress bar matching the terminal aesthetic.
 3. **`TerminalLogViewer`:** Reuse existing or create a new accordion for the debug panel.
@@ -41,9 +41,9 @@ Follow Atomic Design principles. Create these in `components/atoms/` and `compon
 
 ## Phase 5: Organism Assembly & Streaming
 1. **`TranslateLabContent.tsx`:** Assemble the molecules.
-   - Implement the two-pane layout (Input / Output).
+   - Implement the two-pane layout (Input / Output). Use the existing `useIsMobile` hook from `@/hooks/use-mobile` for DRY responsive layout adjustments (e.g., stacking panes vertically on mobile).
    - Add the Swap button logic.
-   - Integrate the `useTranslationWorker` hook.
+   - Integrate the `useTranslationWorker` hook. Keep the render function clean of business logic.
 2. **Streaming Simulation:**
    - In the Output pane, implement the `setInterval` logic to reveal words sequentially.
    - Add RTL support via dynamic `dir` attribute based on the selected target language.
