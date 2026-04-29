@@ -34,15 +34,22 @@ export function useTranslationWorker() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const addLog = useCallback((level: LogEntry['level'], message: string) => {
-    setLogs((prev) => [
-      ...prev,
-      {
-        id: Math.random().toString(36).substring(7),
-        timestamp: new Date().toLocaleTimeString(),
-        level,
-        message,
-      },
-    ]);
+    setLogs((prev) => {
+      const newLogs = [
+        ...prev,
+        {
+          id: Math.random().toString(36).substring(7),
+          timestamp: new Date().toLocaleTimeString(),
+          level,
+          message,
+        },
+      ];
+      // Limit to 100 logs to prevent memory bloat and UI lag
+      if (newLogs.length > 100) {
+        return newLogs.slice(newLogs.length - 100);
+      }
+      return newLogs;
+    });
   }, []);
 
   const initWorker = useCallback(() => {

@@ -20,8 +20,8 @@ export function useTranslationParams() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const src = searchParams.get('src') || 'eng_Latn';
-  const tgt = searchParams.get('tgt') || 'ind_Latn';
+  const src = searchParams.get('src') || 'ind_Latn';
+  const tgt = searchParams.get('tgt') || 'eng_Latn';
 
   const updateParams = useCallback((newSrc: string, newTgt: string) => {
     let finalSrc = newSrc;

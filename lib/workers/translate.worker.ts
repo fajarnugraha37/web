@@ -6,9 +6,7 @@ env.backends.onnx.wasm.wasmPaths = '/wasm/';
 // Configuration for offline caching and WASM
 const isDev = process.env.NODE_ENV === 'development';
 env.allowLocalModels = isDev;
-if (isDev) {
-  env.localModelPath = '/models/';
-}
+env.localModelPath = '/models/'; // ALWAYS explicitly set this to a string to prevent minification bugs with S.replace in Xenova pathJoin
 env.useBrowserCache = true;
 
 let translatorPipeline: any = null;
@@ -24,9 +22,18 @@ self.addEventListener('message', async (event: MessageEvent) => {
         if (!translatorPipeline && !isInitializing) {
           console.log('Initializing translation pipeline...');
           isInitializing = true;
+          const lastProgressTime = new Map<string, number>();
+          
           translatorPipeline = await pipeline('translation', 'Xenova/nllb-200-distilled-600M', {
             quantized: true,
             progress_callback: (data: any) => {
+              // Throttle 'progress' events to max 10 times per second per file
+              if (data.status === 'progress' && data.file) {
+                const now = performance.now();
+                const last = lastProgressTime.get(data.file) || 0;
+                if (now - last < 100) return;
+                lastProgressTime.set(data.file, now);
+              }
               self.postMessage({ type: 'INIT_PROGRESS', payload: data });
             },
           });
@@ -47,15 +54,17 @@ self.addEventListener('message', async (event: MessageEvent) => {
         
         const { text, src, tgt } = payload;
         
-        // Ensure inputs are provided
+        // Ensure inputs are provided and strictly strings
         if (!text || !src || !tgt) {
            throw new Error("Missing required parameters for translation");
         }
+        
+        const safeText = typeof text === 'string' ? text : String(text);
 
         // Output results
-        const result = await translatorPipeline(text, {
-          src_lang: src,
-          tgt_lang: tgt,
+        const result = await translatorPipeline(safeText, {
+          src_lang: String(src),
+          tgt_lang: String(tgt),
         });
 
         // Safely extract the translation text to avoid "undefined" strings

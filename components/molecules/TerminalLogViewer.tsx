@@ -66,7 +66,7 @@ export function TerminalLogViewer({ logs, onClear, className }: TerminalLogViewe
         ) : (
           <div className="text-muted-foreground/50 italic animate-pulse flex items-center gap-2">
             <span className="inline-block w-1.5 h-3 bg-accent/50 animate-blink" />
-            # WAITING_FOR_KERNEL_SIGNAL...
+            # WAITING_FOR_SIGNAL...
           </div>
         )}
       </div>
