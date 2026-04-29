@@ -122,8 +122,14 @@ export function useTranslationWorker() {
       });
       
       workerRef.current.addEventListener('error', (err) => {
-        addLog('ERROR', `Worker global error: ${err.message}`);
-        setStatus('error');
+        if (err && (typeof err === 'string' || err instanceof ErrorEvent && err.message?.includes('Uncaught TypeError: S.replace is not a function'))) {
+          addLog('ERROR', `Worker global error: ${err}`);
+        } else {
+          addLog('ERROR', `Worker global error: ${err.message || JSON.stringify(err || 'unknown error')}`);
+        }
+        if (status != 'ready' && status != 'translating') {
+          setStatus('error');
+        }
       });
 
       setStatus('loading');
