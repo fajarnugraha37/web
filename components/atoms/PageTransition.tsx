@@ -36,27 +36,20 @@ export function PageTransition({ children }: { children: ReactNode }) {
       <motion.div
         initial={{ 
           opacity: 0, 
-          x: -10,
-          skewX: 10,
-          filter: "brightness(2) contrast(1.5) blur(10px)" 
+          y: 5,
         }}
         animate={{ 
           opacity: 1, 
-          x: 0,
-          skewX: 0,
-          filter: "brightness(1) contrast(1) blur(0px)" 
+          y: 0,
         }}
         transition={{ 
-          duration: 0.4, 
-          ease: [0.19, 1, 0.22, 1], // Power4.out equivalent
-          delay: 0.1
+          duration: 0.3, 
+          ease: "easeOut",
         }}
       >
-        {/* Rapid flicker on entrance */}
         <motion.div
           animate={{ 
-            opacity: [1, 0.8, 1, 0.9, 1],
-            x: [0, -2, 2, -1, 0]
+            opacity: [1, 0.9, 1],
           }}
           transition={{ duration: 0.3, ease: "linear" }}
         >
@@ -67,9 +60,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
       {/* "Data Stream" scanline that runs once on mount */}
       <motion.div
         initial={{ top: "-10%", opacity: 0 }}
-        animate={{ top: "110%", opacity: [0, 0.5, 0.5, 0] }}
-        transition={{ duration: 0.6, ease: "circIn" }}
-        className="fixed left-0 w-full h-[20vh] bg-gradient-to-b from-transparent via-accent/20 to-transparent z-[99] pointer-events-none"
+        animate={{ top: "110%", opacity: [0, 0.3, 0.3, 0] }}
+        transition={{ duration: 0.5, ease: "circIn" }}
+        className="fixed left-0 w-full h-[20vh] bg-gradient-to-b from-transparent via-accent/10 to-transparent z-[99] pointer-events-none"
       />
     </div>
   );

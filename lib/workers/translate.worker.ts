@@ -60,26 +60,36 @@ self.addEventListener('message', async (event: MessageEvent) => {
         }
         
         const safeText = typeof text === 'string' ? text : String(text);
+        const lines = safeText.split('\n');
+        const translatedLines = [];
 
-        // Output results
-        const result = await translatorPipeline(safeText, {
-          src_lang: String(src),
-          tgt_lang: String(tgt),
-        });
+        // Process line by line to preserve newlines
+        for (const line of lines) {
+          if (line.trim() === '') {
+            translatedLines.push('');
+            continue;
+          }
 
-        // Safely extract the translation text to avoid "undefined" strings
-        console.log('Raw translation result:', result);
-        let output = result;
-        if (Array.isArray(result) && result.length > 0) {
-          output = result.map((item: any) => item.translation_text || "No translation_text field").join(' ');
-        } else if (typeof result === 'object' && 'translation_text' in result) {
-          output = result.translation_text;
-        } 
+          const result = await translatorPipeline(line, {
+            src_lang: String(src),
+            tgt_lang: String(tgt),
+          });
+
+          // Safely extract the translation text
+          let output = line;
+          if (Array.isArray(result) && result.length > 0) {
+            output = result.map((item: any) => item.translation_text || "No translation_text field").join(' ');
+          } else if (typeof result === 'object' && 'translation_text' in result) {
+            output = result.translation_text;
+          }
+          
+          translatedLines.push(output);
+        }
 
         self.postMessage({ 
           type: 'RESULT', 
           id, 
-          payload: output
+          payload: translatedLines.join('\n')
         });
         break;
 

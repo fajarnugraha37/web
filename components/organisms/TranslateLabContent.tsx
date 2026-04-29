@@ -62,6 +62,14 @@ export function TranslateLabContent() {
     }
   }, [isOffline, status, initWorker, hasAgreed]);
 
+  // Handle fatal errors (e.g., OOM during initialization)
+  useEffect(() => {
+    if (status === 'error') {
+      toast("Translation engine encountered a fatal error. Your device might be out of memory or connection lost. Please refresh the page.", "error");
+      setIsModalOpen(false); // Close any open modals
+    }
+  }, [status]);
+
   // Memory & Offline Guards on Mount
   useEffect(() => {
     const memory = navigator.deviceMemory || 4;
@@ -314,7 +322,7 @@ export function TranslateLabContent() {
               disabled={status === 'translating'} 
             />
             <div 
-              className={`w-full h-40 overflow-y-auto text-sm font-sans mt-2 ${isRtl ? 'text-right' : 'text-left'}`}
+              className={`w-full h-40 overflow-y-auto text-sm font-sans mt-2 whitespace-pre-wrap ${isRtl ? 'text-right' : 'text-left'}`}
               dir={isRtl ? 'rtl' : 'ltr'}
               style={isRtl ? { paddingInlineStart: '1rem' } : {}}
             >
