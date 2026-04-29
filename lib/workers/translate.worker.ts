@@ -1,7 +1,14 @@
 import { pipeline, env } from '@xenova/transformers';
 
+// Configure to use local WASM files instead of jsdelivr
+env.backends.onnx.wasm.wasmPaths = '/wasm/';
+
 // Configuration for offline caching and WASM
-env.allowLocalModels = false;
+const isDev = process.env.NODE_ENV === 'development';
+env.allowLocalModels = isDev;
+if (isDev) {
+  env.localModelPath = '/models/';
+}
 env.useBrowserCache = true;
 
 let translatorPipeline: any = null;
@@ -11,9 +18,11 @@ self.addEventListener('message', async (event: MessageEvent) => {
   const { type, payload, id } = event.data;
 
   try {
+    console.log(`Worker received message: ${type}`, payload);
     switch (type) {
       case 'INIT':
         if (!translatorPipeline && !isInitializing) {
+          console.log('Initializing translation pipeline...');
           isInitializing = true;
           translatorPipeline = await pipeline('translation', 'Xenova/nllb-200-distilled-600M', {
             quantized: true,
@@ -24,7 +33,10 @@ self.addEventListener('message', async (event: MessageEvent) => {
           isInitializing = false;
           self.postMessage({ type: 'READY' });
         } else if (translatorPipeline) {
+          console.log('Translation pipeline already initialized');
           self.postMessage({ type: 'READY' }); // Already initialized
+        } else {
+          console.log('Translation pipeline is currently initializing');
         }
         break;
 
@@ -46,10 +58,19 @@ self.addEventListener('message', async (event: MessageEvent) => {
           tgt_lang: tgt,
         });
 
+        // Safely extract the translation text to avoid "undefined" strings
+        console.log('Raw translation result:', result);
+        let output = result;
+        if (Array.isArray(result) && result.length > 0) {
+          output = result.map((item: any) => item.translation_text || "No translation_text field").join(' ');
+        } else if (typeof result === 'object' && 'translation_text' in result) {
+          output = result.translation_text;
+        } 
+
         self.postMessage({ 
           type: 'RESULT', 
           id, 
-          payload: result[0]?.translation_text || "" 
+          payload: output
         });
         break;
 

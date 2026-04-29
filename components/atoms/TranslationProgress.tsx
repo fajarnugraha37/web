@@ -11,32 +11,27 @@ export function TranslationProgress({ progressData }: TranslationProgressProps) 
   }
 
   // Cap at 100%
-  const percentage = Math.min(Math.round(progressData.progress), 100);
+  const percentage = Math.min(Math.round(progressData.progress || 0), 100);
   
   // Calculate total MB if available
   const loadedMB = progressData.loaded ? (progressData.loaded / 1024 / 1024).toFixed(1) : 0;
   const totalMB = progressData.total ? (progressData.total / 1024 / 1024).toFixed(1) : 0;
 
   return (
-    <div className="w-full flex flex-col gap-2 font-mono text-xs">
-      <div className="flex justify-between items-center text-accent">
+    <div className="w-full flex flex-col gap-1 font-mono text-xs mb-2">
+      <div className="flex justify-between items-center text-foreground">
         <span className="truncate pr-4 flex-1">
           {progressData.file || "model_q4.onnx"}
         </span>
         <span className="shrink-0">{percentage}%</span>
       </div>
       
-      {/* Determinate linear progress bar */}
-      <div className="h-1 w-full bg-muted overflow-hidden">
-        <div 
-          className="h-full bg-accent transition-all duration-150 ease-out shadow-[0_0_8px_rgba(0,255,136,0.6)]"
-          style={{ width: `${percentage}%` }}
-        />
+      <div className="flex justify-between text-muted-foreground">
+        {progressData.total ? <span>{loadedMB}MB / {totalMB}MB</span> : <span>Loading...</span>}
       </div>
 
-      <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-widest">
+      <div className="flex text-[10px] text-accent uppercase tracking-widest mt-1">
         <span>Downloading...</span>
-        {progressData.total ? <span>{loadedMB}MB / {totalMB}MB</span> : null}
       </div>
     </div>
   );

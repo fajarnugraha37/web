@@ -26,7 +26,7 @@ interface TranslateOptions {
 
 export function useTranslationWorker() {
   const [status, setStatus] = useState<TranslationStatus>('idle');
-  const [progressData, setProgressData] = useState<TranslationProgress | null>(null);
+  const [progressItems, setProgressItems] = useState<Record<string, TranslationProgress>>({});
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const workerRef = useRef<Worker | null>(null);
   const resolveRef = useRef<((value: string) => void) | null>(null);
@@ -59,14 +59,31 @@ export function useTranslationWorker() {
         
         switch (type) {
           case 'INIT_PROGRESS':
+            addLog('INFO', 'Initializeion progress: ' + JSON.stringify(payload));
             setStatus('downloading');
-            setProgressData(payload);
+            if (payload.status === 'progress' || payload.status === 'initiate') {
+              addLog('INFO', `Downloading ${payload.file}: ${payload.progress}% (${payload.loaded}/${payload.total} bytes)`);
+              setProgressItems(prev => ({
+                ...prev,
+                [payload.file]: payload
+              }));
+            } else if (payload.status === 'done') {
+              addLog('INFO', `Finished downloading ${payload.file}`);
+              setProgressItems(prev => {
+                const next = { ...prev };
+                delete next[payload.file];
+                return next;
+              });
+            } else {
+              addLog('INFO', `Status update for ${payload.file}: ${payload.status}`);
+            }
             break;
           case 'READY':
             setStatus('ready');
             addLog('INFO', 'Pipeline ready');
             break;
           case 'RESULT':
+            addLog('INFO', 'Received translation result: ' + JSON.stringify(payload));
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             setStatus('ready');
             if (resolveRef.current) {
@@ -77,17 +94,22 @@ export function useTranslationWorker() {
             break;
           case 'ERROR':
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setStatus('error');
             addLog('ERROR', `Worker error: ${payload}`);
             if (rejectRef.current) {
+              setStatus('ready'); // Pipeline is still functional, just this inference failed
               rejectRef.current(new Error(payload));
               resolveRef.current = null;
               rejectRef.current = null;
+            } else {
+              setStatus('error');
             }
             break;
           case 'DISPOSED':
             addLog('INFO', 'Pipeline disposed');
             setStatus('idle');
+            break;
+          default:
+            addLog('WARN', `Unknown message type from worker: ${type}`);
             break;
         }
       });
@@ -126,12 +148,12 @@ export function useTranslationWorker() {
       
       const id = Math.random().toString(36).substring(7);
       
-      // 8-second timeout guard
+      // 60-second timeout guard
       timeoutRef.current = setTimeout(() => {
         addLog('ERROR', 'Inference timeout (8s)');
         setStatus('error');
         reject(new Error('Inference timeout'));
-      }, 8000);
+      }, 60000);
 
       workerRef.current!.postMessage({
         type: 'TRANSLATE',
@@ -157,7 +179,7 @@ export function useTranslationWorker() {
 
   return {
     status,
-    progressData,
+    progressItems,
     logs,
     initWorker,
     translate,

@@ -12,13 +12,13 @@ import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
 import { Button } from "@/components/atoms/Button";
 import { toast } from "@/components/atoms/Toast";
 import { PageTransition } from "@/components/atoms/PageTransition";
-import { ArrowRightLeft, Download, Play, AlertTriangle } from "lucide-react";
+import { ArrowRightLeft, Download, Play, AlertTriangle, Loader2 } from "lucide-react";
 
 export function TranslateLabContent() {
   const isMobile = useIsMobile();
   const {
     status,
-    progressData,
+    progressItems,
     logs,
     initWorker,
     translate,
@@ -38,6 +38,13 @@ export function TranslateLabContent() {
   // Streaming simulation state
   const [displayedOutput, setDisplayedOutput] = useState("");
   const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-initialize engine on mount
+  useEffect(() => {
+    if (!isOffline && status === 'idle') {
+      initWorker();
+    }
+  }, [isOffline, status, initWorker]);
 
   // Memory & Offline Guards on Mount
   useEffect(() => {
@@ -82,20 +89,29 @@ export function TranslateLabContent() {
     setDisplayedOutput("");
     if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
     
-    const words = fullText.split(/(\s+)/);
-    let currentIndex = 0;
+    // Safety check in case undefined or object slips through
+    const safeText = typeof fullText === 'string' ? fullText : String(fullText);
+    const words = safeText.split(/(\s+)/);
+    setDisplayedOutput(words.join('')); // Show full text immediately for now, can implement token-by-token if desired
 
-    streamIntervalRef.current = setInterval(() => {
-      if (currentIndex < words.length) {
-        setDisplayedOutput((prev) => prev + words[currentIndex]);
-        currentIndex++;
-      } else {
-        if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-      }
-    }, 50); // 50ms per token
+    let currentIndex = 0;
+    // streamIntervalRef.current = setInterval(() => {
+    //   if (currentIndex < words.length) {
+    //     setDisplayedOutput((prev) => {
+    //       console.log(`Streaming token: "${words[currentIndex]}"`, words, prev, words[currentIndex]); // Debug log for each token
+    //       return prev + (words[currentIndex] ?? '');
+    //     });
+    //     currentIndex++;
+    //   } else {
+    //     if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
+    //   }
+    // }, 50); // 50ms per token
   };
 
-  const handleTranslate = async (force: boolean = false) => {
+  const handleTranslate = async (force: boolean = false, overrideSrc?: string, overrideTgt?: string) => {
+    const activeSrc = overrideSrc || src;
+    const activeTgt = overrideTgt || tgt;
+
     if (isOffline && status === 'idle') {
       toast("Offline. Model belum diunduh.", "error");
       return;
@@ -113,7 +129,8 @@ export function TranslateLabContent() {
     try {
       setDisplayedOutput("");
       setOutputText("");
-      const result = await translate({ text: inputText, src, tgt });
+      const result = await translate({ text: inputText, src: activeSrc, tgt: activeTgt });
+      console.log('Translation result received in component:', result);
       setOutputText(result);
       simulateStreaming(result);
     } catch (error: any) {
@@ -149,9 +166,7 @@ export function TranslateLabContent() {
           
           <div className="flex items-center gap-2">
             {status === 'idle' && (
-              <Button onClick={handleInit} disabled={isOffline} className="gap-2" variant="cyber">
-                <Download className="w-4 h-4" /> Initialize Engine
-              </Button>
+              <div className="text-muted-foreground text-xs font-mono">WAITING FOR ENGINE...</div>
             )}
             {status === 'downloading' && (
                <div className="text-accent text-xs font-mono animate-pulse">DOWNLOADING MODEL...</div>
@@ -161,14 +176,20 @@ export function TranslateLabContent() {
             )}
             {status === 'ready' && (
               <div className="px-3 py-1 border border-accent text-accent text-[10px] font-mono uppercase bg-accent/10">
-                ✅ Pipeline Active
+                Pipeline Active
               </div>
             )}
           </div>
         </div>
 
         {/* Progress Bar */}
-        {status === 'downloading' && <TranslationProgress progressData={progressData} />}
+        {status === 'downloading' && progressItems && (
+          <div className="flex flex-col gap-2 p-4 border border-border bg-card/50">
+            {Object.values(progressItems).map((item) => (
+              <TranslationProgress key={item.file} progressData={item} />
+            ))}
+          </div>
+        )}
 
         {/* System Warning */}
         {memoryLimit < 300 && (
@@ -188,8 +209,18 @@ export function TranslateLabContent() {
         <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-[1fr_auto_1fr]'} items-stretch`}>
           
           {/* Source Pane */}
-          <div className="flex flex-col gap-2 border border-border p-4 bg-card/50 cyber-chamfer-sm">
-            <LanguageSelect label="Source Language" value={src} onChange={setSrc} disabled={status === 'translating'} />
+          <div className="flex flex-col gap-2 border border-border p-4 bg-card/50">
+            <LanguageSelect 
+              label="Source Language" 
+              value={src} 
+              onChange={(newSrc) => {
+                setSrc(newSrc);
+                if (inputText.trim().length > 0 && status === 'ready') {
+                  handleTranslate(false, newSrc, tgt);
+                }
+              }} 
+              disabled={status === 'translating'} 
+            />
             <textarea
               className="w-full h-40 bg-transparent border-none resize-none focus:ring-0 text-sm font-sans mt-2 outline-none"
               placeholder="Enter text to translate..."
@@ -205,12 +236,21 @@ export function TranslateLabContent() {
           {/* Controls */}
           <div className={`flex ${isMobile ? 'flex-row' : 'flex-col'} justify-center items-center gap-4 py-2`}>
             <button 
-              onClick={swap} 
+              onClick={() => {
+                swap();
+                if (inputText.trim().length > 0 && status === 'ready') {
+                  handleTranslate(false, tgt, src);
+                }
+              }} 
               disabled={status === 'translating'}
-              className="p-3 border border-border bg-muted/20 hover:border-accent hover:text-accent transition-all cyber-chamfer group disabled:opacity-50"
+              className="p-3 border border-border bg-muted/20 hover:border-accent hover:text-accent transition-all cyber-chamfer group disabled:opacity-50 flex items-center justify-center w-12 h-12"
               title="Swap Languages"
             >
-              <ArrowRightLeft className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" />
+              {status === 'translating' ? (
+                <Loader2 className="w-5 h-5 animate-spin text-accent" />
+              ) : (
+                <ArrowRightLeft className="w-5 h-5 group-hover:rotate-180 transition-transform duration-300" />
+              )}
             </button>
             <Button 
                variant="glitch" 
@@ -223,8 +263,18 @@ export function TranslateLabContent() {
           </div>
 
           {/* Target Pane */}
-          <div className="flex flex-col gap-2 border border-border p-4 bg-card/50 cyber-chamfer-sm">
-            <LanguageSelect label="Target Language" value={tgt} onChange={setTgt} disabled={status === 'translating'} />
+          <div className="flex flex-col gap-2 border border-border p-4 bg-card/50">
+            <LanguageSelect 
+              label="Target Language" 
+              value={tgt} 
+              onChange={(newTgt) => {
+                setTgt(newTgt);
+                if (inputText.trim().length > 0 && status === 'ready') {
+                  handleTranslate(false, src, newTgt);
+                }
+              }} 
+              disabled={status === 'translating'} 
+            />
             <div 
               className={`w-full h-40 overflow-y-auto text-sm font-sans mt-2 ${isRtl ? 'text-right' : 'text-left'}`}
               dir={isRtl ? 'rtl' : 'ltr'}
