@@ -9,3 +9,4 @@ out
 .playwright-mcp
 .vscode/
 .locals/
+public/models
