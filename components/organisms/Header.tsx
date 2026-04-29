@@ -21,6 +21,7 @@ const LAB_LINKS = [
   { href: "/labs/knowledge-graph", label: "BLOG NETWORKS.EXE", hoverClass: "hover:text-accent-tertiary" },
   { href: "/labs/markdown", label: "MARKDOWN PLAYGROUND.EXE", hoverClass: "hover:text-accent" },
   { href: "/labs/ffmpeg", label: "MEDIA PROCESSOR.EXE", hoverClass: "hover:text-accent-secondary" },
+  { href: "/labs/translate", label: "TRANSLATION PLAYGROUND.EXE", hoverClass: "hover:text-accent-tertiary" },
 ];
 
 export function Header() {

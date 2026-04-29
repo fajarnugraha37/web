@@ -117,10 +117,7 @@ export function HardwareNodesSection() {
               </div>
             </Link>
           </ScrollReveal>
-        </div>
 
-        {/* Secondary Centered Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:w-2/3 mx-auto">
           <ScrollReveal delay={0.4} direction="up">
             <Link
               href="/labs/markdown"
@@ -169,6 +166,40 @@ export function HardwareNodesSection() {
                 Client-side video/audio transcoding. In-browser signal processing powered by FFmpeg WASM.
               </p>
               <div className="mt-auto flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-accent-secondary opacity-80 group-hover:opacity-100 transition-opacity">
+                <span>CONNECT_NODE</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.6} direction="up">
+            <Link
+              href="/labs/translate"
+              className="group flex flex-col p-6 border border-border bg-card/80 backdrop-blur-sm cyber-chamfer hover:border-accent-tertiary hover:shadow-[0_0_20px_rgba(0,212,255,0.15)] transition-all relative overflow-hidden h-full"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-muted/30 border border-border group-hover:border-accent-tertiary/40 text-accent-tertiary transition-colors">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m5 8 6 6" />
+                    <path d="m4 14 6-6 2-3" />
+                    <path d="M2 5h12" />
+                    <path d="M7 2h1" />
+                    <path d="m22 22-5-10-5 10" />
+                    <path d="M14 18h6" />
+                  </svg>
+                </div>
+                <div className="flex flex-col items-end font-mono text-[10px] uppercase">
+                  <span className="text-muted-foreground">NODE_STATUS</span>
+                  <span className="text-accent-tertiary animate-pulse">[INFERENCE]</span>
+                </div>
+              </div>
+              <h3 className="text-2xl font-black mb-2 text-foreground group-hover:text-accent-tertiary transition-colors uppercase">
+                TRANSLATION NODE.EXE
+              </h3>
+              <p className="text-sm font-mono text-muted-foreground mb-6">
+                Client-side NLLB-200 machine translation. Zero-server inference running securely in the browser.
+              </p>
+              <div className="mt-auto flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-accent-tertiary opacity-80 group-hover:opacity-100 transition-opacity">
                 <span>CONNECT_NODE</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>

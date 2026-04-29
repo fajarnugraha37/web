@@ -53,6 +53,13 @@ The site isn't just text; it's a series of experimental laboratories:
 - Audio extraction, video compression, and fast-seeking segment trimming.
 - Fully multithreaded operations running entirely in the browser. Zero server uploads.
 
+### 5. TRANSLATION NODE.EXE (ONNX Runtime / Transformers)
+
+- Client-side NLLB-200 machine translation.
+- Zero-server inference running securely in the browser.
+- Supports multiple languages: English, Indonesian, Chinese (Simplified), Spanish, Arabic, Malay, Japanese, Korean, German, Dutch, Russian.
+- Dynamic environment-based model loading (local filesystem in dev, CDN in production) to save bandwidth.
+
 ---
 
 ## SYSTEM_STRUCTURE
