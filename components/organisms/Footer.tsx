@@ -191,6 +191,15 @@ export function Footer() {
                   MEDIA PROCESSOR.EXE
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/labs/translate"
+                  className="text-muted-foreground hover:text-accent-tertiary transition-colors flex items-center gap-2 group w-fit"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-tertiary" />
+                  TRANSLATION PLAYGROUND.EXE
+                </Link>
+              </li>
             </ul>
 
             <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border/30">

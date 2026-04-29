@@ -50,6 +50,11 @@ const NAV_LINKS: NavLink[] = [
         label: "MEDIA PROCESSOR.EXE",
         accentClass: "hover:text-accent-secondary",
       },
+      {
+        href: "/labs/translate",
+        label: "TRANSLATION PLAYGROUND.EXE",
+        accentClass: "hover:text-accent-tertiary",
+      },
     ],
   },
   { href: "/feed.xml", label: "/RSS Feed", accentClass: "hover:text-accent" },

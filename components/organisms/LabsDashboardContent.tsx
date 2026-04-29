@@ -51,6 +51,15 @@ const LAB_NODES = [
     status: "STANDBY",
     color: "text-accent-secondary",
   },
+  {
+    id: "translate",
+    name: "TRANSLATION PLAYGROUND.EXE",
+    description: "Client-side offline neural machine translation using transformers.js.",
+    icon: <FileText className="w-8 h-8" />, // Reusing FileText for now, you could also use something else if imported
+    path: "/labs/translate",
+    status: "STANDBY",
+    color: "text-accent-tertiary",
+  },
 ];
 
 /**
