@@ -9,6 +9,7 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  onCancel?: () => void;
   title: string;
   message: string;
   confirmLabel?: string;
@@ -20,6 +21,7 @@ export function ConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
+  onCancel,
   title,
   message,
   confirmLabel = "EXECUTE",
@@ -28,11 +30,14 @@ export function ConfirmationModal({
 }: ConfirmationModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (onCancel) onCancel();
+        onClose();
+      }
     };
     if (isOpen) window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, onCancel]);
 
   const accentColor = {
     destructive: "text-destructive border-destructive/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]",
@@ -55,7 +60,10 @@ export function ConfirmationModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={() => {
+              if (onCancel) onCancel();
+              onClose();
+            }}
           />
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -85,7 +93,10 @@ export function ConfirmationModal({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onClose}
+                onClick={() => {
+                  if (onCancel) onCancel();
+                  onClose();
+                }}
                 className="hover:bg-white/5"
               >
                 {cancelLabel}

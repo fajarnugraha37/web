@@ -51,7 +51,7 @@ export function useFFmpegCore() {
       console.error("FFmpeg load failed:", err);
       setStatus("error");
       toast("FFMPEG_LOAD_FAILED", "error");
-      setLogs(prev => [...prev, `[ERROR] Kernel failed to boot: ${err instanceof Error ? err.message : String(err)}`]);
+      setLogs(prev => [...prev, `[ERROR] Failed to boot: ${err instanceof Error ? err.message : String(err)}`]);
       return false;
     }
   }, []); // Empty dependency array ensures stable function identity

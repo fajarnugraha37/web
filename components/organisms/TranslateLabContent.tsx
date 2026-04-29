@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslationWorker } from "@/hooks/useTranslationWorker";
 import { useTranslationParams } from "@/hooks/useTranslationParams";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,6 +16,7 @@ import { PageTransition } from "@/components/atoms/PageTransition";
 import { ArrowRightLeft, Download, Play, AlertTriangle, Loader2 } from "lucide-react";
 
 export function TranslateLabContent() {
+  const router = useRouter();
   const isMobile = useIsMobile();
   const {
     status,
@@ -35,23 +37,37 @@ export function TranslateLabContent() {
   const [memoryLimit, setMemoryLimit] = useState(300);
   const [isOffline, setIsOffline] = useState(false);
 
+  // Warning Modal State
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [hasAgreed, setHasAgreed] = useState(false);
+
   // Streaming simulation state
   const [displayedOutput, setDisplayedOutput] = useState("");
   const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-initialize engine on mount
+  // Check agreement on mount
   useEffect(() => {
-    if (!isOffline && status === 'idle') {
+    const agreed = localStorage.getItem("translate_lab_agreed");
+    if (agreed === "true") {
+      setHasAgreed(true);
+    } else {
+      setShowWarningModal(true);
+    }
+  }, []);
+
+  // Auto-initialize engine on mount (only if agreed)
+  useEffect(() => {
+    if (!isOffline && status === 'idle' && hasAgreed) {
       initWorker();
     }
-  }, [isOffline, status, initWorker]);
+  }, [isOffline, status, initWorker, hasAgreed]);
 
   // Memory & Offline Guards on Mount
   useEffect(() => {
     const memory = navigator.deviceMemory || 4;
     if (memory < 4) {
       setMemoryLimit(200);
-      toast("RAM device terdeteksi rendah. Batas karakter dikurangi.", "warning");
+      toast("Device RAM detected as low. Character limit reduced.", "warning");
       addLog('WARN', `memory: ${memory}GB - Setting limit to 200`);
     }
 
@@ -62,6 +78,17 @@ export function TranslateLabContent() {
 
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
+
+    // Request persistent storage to protect the 600MB model from browser eviction
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(isPersisted => {
+        if (isPersisted) {
+          console.log("Storage successfully persisted.");
+        } else {
+          console.log("Storage persistence not granted.");
+        }
+      });
+    }
 
     return () => {
       window.removeEventListener("offline", handleOffline);
@@ -113,7 +140,7 @@ export function TranslateLabContent() {
     const activeTgt = overrideTgt || tgt;
 
     if (isOffline && status === 'idle') {
-      toast("Offline. Model belum diunduh.", "error");
+      toast("Offline. Model not downloaded.", "error");
       return;
     }
 
@@ -134,16 +161,27 @@ export function TranslateLabContent() {
       setOutputText(result);
       simulateStreaming(result);
     } catch (error: any) {
-      toast(error.message || "Proses terhenti. Kurangi teks atau refresh.", "error");
+      toast(error.message || "Process halted. Reduce text or refresh.", "error");
     }
   };
 
   const handleInit = () => {
     if (isOffline) {
-      toast("Tidak ada koneksi internet untuk unduhan awal.", "error");
+      toast("No internet connection for initial download.", "error");
       return;
     }
     initWorker();
+  };
+
+  const handleAgree = () => {
+    localStorage.setItem("translate_lab_agreed", "true");
+    setHasAgreed(true);
+    setShowWarningModal(false);
+  };
+
+  const handleCancel = () => {
+    setShowWarningModal(false);
+    router.back();
   };
 
   // Convert structured logs to strings for the Terminal Viewer
@@ -195,13 +233,13 @@ export function TranslateLabContent() {
         {memoryLimit < 300 && (
           <div className="p-3 border border-accent-tertiary/30 bg-accent-tertiary/10 text-accent-tertiary text-xs font-mono flex items-center gap-2">
              <AlertTriangle className="w-4 h-4" />
-             RAM device rendah. Batas karakter diturunkan untuk mencegah OOM crash.
+             Device RAM is low. Character limit is lowered to prevent OOM crashes.
           </div>
         )}
         {isOffline && status === 'idle' && (
            <div className="p-3 border border-destructive/30 bg-destructive/10 text-destructive text-xs font-mono flex items-center gap-2">
            <AlertTriangle className="w-4 h-4" />
-           Koneksi terputus. Model perlu diunduh saat online.
+           Connection lost. Model needs to be downloaded while online.
         </div>
         )}
 
@@ -300,8 +338,20 @@ export function TranslateLabContent() {
           onClose={() => setIsModalOpen(false)}
           onConfirm={() => handleTranslate(true)}
           title="Memory Warning"
-          message={`Teks melebihi batas aman (${memoryLimit} karakter). Hal ini dapat menyebabkan browser crash (Out of Memory) pada beberapa perangkat. Tetap lanjutkan?`}
+          message={`The text exceeds the safe limit (${memoryLimit} characters). This may cause the browser to crash (Out of Memory) on some devices. Continue anyway?`}
           variant="warning"
+        />
+
+        <ConfirmationModal
+          isOpen={showWarningModal}
+          onClose={() => setShowWarningModal(false)}
+          onConfirm={handleAgree}
+          onCancel={handleCancel}
+          title="Computation & Data Warning"
+          message="This feature will download an AI model of approximately ~1GB to your device. This process requires a stable internet connection, a large data quota, and sufficient CPU and RAM resources. Continue?"
+          variant="accent"
+          confirmLabel="AGREE"
+          cancelLabel="CANCEL"
         />
 
       </div>
