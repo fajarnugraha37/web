@@ -9,40 +9,36 @@ Adhere to the existing Cyberpunk + Terminal visual language.
 ## 2. State Management (URL Sync)
 Application state should be deep-linkable and shareable.
 - **URL Query Params:** Language pairs sync to the URL (e.g., `?src=ind_Latn&tgt=eng_Latn`).
-- **React State:** Use a custom hook (`useTranslationState`) wrapping `next/navigation`'s `useRouter` and `useSearchParams`.
+- **React State:** Use a custom hook (`useTranslationParams`) wrapping `next/navigation`'s `useRouter` and `useSearchParams`. Auto-swaps target/source to prevent `ind_Latn -> ind_Latn` duplicate selection.
 
 ## 3. Core User Flows
 
 ### 3.1 Language Pair Selection
 - **Components:** Two dropdowns (Source, Target) and a swap button.
-- **Supported Languages (v1):** `ind_Latn` (Indonesian), `eng_Latn` (English), `zho_Hans` (Chinese Simplified), `spa_Latn` (Spanish), `ara_Arab` (Arabic).
+- **Supported Languages:** `eng_Latn` (English), `ind_Latn` (Indonesian), `zho_Hans` (Chinese Simplified), `spa_Latn` (Spanish), `arb_Arab` (Arabic), `zsm_Latn` (Malay), `jpn_Jpan` (Japanese), `kor_Hang` (Korean), `deu_Latn` (German), `nld_Latn` (Dutch), `rus_Cyrl` (Russian).
 - **RTL Handling:** If the target is `_Arab`, dynamically apply `dir="rtl"` to the output text area. Use CSS logical properties (`padding-inline-start`, `text-align: start`).
-- **Interaction:** The swap button rotates 180deg visually without flipping the layout structure.
+- **Interaction:** The swap button rotates 180deg visually without flipping the layout structure. When actively translating, the swap button turns into a spinner (`Loader2`).
 
 ### 3.2 Progress Download UX
-The initial 150MB model download requires clear feedback.
-- **Idle:** "Model belum siap. Klik untuk mengunduh (~150MB). Hanya sekali."
-- **Downloading:** Determinate linear progress bar `[████░░░] 45%` with neon cyan glow. Update via `requestAnimationFrame` to avoid React re-render thrashing.
-- **Loading:** "Memuat ke worker..." with a blinking terminal cursor `█`.
-- **Ready:** "Pipeline aktif" badge.
+The initial model download provides detailed multi-file feedback.
+- **Idle/Init:** The component auto-initializes the worker on mount. The UI briefly shows "WAITING FOR ENGINE...".
+- **Downloading:** Renders a list of progress bars for multiple concurrent files being fetched, showing filename, MB loaded/total, and percentage. Updates via React state bound to worker messages.
+- **Loading:** "LOADING WORKER █" with a blinking terminal cursor.
+- **Ready:** "✅ PIPELINE ACTIVE" badge.
 
 ### 3.3 Input Constraints & Warnings
 To prevent Out of Memory (OOM) errors:
-- **0–280 chars:** Normal state, grey counter.
-- **280–300 chars:** Yellow counter, Toast warning: "Mendekati batas aman. Translasi mungkin lebih lambat."
-- **>300 chars:** Red counter. On submit, show a blocking modal: "Melebihi 300 karakter. Risiko OOM/akurasi turun. Lanjutkan?".
-- **Override:** If user proceeds, log `[OVERRIDE: N chars]` in the debug panel.
+- **Normal:** 0–280 chars (or 0-180 if deviceMemory < 4GB). Grey counter.
+- **Warning:** 280–300 chars. Yellow counter.
+- **Limit Exceeded:** >300 chars. Red counter. On submit, shows a blocking modal: "Memory Warning. Teks melebihi batas aman... Lanjutkan?".
+- **Override:** If user proceeds, logs `[OVERRIDE: N chars]` in the debug panel.
 
-### 3.4 Simulated Token-by-Token Streaming
-Since native streaming might not be perfectly supported out-of-the-box with the current NLLB pipeline in transformers.js, simulate it for perceived performance.
-1. Run full inference in worker.
-2. Split result by words.
-3. Emit tokens to UI via `setInterval(50-80ms)`.
-4. Append tokens with a fade-in effect and blinking cursor.
+### 3.4 Real-time Translation & Streaming
+- Auto-translation is triggered when the user changes a language dropdown and there is existing input text.
+- Since native streaming isn't perfectly supported out-of-the-box with the current NLLB pipeline, results are emitted to UI via `setInterval(50ms)` token-by-token visual simulation.
 
 ## 4. Debug Panel
 A developer-focused terminal accordion below the translation UI.
-- **Header:** `> SYSTEM LOG [▼]`
+- **Header:** Terminal Log Viewer
 - **Format:** `[HH:MM:SS] [INFO|WARN|ERROR] message`
-- **Controls:** Filter by level, Clear, Copy All.
-- **Auto-scroll:** Keep scrolled to bottom unless the user manually scrolls up.
+- **Controls:** Clear Logs. Auto-scrolls.

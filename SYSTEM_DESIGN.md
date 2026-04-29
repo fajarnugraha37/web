@@ -35,6 +35,7 @@ Complex UI sections orchestrating molecules and atoms.
 - **HomeContent:** Client-side orchestrator for the global "Boot-up" sequence.
 - **HeroSection:** High-impact entrance with synchronized theme transitions.
 - **SqlTerminalSection:** Interactive laboratory node for browser-side SQL exploration.
+- **TranslateLabContent:** Client-side machine translation node, managing web workers and real-time streaming UI.
 
 ---
 
@@ -66,10 +67,11 @@ Extracted logic layer to ensure UI components remain clean:
 - `useMarkdownEditor` & `useMarkdownActions`: Orchestrates real-time editor speed, VIM mode, and multi-format exports.
 - `useTerminal` & `usePgliteActions` / `useDuckDbActions`: Handles system terminal simulation and WASM database operations.
 - `useFFmpegCore` & `useFFmpegLabActions`: Manages multithreaded FFmpeg WASM lifecycle, memory-safe file operations (Clean Slate Strategy), and dynamic media processing logic.
+- `useTranslationWorker` & `useTranslationParams`: Manages Xenova/transformers.js pipeline lifecycle, Web Worker communication, and URL-synced language state.
 
 ### Data Flow
 - **Server-Side:** Pages (`app/**/page.tsx`) fetch MDX data and prepare SEO/JSON-LD.
-- **Client-Side:** Data is injected into Organisms. Heavy computation (SQL/Analytics/Transcoding) is performed in WASM-based local nodes (PGlite, DuckDB, FFmpeg-MT).
+- **Client-Side:** Data is injected into Organisms. Heavy computation (SQL/Analytics/Transcoding/Machine Translation) is performed in WASM-based local nodes (PGlite, DuckDB, FFmpeg-MT, ONNX Runtime).
 
 ---
 
