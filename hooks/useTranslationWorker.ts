@@ -123,7 +123,13 @@ export function useTranslationWorker() {
       
       workerRef.current.addEventListener('error', (err) => {
         addLog('ERROR', `Worker global error: ${err.message || JSON.stringify(err || 'unknown error')}`);
-        if (status != 'ready' && status != 'translating') {
+        const isBeforeInit =
+          status != 'ready' 
+          && status != 'translating'
+          && !(typeof err === 'string' && err.includes('TypeError: S.replace is')
+          && !(err?.message.includes('TypeError: S.replace is')));
+
+        if (isBeforeInit) {
           setStatus('error');
         }
       });
