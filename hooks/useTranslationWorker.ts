@@ -108,6 +108,7 @@ export function useTranslationWorker() {
               resolveRef.current = null;
               rejectRef.current = null;
             } else {
+              console.error('[workerRef.current.addEventListener->message] Worker error without pending inference:', payload);
               setStatus('error');
             }
             break;
@@ -123,14 +124,9 @@ export function useTranslationWorker() {
       
       workerRef.current.addEventListener('error', (err) => {
         addLog('ERROR', `Worker global error: ${err.message || JSON.stringify(err || 'unknown error')}`);
-        const isBeforeInit =
-          status != 'ready' 
-          && status != 'translating'
-          && !(typeof err === 'string' && err.includes('TypeError: S.replace is')
-          && !(err?.message.includes('TypeError: S.replace is')));
-
-        if (isBeforeInit) {
-          console.error('Worker initialization error:', status, err);
+        console.error('Worker initialization error:', status, err);
+        if (!rejectRef.current) {
+          console.error('[workerRef.current.addEventListener->error] Worker initialization failed without pending inference:', err);
           setStatus('error');
         }
       });
@@ -139,6 +135,7 @@ export function useTranslationWorker() {
       addLog('INFO', 'Sending INIT command to worker...');
       workerRef.current.postMessage({ type: 'INIT' });
     } catch (e: any) {
+      console.error('[initWorker] Worker creation error:', e);
       addLog('ERROR', `Failed to create worker: ${e.message}`);
       setStatus('error');
     }
@@ -166,6 +163,7 @@ export function useTranslationWorker() {
       
       // 60-second timeout guard
       timeoutRef.current = setTimeout(() => {
+        console.error('[timeoutRef.current] Inference timeout:', { text, src, tgt });
         addLog('ERROR', 'Inference timeout (8s)');
         setStatus('error');
         reject(new Error('Inference timeout'));
