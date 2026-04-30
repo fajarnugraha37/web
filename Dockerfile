@@ -3,6 +3,9 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
+ARG NEXT_PUBLIC_BASE_URL=https://fajarnugraha37.github.io
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 

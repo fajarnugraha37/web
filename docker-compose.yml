@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-https://fajarnugraha37.github.io}
     ports:
       - "80:80"
     restart: unless-stopped
