@@ -35,7 +35,7 @@ Complex UI sections orchestrating molecules and atoms.
 - **HomeContent:** Client-side orchestrator for the global "Boot-up" sequence.
 - **HeroSection:** High-impact entrance with synchronized theme transitions.
 - **SqlTerminalSection:** Interactive laboratory node for browser-side SQL exploration.
-- **TranslateLabContent:** Client-side machine translation node, managing web workers and real-time streaming UI.
+- **TranslateLabContent:** Client-side machine translation playground, managing web workers and real-time streaming UI.
 
 ---
 

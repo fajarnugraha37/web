@@ -194,7 +194,7 @@ export function HardwareNodesSection() {
                 </div>
               </div>
               <h3 className="text-2xl font-black mb-2 text-foreground group-hover:text-accent-tertiary transition-colors uppercase">
-                TRANSLATION NODE.EXE
+                TRANSLATION PLAYGROUND.EXE
               </h3>
               <p className="text-sm font-mono text-muted-foreground mb-6">
                 Client-side NLLB-200 machine translation. Zero-server inference running securely in the browser.

@@ -205,8 +205,8 @@ export function TranslateLabContent() {
           <div className="flex-1">
             <PageHeader 
               title="TRANSLATION"
-              accentText="NODE"
-              tagText="DATA_STREAM // NEURAL_NETWORK"
+              accentText="PLAYGROUND"
+              tagText="DATA_STREAM // TRANSLATOR_ENGINE"
               tagIcon={Loader2}
               subtitle="Client-Side NLLB-200 / Zero-Server Inference"
               className="mb-0"
