@@ -7,7 +7,8 @@ import { useMarkdownEditor } from "@/hooks/useMarkdownEditor";
 import { useMarkdownActions } from "@/hooks/useMarkdownActions";
 import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
 import { toast } from "@/components/atoms/Toast";
-import { FileUp, List as ListIcon, Minimize2 } from "lucide-react";
+import { FileUp, List as ListIcon, Minimize2, FileText } from "lucide-react";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { MarkdownToolbar } from "@/components/molecules/MarkdownToolbar";
 import { FileTabs } from "@/components/molecules/FileTabs";
 import { MarkdownEditorPane } from "@/components/molecules/MarkdownEditorPane";
@@ -110,7 +111,15 @@ export function MarkdownPlaygroundContent() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground font-mono p-4">
-      <header className="border-b border-border pb-4 mb-4 relative z-20">
+      <PageHeader 
+        title="MARKDOWN"
+        accentText="PLAYGROUND.EXE"
+        tagText="DATA_STREAM // TEXT_EDITOR"
+        tagIcon={FileText}
+        subtitle="Live Markdown editor with split-pane preview"
+        className="mb-8 max-w-6xl mx-auto"
+      />
+      <header className="border-b border-border pb-4 mb-4 relative z-20 max-w-6xl mx-auto">
         <MarkdownToolbar 
           viewMode={viewMode}
           setViewMode={setViewMode}
@@ -153,7 +162,7 @@ export function MarkdownPlaygroundContent() {
         </div>
       </header>
 
-      <div className="flex gap-4 h-[calc(100vh-380px)] min-h-[450px] relative">
+      <div className="flex gap-4 h-[calc(100vh-380px)] min-h-[450px] relative max-w-6xl mx-auto">
         <motion.main key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex gap-0 overflow-hidden relative">
           {(viewMode === "editor" || (viewMode === "split" && !isMobile)) && (
             <MarkdownEditorPane 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslationWorker } from "@/hooks/useTranslationWorker";
 import { useTranslationParams } from "@/hooks/useTranslationParams";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { LanguageSelect } from "@/components/molecules/LanguageSelect";
 import { TranslationProgress } from "@/components/atoms/TranslationProgress";
 import { CharacterCounter } from "@/components/atoms/CharacterCounter";
@@ -200,17 +201,19 @@ export function TranslateLabContent() {
       <div className="flex flex-col gap-6 py-8 max-w-5xl mx-auto px-4 md:px-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase cyber-glitch-text" data-text="TRANSLATION NODE">
-              TRANSLATION <span className="text-accent-tertiary">NODE</span>
-            </h1>
-            <p className="text-muted-foreground font-mono text-xs uppercase tracking-[0.2em] mt-2">
-              Client-Side NLLB-200 / Zero-Server Inference
-            </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
+          <div className="flex-1">
+            <PageHeader 
+              title="TRANSLATION"
+              accentText="NODE"
+              tagText="DATA_STREAM // NEURAL_NETWORK"
+              tagIcon={Loader2}
+              subtitle="Client-Side NLLB-200 / Zero-Server Inference"
+              className="mb-0"
+            />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             {status === 'idle' && (
               <div className="text-muted-foreground text-xs font-mono">WAITING FOR ENGINE...</div>
             )}

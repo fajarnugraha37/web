@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/atoms/PageTransition";
 import { KnowledgeGraphCanvas } from "@/components/organisms/KnowledgeGraphCanvas";
 import relations from "@/public/relations.json";
 import searchIndex from "@/public/search-index.json";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { transformDataToGraph } from "@/lib/graph-utils";
 import Link from "next/link";
 import { ChevronLeft, Info, Activity, Database, Share2 } from "lucide-react";
@@ -25,7 +26,7 @@ export default function KnowledgeGraphPage() {
   return (
     <PageTransition>
       <div className="relative min-h-[calc(100vh-4rem)] flex flex-col">
-        <div className="flex items-center justify-between mb-8 mt-8 ">
+        <div className="flex items-center justify-between mb-4 mt-8 ">
           <Link
             href="/labs"
             className="inline-flex items-center text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-accent transition-all group"
@@ -46,6 +47,15 @@ export default function KnowledgeGraphPage() {
             </div>
           </div>
         </div>
+
+        <PageHeader 
+          title="BLOG"
+          accentText="NETWORKS.EXE"
+          tagText="DATA_STREAM // NEURAL_MAP"
+          tagIcon={Activity}
+          subtitle="Interactive 3D visualization of semantic relationships"
+          className="mb-8"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 flex-1">
           <div className="relative h-[600px] lg:h-auto min-h-[500px]">

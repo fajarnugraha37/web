@@ -130,6 +130,7 @@ export function useTranslationWorker() {
           && !(err?.message.includes('TypeError: S.replace is')));
 
         if (isBeforeInit) {
+          console.error('Worker initialization error:', status, err);
           setStatus('error');
         }
       });

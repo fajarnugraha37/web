@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/atoms/PageTransition";
 import { StatusCard } from "@/components/atoms/StatusCard";
 import { VideoPreview } from "@/components/atoms/VideoPreview";
 import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { FfmpegDropzone } from "@/components/molecules/FfmpegDropzone";
 import { PresetSelector } from "@/components/molecules/PresetSelector";
 import { AdvancedSettingsForm } from "@/components/molecules/AdvancedSettingsForm";
@@ -93,20 +94,13 @@ export function FFmpegLabContent() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 py-8 md:py-12 max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <Film className="w-6 h-6 text-accent-secondary" />
-              <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase">
-                MEDIA PROCESSOR<span className="text-accent-secondary">.EXE</span>
-              </h1>
-            </div>
-            <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">
-              FFmpeg-WASM Node // Signal Transcoding Active
-            </p>
-          </div>
-        </div>
+        <PageHeader 
+          title="MEDIA"
+          accentText="PROCESSOR.EXE"
+          tagText="DATA_STREAM // FFMPEG_WASM"
+          tagIcon={Film}
+          subtitle="FFmpeg-WASM Node // Signal Transcoding Active"
+        />
 
         {/* Status Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

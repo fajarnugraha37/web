@@ -7,9 +7,11 @@ import { SqlTerminalSection } from "@/components/organisms/SqlTerminalSection";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
 import { StatusCard } from "@/components/atoms/StatusCard";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { PostgresToolbar } from "@/components/molecules/PostgresToolbar";
 import {
   Cpu,
+  Database,
   HardDrive,
   ShieldAlert,
   Table as TableIcon,
@@ -31,6 +33,13 @@ export function PostgresLabContent() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 py-8 md:py-12 max-w-6xl mx-auto">
+        <PageHeader 
+          title="SQL"
+          accentText="LAB.EXE"
+          tagText="DATA_STREAM // RDBMS_INSTANCE"
+          tagIcon={Database}
+          subtitle="Persistent PostgreSQL WASM Node"
+        />
         <PostgresToolbar onPurge={() => setIsPurgeModalOpen(true)} />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

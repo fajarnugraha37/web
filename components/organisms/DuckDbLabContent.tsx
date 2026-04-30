@@ -6,6 +6,7 @@ import { useDuckDbActions } from "@/hooks/useDuckDbActions";
 import { SqlTerminalSection } from "@/components/organisms/SqlTerminalSection";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { StatusCard } from "@/components/atoms/StatusCard";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { DuckDbToolbar } from "@/components/molecules/DuckDbToolbar";
 import { VolumeDatasetManager } from "@/components/molecules/VolumeDatasetManager";
 import { Cpu, Zap, Table as TableIcon, BarChart3 } from "lucide-react";
@@ -29,6 +30,13 @@ export function DuckDbLabContent() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 py-8 md:py-12 max-w-6xl mx-auto">
+        <PageHeader 
+          title="TELEMETRY"
+          accentText="ANALYTICS.EXE"
+          tagText="DATA_STREAM // OLAP_ENGINE"
+          tagIcon={BarChart3}
+          subtitle="OLAP engine for big data analysis exploration"
+        />
         <DuckDbToolbar onFileUpload={handleFileUpload} />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

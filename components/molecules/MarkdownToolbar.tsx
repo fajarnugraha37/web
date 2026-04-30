@@ -51,7 +51,6 @@ export function MarkdownToolbar({
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-6">
       <div className="flex flex-col gap-1 items-center md:items-start">
-        <h1 className="text-2xl font-bold text-accent tracking-tighter">MARKDOWN.EXE</h1>
         <div className="flex items-center gap-3 text-[9px] text-muted-foreground uppercase">
           <span>{readTime} Min Read | {wordCount} Words | {charCount} Chars</span>
           {syncStatus !== "idle" && (

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PageTransition } from "@/components/atoms/PageTransition";
+import { PageHeader } from "@/components/molecules/PageHeader";
 import { LabNodeCard } from "@/components/molecules/LabNodeCard";
 import { Database, BarChart3, Binary, FileText, Film } from "lucide-react";
 
@@ -71,17 +72,13 @@ export function LabsDashboardContent() {
     <PageTransition>
       <div className="flex flex-col gap-8 py-12 max-w-5xl mx-auto px-4">
         {/* Header */}
-        <div className="space-y-2 border-b border-border pb-8">
-          <div className="flex items-center gap-3">
-            <Binary className="w-6 h-6 text-accent" />
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-              LABORATORY <span className="text-accent">DASHBOARD</span>
-            </h1>
-          </div>
-          <p className="text-muted-foreground font-mono text-sm uppercase tracking-[0.3em]">
-            Select an active node to begin
-          </p>
-        </div>
+        <PageHeader 
+          title="LABORATORY"
+          accentText="DASHBOARD"
+          tagText="SYSTEM_CORE // MODULE_SELECTION"
+          tagIcon={Binary}
+          subtitle="Select an active node to begin"
+        />
 
         {/* System Warning */}
         <div className="p-6 border border-destructive/20 bg-destructive/5">

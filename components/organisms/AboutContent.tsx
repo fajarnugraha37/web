@@ -2,7 +2,8 @@
 
 import React from "react";
 import { PageTransition } from "@/components/atoms/PageTransition";
-import { AboutHeader } from "@/components/organisms/AboutHeader";
+import { PageHeader } from "@/components/molecules/PageHeader";
+import { Activity } from "lucide-react";
 import { SummarySection } from "@/components/organisms/SummarySection";
 import { CareerSection } from "@/components/organisms/CareerSection";
 import { EducationSection } from "@/components/organisms/EducationSection";
@@ -26,7 +27,14 @@ export function AboutContent() {
 
       <PageTransition>
         <div className="max-w-4xl mx-auto py-12 px-6 relative z-10">
-          <AboutHeader />
+          <PageHeader 
+            title="ABOUT"
+            accentText="IDENTITY"
+            tagText="DATA_STREAM // IDENTITY_QUERY"
+            tagIcon={Activity}
+            subtitle="Professional fragments..."
+            className="mb-20"
+          />
           <div className="space-y-24">
             <SummarySection />
             <CareerSection jobs={CAREER_DATA} />
