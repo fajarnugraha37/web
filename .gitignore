@@ -10,3 +10,6 @@ coverage/
 .locals/
 .playwright-mcp
 .sourcerer
+.opencode
+.gemini
+opencode.jsonc
