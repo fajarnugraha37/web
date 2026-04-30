@@ -74,7 +74,7 @@ export function NotFoundContent() {
             variant="neutral"
             className="w-full sm:w-auto hover:border-accent-tertiary hover:text-accent-tertiary"
           >
-            <Link href="/blogs">READ_LOGS</Link>
+            <Link href="/blogs">READ_BLOGS</Link>
           </Button>
           <Button
             asChild

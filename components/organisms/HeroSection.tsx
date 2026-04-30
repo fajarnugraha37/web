@@ -140,7 +140,7 @@ export function HeroSection({ onBootComplete }: HeroSectionProps) {
               asChild
               className="w-full sm:w-auto text-center justify-center hover:border-accent-secondary hover:text-accent-secondary hover:shadow-[0_0_15px_rgba(255,0,127,0.4)]"
             >
-              <Link href="/blogs">READ_LOGS</Link>
+              <Link href="/blogs">READ_BLOGS</Link>
             </Button>
           </div>
         </ScrollReveal>

@@ -5,7 +5,7 @@ The `DuckDBLab` component provides an interactive analytical SQL terminal in the
 
 ## Functionality
 *   **User Interface:**
-    *   **Telemetry Analytics Header:** Displays Lab status, controls for file ingestion, and layout switching (stack/wide).
+    *   **OLAP LAB Header:** Displays Lab status, controls for file ingestion, and layout switching (stack/wide).
     *   **Global Status Bar:** Real-time metrics (Engine status, compute mode, volumes, throughput).
     *   **Analytics Tips/Accordions:** Instructional panels for file ingestion, active volumes, and pre-defined datasets.
     *   **SQL Terminal:** Contains an `SqlEditor` for query input and a `ResultMatrix` for viewing/paginating/exporting results.

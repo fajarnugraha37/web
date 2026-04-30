@@ -32,7 +32,7 @@ const NAV_LINKS: NavLink[] = [
       },
       {
         href: "/labs/duckdb",
-        label: "TELEMETRY ANALYTICS.EXE",
+        label: "OLAP LAB.EXE",
         accentClass: "hover:text-accent-secondary",
       },
       {

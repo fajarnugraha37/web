@@ -11,7 +11,7 @@ The `NotFound` component is the application-wide 404 error page. It maintains th
     *   Navigation buttons (Home, Blogs, Contacts).
 *   **Navigation:**
     *   `SYS//OP` link to home (`/`).
-    *   `READ_LOGS` link to blogs (`/blogs`).
+    *   `READ_BLOGS` link to blogs (`/blogs`).
     *   `CONTACT.EXE` link to contacts (`/contacts`).
 
 ## Behavior

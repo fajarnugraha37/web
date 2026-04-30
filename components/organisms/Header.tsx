@@ -17,7 +17,7 @@ const NAV_LINKS = [
 
 const LAB_LINKS = [
   { href: "/labs/postgresql", label: "SQL LAB.EXE", hoverClass: "hover:text-accent" },
-  { href: "/labs/duckdb", label: "TELEMETRY ANALYTICS.EXE", hoverClass: "hover:text-accent-secondary" },
+  { href: "/labs/duckdb", label: "OLAP LAB.EXE", hoverClass: "hover:text-accent-secondary" },
   { href: "/labs/knowledge-graph", label: "BLOG NETWORKS.EXE", hoverClass: "hover:text-accent-tertiary" },
   { href: "/labs/markdown", label: "MARKDOWN PLAYGROUND.EXE", hoverClass: "hover:text-accent" },
   { href: "/labs/ffmpeg", label: "MEDIA PROCESSOR.EXE", hoverClass: "hover:text-accent-secondary" },

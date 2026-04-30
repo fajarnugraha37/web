@@ -18,7 +18,7 @@ const LAB_NODES = [
   },
   {
     id: "duckdb",
-    name: "TELEMETRY ANALYTICS.EXE",
+    name: "OLAP LAB.EXE",
     description: "OLAP engine (DuckDB) for big data analysis exploration.",
     icon: <BarChart3 className="w-8 h-8" />,
     path: "/labs/duckdb",

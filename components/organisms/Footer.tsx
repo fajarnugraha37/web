@@ -161,7 +161,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-accent-secondary transition-colors flex items-center gap-2 group w-fit"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-secondary" />
-                  TELEMETRY ANALYTICS.EXE
+                  OLAP LAB.EXE
                 </Link>
               </li>
               <li>

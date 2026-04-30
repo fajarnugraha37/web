@@ -75,7 +75,7 @@ export function HardwareNodesSection() {
                 </div>
               </div>
               <h3 className="text-2xl font-black mb-2 text-foreground group-hover:text-accent-secondary transition-colors uppercase">
-                TELEMETRY ANALYTICS.EXE
+                OLAP LAB.EXE
               </h3>
               <p className="text-sm font-mono text-muted-foreground mb-6">
                 OLAP engine powered by DuckDB-WASM. Drop massive CSV/Parquet
