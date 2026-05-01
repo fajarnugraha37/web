@@ -25,6 +25,7 @@ export function ContentEditorSaveForm({
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const tagPopoverRef = useRef<HTMLDivElement>(null);
 
   // Derive initial values from file metadata or default
   const metadata = activeFile?.metadata || {
@@ -38,6 +39,21 @@ export function ContentEditorSaveForm({
     if (isAddingTag && tagInputRef.current) {
       tagInputRef.current.focus();
     }
+  }, [isAddingTag]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tagPopoverRef.current && !tagPopoverRef.current.contains(event.target as Node)) {
+        setIsAddingTag(false);
+      }
+    };
+
+    if (isAddingTag) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [isAddingTag]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -172,7 +188,7 @@ export function ContentEditorSaveForm({
                   </span>
                 ))}
                 
-                <div className="relative">
+                <div className="relative" ref={tagPopoverRef}>
                   {!isAddingTag ? (
                     <button 
                       onClick={() => setIsAddingTag(true)}
