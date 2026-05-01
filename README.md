@@ -42,6 +42,7 @@ The site isn't just text; it's a series of experimental laboratories:
 
 - **VIM_MODE:** Because using a mouse is a failure of imagination.
 - **Sync_Scroll:** Keep your source and preview in perfect alignment.
+- **Content_Editor (Write Mode Only):** In write mode, access the Content Database to search, open, save, and delete actual `.mdx` blogs directly to the filesystem. Built-in metadata (frontmatter) management via a Cyberpunk Accordion UI.
 - **GitHub_Alerts:** Full support for `[!NOTE]`, `[!TIP]`, and more.
 - **Exporters:** Static HTML and PDF Report generation integrated.
 - **Security:** DOMPurify sanitization. High-fidelity, zero-trust.
@@ -109,6 +110,17 @@ bun run build
 ```
 
 *Note: `pre-build` generates search indices and metadata. Don't skip it. The system will know.*
+
+---
+
+## ENVIRONMENT_VARIABLES
+
+The system behavior is controlled by the following centralized environment variables (configured in `lib/env.ts`):
+
+- `NEXT_PUBLIC_APP_MODE`: Controls the mode of the application. Set to `write` to enable SSR and the Content Editor API routes for managing markdown blogs. Defaults to `read` (SSG / Static Export Mode) which disables data-mutating APIs.
+- `NEXT_PUBLIC_BASE_URL`: The base URL of the deployment (used for SEO, metadata, and RSS feed). Defaults to `https://fajarnugraha37.github.io`.
+- `DISABLE_HMR`: Set to `true` to disable Hot Module Replacement in dev mode.
+- `NODE_ENV`: Standard environment flag (`development`, `production`).
 
 ---
 
