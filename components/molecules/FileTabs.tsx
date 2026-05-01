@@ -56,7 +56,7 @@ export function FileTabs({
   }, []);
 
   return (
-    <div className="flex gap-2 items-center mb-4 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide">
       {files.map((f) => (
         <div 
           key={f.id} 

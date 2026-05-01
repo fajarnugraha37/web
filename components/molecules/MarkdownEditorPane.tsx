@@ -51,10 +51,6 @@ export const MarkdownEditorPane = forwardRef<MarkdownEditorRef, MarkdownEditorPa
         style={{ width }} 
         className="border border-accent/20 bg-card/5 overflow-hidden relative group hover:border-accent/40 transition-colors flex flex-col h-full"
       >
-        <div className="absolute top-2 right-4 text-[8px] text-accent/20 uppercase tracking-[0.2em] z-10 pointer-events-none">
-          -- VIM_MODE_ACTIVE --
-        </div>
-        
         <CodeMirror
           ref={cmRef}
           value={activeFile?.content || ""}
@@ -88,7 +84,7 @@ export const MarkdownEditorPane = forwardRef<MarkdownEditorRef, MarkdownEditorPa
         {onOpenAssets && (
           <button
             onClick={onOpenAssets}
-            className="absolute top-10 right-6 z-20 flex items-center justify-center gap-2 bg-black border border-accent/40 text-accent px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,136,0.15)] hover:bg-accent/10 hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all group-hover:opacity-100 opacity-70"
+            className="absolute top-6 right-6 z-20 flex items-center justify-center gap-2 bg-black border border-accent/40 text-accent px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,136,0.15)] hover:bg-accent/10 hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all group-hover:opacity-100 opacity-70"
           >
             <ImageIcon size={14} />
             <span className="text-[10px] uppercase font-bold tracking-widest">Assets</span>

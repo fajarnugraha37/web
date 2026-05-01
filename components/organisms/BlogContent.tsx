@@ -36,7 +36,7 @@ export function BlogContent({ postData, headings, relatedPosts, children }: Blog
           </aside>
 
           {/* Main Content */}
-          <main className="min-w-0">
+          <div className="min-w-0">
             <div className="sticky top-16 z-30 bg-background/90 backdrop-blur-xl border-b border-accent/20 shadow-[0_15px_35px_rgba(0,0,0,0.9)] -mx-4 md:-mx-10 mb-12 px-4 md:px-10 py-4 flex items-center justify-between gap-4">
               <Link
                 href="/blogs"
@@ -94,7 +94,7 @@ export function BlogContent({ postData, headings, relatedPosts, children }: Blog
                 <span className="w-1.5 h-3 bg-accent animate-blink" />
               </div>
             </div>
-          </main>
+          </div>
 
           {/* Right Sidebar: Related Posts */}
           <aside className="hidden lg:block relative">

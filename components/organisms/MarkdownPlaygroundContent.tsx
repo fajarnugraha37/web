@@ -17,6 +17,7 @@ import { MarkdownModals } from "@/components/molecules/MarkdownModals";
 import { ContentEditorSaveForm } from "@/components/molecules/ContentEditorSaveForm";
 import { ContentEditorSearchModal } from "@/components/molecules/ContentEditorSearchModal";
 import { AssetsPickerModal } from "@/components/molecules/AssetsPickerModal";
+import { StatusBar } from "@/components/molecules/StatusBar";
 
 import { ENV } from "@/lib/env";
 
@@ -81,6 +82,7 @@ export function MarkdownPlaygroundContent() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchModalMode, setSearchModalMode] = useState<'open' | 'delete'>('open');
   const [assetsModalOpen, setAssetsModalOpen] = useState(false);
+  const [metadataModalOpen, setMetadataModalOpen] = useState(false);
   const isWriteMode = ENV.IS_WRITE_MODE;
 
   // Statistics
@@ -159,105 +161,116 @@ export function MarkdownPlaygroundContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground font-mono p-4">
+    <div className="h-screen overflow-hidden bg-[#0a0a0a] text-foreground font-mono flex flex-col p-4 max-w-[1400px] mx-auto">
       <PageHeader 
         title="MARKDOWN"
         accentText="PLAYGROUND.EXE"
         tagText="DATA_STREAM // TEXT_EDITOR"
         tagIcon={FileText}
         subtitle="Live Markdown editor with split-pane preview"
-        className="mb-8 max-w-6xl mx-auto"
+        className="mb-6 shrink-0"
       />
-      <header className="border-b border-border pb-4 mb-4 relative z-20 max-w-6xl mx-auto">
+
+      {/* Pane Header: FileTabs (Left) + ViewModes & Actions (Right) */}
+      <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-4 mb-2 shrink-0">
+        <div className="flex-1 overflow-hidden">
+          <FileTabs 
+            files={files}
+            activeFileId={activeFileId}
+            setActiveFileId={setActiveFileId}
+            addFile={addFile}
+            duplicateFile={duplicateFile}
+            onRename={(id, name) => setRenameState({ id, name })}
+            onDelete={(id) => setDeleteState(id)}
+          />
+        </div>
         <MarkdownToolbar 
           viewMode={viewMode}
           setViewMode={setViewMode}
           isMobile={isMobile}
-          readTime={readTime}
-          wordCount={wordCount}
-          charCount={charCount}
-          syncStatus={syncStatus}
           onImport={() => setModal("import")}
           onExport={() => setModal("export")}
           onCopy={handleCopy}
           copied={copied}
           showToc={showToc}
           setShowToc={setShowToc}
+          onOpenMetadata={() => setMetadataModalOpen(true)}
           onOpenContentEditor={handleOpenContentEditor}
         />
+      </div>
 
-        <FileTabs 
-          files={files}
-          activeFileId={activeFileId}
-          setActiveFileId={setActiveFileId}
-          addFile={addFile}
-          duplicateFile={duplicateFile}
-          onRename={(id, name) => setRenameState({ id, name })}
-          onDelete={(id) => setDeleteState(id)}
+      {/* Status Bar */}
+      <div className="shrink-0 rounded-sm overflow-hidden border border-accent/20">
+        <StatusBar 
+          readTime={readTime}
+          wordCount={wordCount}
+          charCount={charCount}
+          syncStatus={syncStatus}
         />
+      </div>
 
-        <div 
+      <div className="flex gap-4 flex-1 min-h-0 relative">
+        <motion.div 
+          key={viewMode} 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          className="flex-1 flex flex-col border border-border/50 bg-[#0a0a0a] relative overflow-hidden"
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileUpload(e.dataTransfer.files); }}
-          className={`border-2 border-dashed rounded-lg p-6 transition-all flex flex-col items-center justify-center gap-3 relative overflow-hidden mb-4 ${
-            isDragOver ? "border-accent bg-accent/5" : "border-border/30 bg-card/5"
-          }`}
         >
-          <div className="absolute inset-0 cyber-grid-bg opacity-5 pointer-events-none" />
-          <FileUp size={24} className={isDragOver ? "text-accent animate-bounce" : "text-muted-foreground opacity-40"} />
-          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest text-center">
-            Drop your markdown file here or <label className="text-accent cursor-pointer hover:underline">click to browse <input type="file" className="hidden" onChange={(e) => handleFileUpload(e.target.files)} accept=".md,.mdx,.txt" /></label>
-          </p>
-        </div>
+          {/* Smart Dropzone Overlay */}
+          <AnimatePresence>
+            {isDragOver && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                className="absolute inset-0 z-50 bg-black/80 border-2 border-dashed border-accent flex flex-col items-center justify-center backdrop-blur-sm"
+              >
+                <FileUp size={48} className="text-accent animate-bounce mb-4" />
+                <p className="text-accent font-bold tracking-widest uppercase text-xl">Drop file to import</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {isWriteMode && (
-          <ContentEditorSaveForm 
-            activeFile={activeFile}
-            activeContent={activeContent}
-            updateFileMetadata={updateFileMetadata}
-            onSaveSuccess={() => toast("Post saved successfully", "success")}
-          />
-        )}
-      </header>
+          <div className="flex-1 flex gap-0 overflow-hidden relative">
+            {(viewMode === "editor" || (viewMode === "split" && !isMobile)) && (
+              <MarkdownEditorPane 
+                ref={editorPaneRef}
+                activeFile={activeFile}
+                updateFileContent={updateFileContent}
+                editorParentRef={editorParentRef}
+                onScroll={handleEditorScroll}
+                width={viewMode === "split" && !isMobile ? `${splitRatio}%` : "100%"}
+                onOpenAssets={() => setAssetsModalOpen(true)}
+              />
+            )}
 
-      <div className="flex gap-4 h-[calc(100vh-380px)] min-h-[450px] relative max-w-6xl mx-auto">
-        <motion.main key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex gap-0 overflow-hidden relative">
-          {(viewMode === "editor" || (viewMode === "split" && !isMobile)) && (
-            <MarkdownEditorPane 
-              ref={editorPaneRef}
-              activeFile={activeFile}
-              updateFileContent={updateFileContent}
-              editorParentRef={editorParentRef}
-              onScroll={handleEditorScroll}
-              width={viewMode === "split" && !isMobile ? `${splitRatio}%` : "100%"}
-              onOpenAssets={() => setAssetsModalOpen(true)}
-            />
-          )}
+            {viewMode === "split" && !isMobile && (
+              <div 
+                onMouseDown={() => setIsResizing(true)} 
+                className={`w-1 cursor-col-resize hover:bg-accent/40 transition-colors flex items-center justify-center ${isResizing ? "bg-accent" : "bg-transparent"} z-10`}
+              >
+                <div className="h-8 w-px bg-accent/20" />
+              </div>
+            )}
 
-          {viewMode === "split" && !isMobile && (
-            <div 
-              onMouseDown={() => setIsResizing(true)} 
-              className={`w-1 cursor-col-resize hover:bg-accent/40 transition-colors flex items-center justify-center ${isResizing ? "bg-accent" : "bg-transparent"}`}
-            >
-              <div className="h-8 w-px bg-accent/20" />
-            </div>
-          )}
-
-          {(viewMode === "preview" || (viewMode === "split" && !isMobile)) && (
-            <MarkdownPreviewPane 
-              content={previewContent}
-              previewRef={previewRef}
-              onScroll={handlePreviewScroll}
-              onFullScreen={() => setIsFullScreen(true)}
-              width={viewMode === "split" && !isMobile ? `${100 - splitRatio}%` : "100%"}
-            />
-          )}
-        </motion.main>
+            {(viewMode === "preview" || (viewMode === "split" && !isMobile)) && (
+              <MarkdownPreviewPane 
+                content={previewContent}
+                previewRef={previewRef}
+                onScroll={handlePreviewScroll}
+                onFullScreen={() => setIsFullScreen(true)}
+                width={viewMode === "split" && !isMobile ? `${100 - splitRatio}%` : "100%"}
+              />
+            )}
+          </div>
+        </motion.div>
 
         <AnimatePresence>
           {showToc && (
-            <motion.aside initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 300, opacity: 0 }} className="w-64 border border-accent/20 bg-card/5 p-4 overflow-auto hidden lg:block">
+            <motion.aside initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 300, opacity: 0 }} className="w-64 border border-accent/20 bg-card/5 p-4 overflow-auto hidden lg:block shrink-0">
               <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><ListIcon size={12} /> STRUCTURE</h3>
               <div className="space-y-2">
                 {headings.map((h, i) => {
@@ -341,6 +354,17 @@ export function MarkdownPlaygroundContent() {
         onClose={() => setAssetsModalOpen(false)}
         onSelect={handleAssetSelect}
       />
+
+      {isWriteMode && (
+        <ContentEditorSaveForm 
+          isOpen={metadataModalOpen}
+          onClose={() => setMetadataModalOpen(false)}
+          activeFile={activeFile}
+          activeContent={activeContent}
+          updateFileMetadata={updateFileMetadata}
+          onSaveSuccess={() => toast("Post saved successfully", "success")}
+        />
+      )}
     </div>
   );
 }
