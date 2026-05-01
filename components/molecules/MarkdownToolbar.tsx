@@ -9,8 +9,7 @@ import {
   List as ListIcon, 
   Save,
   PenTool,
-  ChevronDown,
-  Image as ImageIcon
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 
@@ -31,7 +30,6 @@ interface MarkdownToolbarProps {
   showToc: boolean;
   setShowToc: (show: boolean) => void;
   onOpenContentEditor?: (action: 'open' | 'delete') => void;
-  onOpenAssets?: () => void;
 }
 
 /**
@@ -53,7 +51,6 @@ export function MarkdownToolbar({
   showToc,
   setShowToc,
   onOpenContentEditor,
-  onOpenAssets,
 }: MarkdownToolbarProps) {
   const [editorMenuOpen, setEditorMenuOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -106,48 +103,58 @@ export function MarkdownToolbar({
           ))}
         </div>
 
-        <div className="flex items-center gap-2 relative">
-          <Button variant="outline" size="xs" onClick={onOpenAssets} className="gap-2 px-4 py-3 h-auto">
-            <ImageIcon size={12} /> ASSETS
+        <div className="flex items-center gap-2 relative" ref={dropdownRef}>
+          <Button 
+            variant="outline" 
+            size="xs" 
+            onClick={() => setEditorMenuOpen(!editorMenuOpen)} 
+            className="gap-2 px-4 py-3 h-auto"
+          >
+            <FolderOpen size={12} /> FILE ACTIONS <ChevronDown size={10} />
           </Button>
-          {isWriteMode && (
-            <div className="relative" ref={dropdownRef}>
-              <Button 
-                variant="outline" 
-                size="xs" 
-                onClick={() => setEditorMenuOpen(!editorMenuOpen)} 
-                className="gap-2 px-4 py-3 h-auto"
+
+          {editorMenuOpen && (
+            <div className="absolute top-full mt-2 right-0 w-48 bg-black border border-accent/30 rounded shadow-[0_0_15px_rgba(0,255,136,0.2)] z-50 overflow-hidden flex flex-col">
+              <button 
+                onClick={() => { setEditorMenuOpen(false); onImport(); }}
+                className="px-4 py-3 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors flex items-center gap-3"
               >
-                <PenTool size={12} /> CONTENT EDITOR <ChevronDown size={10} />
-              </Button>
-              {editorMenuOpen && (
-                <div className="absolute top-full mt-2 left-0 w-full bg-black border border-accent/30 rounded shadow-[0_0_15px_rgba(0,255,136,0.2)] z-50 overflow-hidden flex flex-col">
+                <FolderOpen size={12} /> Import
+              </button>
+              <button 
+                onClick={() => { setEditorMenuOpen(false); onExport(); }}
+                className="px-4 py-3 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors flex items-center gap-3"
+              >
+                <Download size={12} /> Export
+              </button>
+              <button 
+                onClick={() => { setEditorMenuOpen(false); onCopy(); }}
+                className="px-4 py-3 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors flex items-center gap-3"
+              >
+                {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+              
+              {isWriteMode && (
+                <>
+                  <div className="h-px bg-accent/20 my-1 w-full" />
                   <button 
                     onClick={() => { setEditorMenuOpen(false); onOpenContentEditor?.('open'); }}
-                    className="px-4 py-2 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors"
+                    className="px-4 py-3 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors flex items-center gap-3"
                   >
-                    Open Post
+                    <PenTool size={12} /> Open Post
                   </button>
                   <button 
                     onClick={() => { setEditorMenuOpen(false); onOpenContentEditor?.('delete'); }}
-                    className="px-4 py-2 text-[10px] text-left hover:bg-red-500/20 text-red-500 uppercase tracking-wider transition-colors"
+                    className="px-4 py-3 text-[10px] text-left hover:bg-red-500/20 text-red-500 uppercase tracking-wider transition-colors flex items-center gap-3"
                   >
-                    Delete Post
+                    <PenTool size={12} className="text-red-500" /> Delete Post
                   </button>
-                </div>
+                </>
               )}
             </div>
           )}
-          <Button variant="outline" size="xs" onClick={onImport} className="gap-2 px-4 py-3 h-auto">
-            <FolderOpen size={12} /> IMPORT
-          </Button>
-          <Button variant="outline" size="xs" onClick={onExport} className="gap-2 px-4 py-3 h-auto">
-            <Download size={12} /> EXPORT
-          </Button>
-          <Button variant="outline" size="xs" onClick={onCopy} className="gap-2 px-4 py-3 h-auto">
-            {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
-            {copied ? "COPIED" : "COPY"}
-          </Button>
+
           <Button 
             variant="outline" 
             size="xs" 
@@ -161,3 +168,4 @@ export function MarkdownToolbar({
     </div>
   );
 }
+

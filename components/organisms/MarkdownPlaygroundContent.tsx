@@ -184,7 +184,6 @@ export function MarkdownPlaygroundContent() {
           showToc={showToc}
           setShowToc={setShowToc}
           onOpenContentEditor={handleOpenContentEditor}
-          onOpenAssets={() => setAssetsModalOpen(true)}
         />
 
         <FileTabs 
@@ -232,6 +231,7 @@ export function MarkdownPlaygroundContent() {
               editorParentRef={editorParentRef}
               onScroll={handleEditorScroll}
               width={viewMode === "split" && !isMobile ? `${splitRatio}%` : "100%"}
+              onOpenAssets={() => setAssetsModalOpen(true)}
             />
           )}
 

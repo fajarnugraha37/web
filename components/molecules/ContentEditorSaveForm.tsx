@@ -18,7 +18,7 @@ export function ContentEditorSaveForm({
   updateFileMetadata,
   onSaveSuccess
 }: ContentEditorSaveFormProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
