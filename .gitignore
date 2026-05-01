@@ -13,3 +13,5 @@ coverage/
 .opencode
 .gemini
 opencode.jsonc
+.tmp/
+thoughts/
