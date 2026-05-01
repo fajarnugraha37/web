@@ -7,9 +7,13 @@ import {
   Copy, 
   Check, 
   List as ListIcon, 
-  Save 
+  Save,
+  PenTool,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
+
+import { ENV } from "@/lib/env";
 
 interface MarkdownToolbarProps {
   viewMode: string;
@@ -25,6 +29,7 @@ interface MarkdownToolbarProps {
   copied: boolean;
   showToc: boolean;
   setShowToc: (show: boolean) => void;
+  onOpenContentEditor?: (action: 'open' | 'delete') => void;
 }
 
 /**
@@ -45,8 +50,27 @@ export function MarkdownToolbar({
   copied,
   showToc,
   setShowToc,
+  onOpenContentEditor,
 }: MarkdownToolbarProps) {
+  const [editorMenuOpen, setEditorMenuOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const modes = isMobile ? ["editor", "preview"] : ["editor", "split", "preview"];
+  const isWriteMode = ENV.IS_WRITE_MODE;
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setEditorMenuOpen(false);
+      }
+    };
+
+    if (editorMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editorMenuOpen]);
 
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-6">
@@ -79,7 +103,35 @@ export function MarkdownToolbar({
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative">
+          {isWriteMode && (
+            <div className="relative" ref={dropdownRef}>
+              <Button 
+                variant="outline" 
+                size="xs" 
+                onClick={() => setEditorMenuOpen(!editorMenuOpen)} 
+                className="gap-2 px-4 py-3 h-auto"
+              >
+                <PenTool size={12} /> CONTENT EDITOR <ChevronDown size={10} />
+              </Button>
+              {editorMenuOpen && (
+                <div className="absolute top-full mt-2 left-0 w-full bg-black border border-accent/30 rounded shadow-[0_0_15px_rgba(0,255,136,0.2)] z-50 overflow-hidden flex flex-col">
+                  <button 
+                    onClick={() => { setEditorMenuOpen(false); onOpenContentEditor?.('open'); }}
+                    className="px-4 py-2 text-[10px] text-left hover:bg-accent/20 text-accent uppercase tracking-wider transition-colors"
+                  >
+                    Open Post
+                  </button>
+                  <button 
+                    onClick={() => { setEditorMenuOpen(false); onOpenContentEditor?.('delete'); }}
+                    className="px-4 py-2 text-[10px] text-left hover:bg-red-500/20 text-red-500 uppercase tracking-wider transition-colors"
+                  >
+                    Delete Post
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <Button variant="outline" size="xs" onClick={onImport} className="gap-2 px-4 py-3 h-auto">
             <FolderOpen size={12} /> IMPORT
           </Button>

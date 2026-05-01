@@ -1,12 +1,12 @@
 import { MetadataRoute } from "next";
 import { getSortedBlogsData } from "@/lib/mdx";
+import { ENV } from "@/lib/env";
 
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogs = getSortedBlogsData();
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io";
+  const baseUrl = ENV.BASE_URL;
 
   const blogUrls = blogs.map((blog) => ({
     url: `${baseUrl}/blogs/${blog.slug}`,

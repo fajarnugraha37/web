@@ -4,6 +4,7 @@ import "./app.css";
 import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
 import { Orbitron, Share_Tech_Mono, JetBrains_Mono } from "next/font/google";
+import { ENV } from "@/lib/env";
 import { Header } from "@/components/organisms/Header";
 import { Footer } from "@/components/organisms/Footer";
 import { ScrollProgress } from "@/components/atoms/ScrollProgress";
@@ -45,9 +46,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Fajar Abdi Nugraha" }],
   creator: "Fajar Abdi Nugraha",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io",
-  ),
+  metadataBase: new URL(ENV.BASE_URL),
   openGraph: {
     type: "profile",
     locale: "en_US",

@@ -2,11 +2,12 @@
 
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, AlertTriangle } from "lucide-react";
+import { X, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "./Button";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
+  isLoading?: boolean;
   onClose: () => void;
   onConfirm: () => void;
   onCancel?: () => void;
@@ -19,6 +20,7 @@ interface ConfirmationModalProps {
 
 export function ConfirmationModal({
   isOpen,
+  isLoading = false,
   onClose,
   onConfirm,
   onCancel,
@@ -30,14 +32,14 @@ export function ConfirmationModal({
 }: ConfirmationModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !isLoading) {
         if (onCancel) onCancel();
         onClose();
       }
     };
     if (isOpen) window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose, onCancel]);
+  }, [isOpen, onClose, onCancel, isLoading]);
 
   const accentColor = {
     destructive: "text-destructive border-destructive/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]",
@@ -54,13 +56,14 @@ export function ConfirmationModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => {
+              if (isLoading) return;
               if (onCancel) onCancel();
               onClose();
             }}
@@ -80,7 +83,7 @@ export function ConfirmationModal({
               <div className={`p-2 bg-current/10 border border-current/30`}>
                 <AlertTriangle className="w-6 h-6" />
               </div>
-              <h2 className="text-xl font-black uppercase tracking-tighter italic">
+              <h2 className="text-xl font-black uppercase tracking-tighter italic flex items-center gap-2">
                 {title}
               </h2>
             </div>
@@ -93,6 +96,7 @@ export function ConfirmationModal({
               <Button
                 variant="ghost"
                 size="sm"
+                disabled={isLoading}
                 onClick={() => {
                   if (onCancel) onCancel();
                   onClose();
@@ -104,13 +108,14 @@ export function ConfirmationModal({
               <Button
                 variant={btnVariant}
                 size="sm"
+                disabled={isLoading}
                 onClick={() => {
                   onConfirm();
-                  onClose();
                 }}
-                className={variant === "destructive" ? "bg-destructive text-white" : ""}
+                className={variant === "destructive" ? "bg-destructive text-white flex items-center gap-2" : "flex items-center gap-2"}
               >
-                {confirmLabel}
+                {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
+                {isLoading ? "PROCESSING..." : confirmLabel}
               </Button>
             </div>
           </motion.div>

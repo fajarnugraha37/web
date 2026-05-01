@@ -1,10 +1,11 @@
 import { pipeline, env } from '@xenova/transformers';
+import { ENV } from "@/lib/env";
 
 // Configure to use local WASM files instead of jsdelivr
 env.backends.onnx.wasm.wasmPaths = '/wasm/';
 
 // Configuration for offline caching and WASM
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = ENV.IS_DEV;
 env.allowLocalModels = isDev;
 env.localModelPath = '/models/'; // ALWAYS explicitly set this to a string to prevent minification bugs with S.replace in Xenova pathJoin
 env.useBrowserCache = true;

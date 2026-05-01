@@ -1,11 +1,11 @@
 import { getSortedBlogsData } from "@/lib/mdx";
+import { ENV } from "@/lib/env";
 
 export const dynamic = "force-static";
 
 export async function GET() {
   const blogs = getSortedBlogsData();
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://fajarnugraha37.github.io";
+  const baseUrl = ENV.BASE_URL;
 
   const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">

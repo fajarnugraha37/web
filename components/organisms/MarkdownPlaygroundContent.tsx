@@ -14,6 +14,10 @@ import { FileTabs } from "@/components/molecules/FileTabs";
 import { MarkdownEditorPane } from "@/components/molecules/MarkdownEditorPane";
 import { MarkdownPreviewPane } from "@/components/molecules/MarkdownPreviewPane";
 import { MarkdownModals } from "@/components/molecules/MarkdownModals";
+import { ContentEditorSaveForm } from "@/components/molecules/ContentEditorSaveForm";
+import { ContentEditorSearchModal } from "@/components/molecules/ContentEditorSearchModal";
+
+import { ENV } from "@/lib/env";
 
 /**
  * Organism: MarkdownPlaygroundContent
@@ -33,6 +37,7 @@ export function MarkdownPlaygroundContent() {
     duplicateFile,
     deleteFile,
     renameFile,
+    updateFileMetadata,
     viewMode,
     setViewMode,
     isLoaded,
@@ -71,7 +76,10 @@ export function MarkdownPlaygroundContent() {
   const [splitRatio, setSplitRatio] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [searchModalMode, setSearchModalMode] = useState<'open' | 'delete'>('open');
+  const isWriteMode = ENV.IS_WRITE_MODE;
+
   // Statistics
   const wordCount = activeContent?.split(/\s+/).filter(Boolean).length || 0;
   const charCount = activeContent?.length || 0;
@@ -100,6 +108,37 @@ export function MarkdownPlaygroundContent() {
       window.removeEventListener("mouseup", handleUp);
     };
   }, [isResizing, editorParentRef]);
+
+  const handleOpenContentEditor = (action: 'open' | 'delete') => {
+    setSearchModalMode(action);
+    setSearchModalOpen(true);
+  };
+
+  const handleContentSelect = async (slug: string, data?: any) => {
+    if (searchModalMode === 'delete') {
+      try {
+        const res = await fetch(`/api/labs/markdown/${slug}`, {
+          method: "DELETE",
+        });
+        if (res.ok) {
+          toast("Post deleted successfully", "success");
+        } else {
+          throw new Error("Failed to delete");
+        }
+      } catch (err: any) {
+        toast(err.message, "error");
+      }
+    } else if (data) {
+      const newId = addFile(`${slug}.mdx`, data.content);
+      updateFileMetadata(newId, {
+        slug,
+        title: data.title,
+        description: data.description,
+        tags: data.tags
+      });
+      toast("Content loaded successfully", "success");
+    }
+  };
 
   if (!isLoaded || !activeFileId) {
     return (
@@ -134,6 +173,7 @@ export function MarkdownPlaygroundContent() {
           copied={copied}
           showToc={showToc}
           setShowToc={setShowToc}
+          onOpenContentEditor={handleOpenContentEditor}
         />
 
         <FileTabs 
@@ -150,7 +190,7 @@ export function MarkdownPlaygroundContent() {
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileUpload(e.dataTransfer.files); }}
-          className={`border-2 border-dashed rounded-lg p-6 transition-all flex flex-col items-center justify-center gap-3 relative overflow-hidden ${
+          className={`border-2 border-dashed rounded-lg p-6 transition-all flex flex-col items-center justify-center gap-3 relative overflow-hidden mb-4 ${
             isDragOver ? "border-accent bg-accent/5" : "border-border/30 bg-card/5"
           }`}
         >
@@ -160,6 +200,15 @@ export function MarkdownPlaygroundContent() {
             Drop your markdown file here or <label className="text-accent cursor-pointer hover:underline">click to browse <input type="file" className="hidden" onChange={(e) => handleFileUpload(e.target.files)} accept=".md,.mdx,.txt" /></label>
           </p>
         </div>
+
+        {isWriteMode && (
+          <ContentEditorSaveForm 
+            activeFile={activeFile}
+            activeContent={activeContent}
+            updateFileMetadata={updateFileMetadata}
+            onSaveSuccess={() => toast("Post saved successfully", "success")}
+          />
+        )}
       </header>
 
       <div className="flex gap-4 h-[calc(100vh-380px)] min-h-[450px] relative max-w-6xl mx-auto">
@@ -266,6 +315,13 @@ export function MarkdownPlaygroundContent() {
         message="This operation will permanently purge the selected knowledge fragment from local buffer memory. This action cannot be undone."
         variant="destructive"
         confirmLabel="PURGE_FILE"
+      />
+
+      <ContentEditorSearchModal 
+        isOpen={searchModalOpen}
+        mode={searchModalMode}
+        onClose={() => setSearchModalOpen(false)}
+        onSelect={handleContentSelect}
       />
     </div>
   );

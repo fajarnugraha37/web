@@ -6,7 +6,7 @@
     "pre-build": "bun run scripts/pre-build.ts",
     "dev": "bun run scripts/pre-build.ts && next dev",
     "build": "bun run scripts/pre-build.ts && next build",
-    "start": "bunx serve@latest out",
+    "start": "next start",
     "lint": "eslint .",
     "clean": "next clean"
   },

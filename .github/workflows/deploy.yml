@@ -55,6 +55,7 @@ jobs:
         env:
           PAGES_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
           NEXT_PUBLIC_BASE_URL: https://fajarnugraha37.github.io
+          NEXT_PUBLIC_APP_MODE: read
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

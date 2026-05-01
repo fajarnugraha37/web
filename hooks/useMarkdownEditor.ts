@@ -100,6 +100,11 @@ export function useMarkdownEditor() {
     }
   }, [viewMode, isLoaded]);
 
+  const persistFiles = useCallback((newFiles: LabFile[], newActiveId: string) => {
+    localStorage.setItem("markdown-lab-files", JSON.stringify(newFiles));
+    localStorage.setItem("markdown-lab-active-id", newActiveId);
+  }, []);
+
   // Sync contentRef back to the files array and localStorage (Debounced)
   useEffect(() => {
     if (!isLoaded || !activeFileId) return;
@@ -109,15 +114,11 @@ export function useMarkdownEditor() {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       
       saveTimeoutRef.current = setTimeout(() => {
-        setFiles(prev => prev.map(f => f.id === activeFileId ? { ...f, content: contentRef.current } : f));
-        
-        const currentFiles = JSON.parse(localStorage.getItem("markdown-lab-files") || "[]");
-        const updatedFiles = currentFiles.map((f: any) => 
-          f.id === activeFileId ? { ...f, content: contentRef.current } : f
-        );
-        
-        localStorage.setItem("markdown-lab-files", JSON.stringify(updatedFiles));
-        localStorage.setItem("markdown-lab-active-id", activeFileId);
+        setFiles(prev => {
+          const newFiles = prev.map(f => f.id === activeFileId ? { ...f, content: contentRef.current } : f);
+          persistFiles(newFiles, activeFileId);
+          return newFiles;
+        });
         
         setSyncStatus("saved");
         const idleTimer = setTimeout(() => setSyncStatus("idle"), 2000);
@@ -126,7 +127,7 @@ export function useMarkdownEditor() {
     };
 
     syncToStorage();
-  }, [previewContent, activeFileId, isLoaded]);
+  }, [previewContent, activeFileId, isLoaded, persistFiles]);
 
   const updateFileContent = useCallback((content: string) => {
     contentRef.current = content; 
@@ -143,18 +144,23 @@ export function useMarkdownEditor() {
       setActiveFileId(id);
       contentRef.current = file.content;
       setPreviewContent(file.content);
+      persistFiles(files, id);
     }
-  }, [files]);
+  }, [files, persistFiles]);
 
   const addFile = useCallback((name: string, content: string) => {
     const newId = Date.now().toString();
     const newFile = { id: newId, name, content };
-    setFiles((prev) => [...prev, newFile]);
+    setFiles((prev) => {
+      const newFiles = [...prev, newFile];
+      persistFiles(newFiles, newId);
+      return newFiles;
+    });
     setActiveFileId(newId);
     contentRef.current = content;
     setPreviewContent(content);
     return newId;
-  }, []);
+  }, [persistFiles]);
 
   const duplicateFile = useCallback((id: string) => {
     const original = files.find(f => f.id === id);
@@ -165,11 +171,15 @@ export function useMarkdownEditor() {
       name: `${original.name.replace('.md', '')}_copy.md`, 
       content: original.content 
     };
-    setFiles(prev => [...prev, newFile]);
+    setFiles(prev => {
+      const newFiles = [...prev, newFile];
+      persistFiles(newFiles, newId);
+      return newFiles;
+    });
     setActiveFileId(newId);
     contentRef.current = original.content;
     setPreviewContent(original.content);
-  }, [files]);
+  }, [files, persistFiles]);
 
   const deleteFile = useCallback((id: string) => {
     setFiles((prev) => {
@@ -180,22 +190,36 @@ export function useMarkdownEditor() {
         setActiveFileId(fallbackId);
         contentRef.current = "";
         setPreviewContent("");
+        persistFiles([fallback], fallbackId);
         return [fallback];
       }
       if (activeFileId === id) {
         setActiveFileId(newFiles[0].id);
         contentRef.current = newFiles[0].content;
         setPreviewContent(newFiles[0].content);
+        persistFiles(newFiles, newFiles[0].id);
+      } else {
+        persistFiles(newFiles, activeFileId);
       }
       return newFiles;
     });
-  }, [activeFileId]);
+  }, [activeFileId, persistFiles]);
 
   const renameFile = useCallback((id: string, newName: string) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, name: newName } : f))
-    );
-  }, []);
+    setFiles((prev) => {
+      const newFiles = prev.map((f) => (f.id === id ? { ...f, name: newName } : f));
+      persistFiles(newFiles, activeFileId);
+      return newFiles;
+    });
+  }, [activeFileId, persistFiles]);
+
+  const updateFileMetadata = useCallback((id: string, metadata: any) => {
+    setFiles((prev) => {
+      const newFiles = prev.map((f) => (f.id === id ? { ...f, metadata: { ...f.metadata, ...metadata } } : f));
+      persistFiles(newFiles, activeFileId);
+      return newFiles;
+    });
+  }, [activeFileId, persistFiles]);
 
   const handleEditorScroll = useCallback(() => {
     if (viewMode !== "split" || isSyncingScroll.current || !editorParentRef.current || !previewRef.current)
@@ -235,6 +259,7 @@ export function useMarkdownEditor() {
     duplicateFile,
     deleteFile,
     renameFile,
+    updateFileMetadata,
     viewMode,
     setViewMode,
     isLoaded,

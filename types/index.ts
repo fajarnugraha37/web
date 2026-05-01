@@ -87,6 +87,12 @@ export interface LabFile {
   id: string;
   name: string;
   content: string;
+  metadata?: {
+    slug: string;
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
 
 export type ViewMode = "editor" | "split" | "preview";
