@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,6 +10,7 @@ import { BlogMetadata } from "@/types";
 import { TagList } from "@/components/molecules/TagList";
 import { BlogCard } from "@/components/molecules/BlogCard";
 import { PaginationControls } from "@/components/molecules/PaginationControls";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface BlogListSectionProps {
   blogs: BlogMetadata[];
@@ -18,8 +19,17 @@ interface BlogListSectionProps {
 const PAGE_SIZE = 5;
 
 export function BlogListSection({ blogs }: BlogListSectionProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL
+  const initialSearch = searchParams.get("q") || "";
+  const initialTags = searchParams.get("t") ? searchParams.get("t")!.split(",") : [];
+  const initialPage = searchParams.get("p") ? parseInt(searchParams.get("p")!, 10) : 1;
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const isMobile = useIsMobile();
   const listTopRef = useRef<HTMLDivElement>(null);
@@ -39,14 +49,42 @@ export function BlogListSection({ blogs }: BlogListSectionProps) {
   } = usePagination({
     totalRecords: filteredBlogs.length,
     pageSize: PAGE_SIZE,
+    initialPage,
   });
 
   const pagedBlogs = filteredBlogs.slice(startIndex, endIndex);
 
+  // Sync state to URL
+  const updateUrl = useCallback(
+    (query: string, tags: string[], page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (query) params.set("q", query);
+      else params.delete("q");
+
+      if (tags.length > 0) params.set("t", tags.join(","));
+      else params.delete("t");
+
+      if (page > 1) params.set("p", page.toString());
+      else params.delete("p");
+
+      const search = params.toString();
+      const queryStr = search ? `?${search}` : "";
+      router.replace(`${pathname}${queryStr}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
+  // Debounce search query updates to URL
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      updateUrl(searchQuery, selectedTags, safePage);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedTags, safePage, updateUrl]);
+
   const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+    setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
     handlePageChange(1);
   };
 
