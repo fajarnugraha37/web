@@ -16,6 +16,7 @@ import { MarkdownPreviewPane } from "@/components/molecules/MarkdownPreviewPane"
 import { MarkdownModals } from "@/components/molecules/MarkdownModals";
 import { ContentEditorSaveForm } from "@/components/molecules/ContentEditorSaveForm";
 import { ContentEditorSearchModal } from "@/components/molecules/ContentEditorSearchModal";
+import { AssetsPickerModal } from "@/components/molecules/AssetsPickerModal";
 
 import { ENV } from "@/lib/env";
 
@@ -48,6 +49,7 @@ export function MarkdownPlaygroundContent() {
     setIsFullScreen,
     editorParentRef,
     previewRef,
+    editorPaneRef,
     handleEditorScroll,
     handlePreviewScroll,
   } = useMarkdownEditor();
@@ -78,6 +80,7 @@ export function MarkdownPlaygroundContent() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchModalMode, setSearchModalMode] = useState<'open' | 'delete'>('open');
+  const [assetsModalOpen, setAssetsModalOpen] = useState(false);
   const isWriteMode = ENV.IS_WRITE_MODE;
 
   // Statistics
@@ -140,6 +143,13 @@ export function MarkdownPlaygroundContent() {
     }
   };
 
+  const handleAssetSelect = (injectionText: string) => {
+    if (editorPaneRef.current) {
+      editorPaneRef.current.insertTextAtCursor(injectionText);
+      toast("Asset injected", "success");
+    }
+  };
+
   if (!isLoaded || !activeFileId) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-mono text-accent">
@@ -174,6 +184,7 @@ export function MarkdownPlaygroundContent() {
           showToc={showToc}
           setShowToc={setShowToc}
           onOpenContentEditor={handleOpenContentEditor}
+          onOpenAssets={() => setAssetsModalOpen(true)}
         />
 
         <FileTabs 
@@ -215,6 +226,7 @@ export function MarkdownPlaygroundContent() {
         <motion.main key={viewMode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex gap-0 overflow-hidden relative">
           {(viewMode === "editor" || (viewMode === "split" && !isMobile)) && (
             <MarkdownEditorPane 
+              ref={editorPaneRef}
               activeFile={activeFile}
               updateFileContent={updateFileContent}
               editorParentRef={editorParentRef}
@@ -322,6 +334,12 @@ export function MarkdownPlaygroundContent() {
         mode={searchModalMode}
         onClose={() => setSearchModalOpen(false)}
         onSelect={handleContentSelect}
+      />
+
+      <AssetsPickerModal 
+        isOpen={assetsModalOpen}
+        onClose={() => setAssetsModalOpen(false)}
+        onSelect={handleAssetSelect}
       />
     </div>
   );

@@ -9,7 +9,8 @@ import {
   List as ListIcon, 
   Save,
   PenTool,
-  ChevronDown
+  ChevronDown,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 
@@ -30,6 +31,7 @@ interface MarkdownToolbarProps {
   showToc: boolean;
   setShowToc: (show: boolean) => void;
   onOpenContentEditor?: (action: 'open' | 'delete') => void;
+  onOpenAssets?: () => void;
 }
 
 /**
@@ -51,6 +53,7 @@ export function MarkdownToolbar({
   showToc,
   setShowToc,
   onOpenContentEditor,
+  onOpenAssets,
 }: MarkdownToolbarProps) {
   const [editorMenuOpen, setEditorMenuOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -104,6 +107,9 @@ export function MarkdownToolbar({
         </div>
 
         <div className="flex items-center gap-2 relative">
+          <Button variant="outline" size="xs" onClick={onOpenAssets} className="gap-2 px-4 py-3 h-auto">
+            <ImageIcon size={12} /> ASSETS
+          </Button>
           {isWriteMode && (
             <div className="relative" ref={dropdownRef}>
               <Button 

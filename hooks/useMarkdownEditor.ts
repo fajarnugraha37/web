@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LabFile, ViewMode } from "@/types";
 import { useIsMobile } from "./use-mobile";
+import { MarkdownEditorRef } from "@/components/molecules/MarkdownEditorPane";
 
 export function useMarkdownEditor() {
   const [files, setFiles] = useState<LabFile[]>([]);
@@ -20,6 +21,7 @@ export function useMarkdownEditor() {
   const isMobile = useIsMobile();
   const editorParentRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const editorPaneRef = useRef<MarkdownEditorRef>(null);
   const isSyncingScroll = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -270,6 +272,7 @@ export function useMarkdownEditor() {
     setIsFullScreen,
     editorParentRef,
     previewRef,
+    editorPaneRef,
     handleEditorScroll,
     handlePreviewScroll,
   };
