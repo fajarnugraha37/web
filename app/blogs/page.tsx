@@ -3,6 +3,7 @@ import { BlogListSection } from "@/components/organisms/BlogListSection";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { BlogsHeader } from "@/components/organisms/BlogsHeader";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Logs | Fajar Abdi Nugraha - Software Engineer & Solution Architect",
@@ -25,7 +26,9 @@ export default function BlogsPage() {
       <div className="py-8 md:py-12">
         <BlogsHeader />
 
-        <BlogListSection blogs={allBlogs} />
+        <Suspense fallback={<div className="flex items-center justify-center py-24 font-mono text-accent animate-pulse tracking-widest">LOADING_ARCHIVES...</div>}>
+          <BlogListSection blogs={allBlogs} />
+        </Suspense>
       </div>
     </PageTransition>
   );
