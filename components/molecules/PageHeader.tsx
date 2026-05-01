@@ -27,7 +27,7 @@ export function PageHeader({
   const fullTitle = accentText ? `${title} ${accentText}`.trim() : title;
   
   return (
-    <header className={cn("relative group", className)}>
+    <div className={cn("relative group", className)}>
       <div className="absolute -left-4 top-0 w-1 h-full bg-accent/30 group-hover:bg-accent transition-colors" />
       <ScrollReveal direction="right">
         <div className="inline-flex items-center gap-2 px-3 py-1 border border-accent/20 bg-accent/5 font-mono text-[10px] text-accent mb-4 cyber-chamfer-reverse">
@@ -44,6 +44,6 @@ export function PageHeader({
           <div className="h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
         </div>
       </ScrollReveal>
-    </header>
+    </div>
   );
 }

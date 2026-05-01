@@ -96,3 +96,15 @@ export interface LabFile {
 }
 
 export type ViewMode = "editor" | "split" | "preview";
+
+// --- Assets Picker ---
+
+export type AssetCategory = "img" | "video" | "audio" | "doc";
+
+export interface AssetItem {
+  name: string;
+  url: string;
+  category: AssetCategory;
+  size: number;
+  lastModified: number;
+}

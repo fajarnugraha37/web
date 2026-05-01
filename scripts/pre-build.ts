@@ -7,6 +7,40 @@ const CONTENT_DIR = path.join(process.cwd(), "content/blogs");
 const CACHE_DIR = path.join(process.cwd(), ".cache");
 const EMBEDDINGS_FILE = path.join(CACHE_DIR, "embeddings.json");
 const API_DIR = path.join(process.cwd(), "app/api");
+const ASSETS_DIR = path.join(process.cwd(), "public/assets");
+
+async function generateAssetsIndex() {
+  console.log("Generating assets index...");
+  const assets: any[] = [];
+  const categories = ["img", "video", "audio", "doc"];
+
+  for (const category of categories) {
+    const dir = path.join(ASSETS_DIR, category);
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isFile()) {
+          const stat = await fs.stat(path.join(dir, entry.name));
+          assets.push({
+            name: entry.name,
+            url: `/assets/${category}/${entry.name}`,
+            category,
+            size: stat.size,
+            lastModified: stat.mtimeMs
+          });
+        }
+      }
+    } catch (e) {
+      // Directory might not exist, skip
+    }
+  }
+
+  assets.sort((a, b) => b.lastModified - a.lastModified);
+  await fs.writeFile(
+    path.join(process.cwd(), "public/assets-index.json"),
+    JSON.stringify(assets)
+  );
+}
 
 async function getApiRoutes(dir: string): Promise<string[]> {
   try {
@@ -150,6 +184,9 @@ async function run() {
     path.join(process.cwd(), "public/relations.json"),
     JSON.stringify(relations),
   );
+  
+  await generateAssetsIndex();
+  
   console.log("Build-time processing complete.");
 }
 
