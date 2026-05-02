@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export type TranslationStatus = 'idle' | 'downloading' | 'loading' | 'ready' | 'translating' | 'error';
 

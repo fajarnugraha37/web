@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 export const SUPPORTED_LANGUAGES = [
