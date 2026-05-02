@@ -31,13 +31,16 @@ export function ContentEditorSearchModal({ isOpen, mode = 'open', onClose, onSel
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Fetch list only when modal is open
   const { data, isLoading, isFetching } = useRemoteBlogs({
     query: debouncedQuery,
     page,
     limit: 10,
+    enabled: isOpen,
   });
 
-  const { data: postData } = useMarkdownPostQuery(selectedSlug);
+  // Fetch individual post only when a slug is selected AND modal is open
+  const { data: postData } = useMarkdownPostQuery(selectedSlug, isOpen);
 
   useEffect(() => {
     if (postData && selectedSlug) {
