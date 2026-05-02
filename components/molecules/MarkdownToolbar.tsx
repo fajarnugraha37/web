@@ -71,7 +71,7 @@ export function MarkdownToolbar({
         {modes.map((mode) => (
           <button
             key={mode}
-            onClick={() => setViewMode(mode as any)}
+            onClick={() => setViewMode(mode as any, isMobile)}
             className={`px-4 py-1 text-[10px] uppercase tracking-widest transition-all ${
               viewMode === mode 
                 ? "bg-accent text-black font-bold shadow-[0_0_10px_rgba(0,255,136,0.5)]" 

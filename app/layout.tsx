@@ -10,6 +10,7 @@ import { Footer } from "@/components/organisms/Footer";
 import { ScrollProgress } from "@/components/atoms/ScrollProgress";
 import { ScrollToTop } from "@/components/atoms/ScrollToTop";
 import { ToastProvider } from "@/components/atoms/Toast";
+import { ReactQueryProvider } from "@/components/providers/ReactQueryProvider";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 const jetbrains = JetBrains_Mono({
@@ -93,16 +94,17 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-background text-foreground selection:bg-accent selection:text-black">
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/coi-serviceworker.js" async></script>
-        <ToastProvider />
-        <ScrollProgress />
-        <ScrollToTop />
-        <Header />
-        <main className="flex-1 pt-16 relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 pb-20">
-          {children}
-        </main>
-        <Footer />
+        <ReactQueryProvider>
+          <ToastProvider />
+          <ScrollProgress />
+          <ScrollToTop />
+          <Header />
+          <main className="flex-1 pt-16 relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 pb-20">
+            {children}
+          </main>
+          <Footer />
+        </ReactQueryProvider>
       </body>
     </html>
   );

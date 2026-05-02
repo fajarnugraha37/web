@@ -19,6 +19,8 @@ import {
   HtmlIcon,
   PdfIcon,
 } from "@/components/atoms/Icons";
+import { toast } from "@/components/atoms/Toast";
+// @ts-ignore
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
@@ -55,10 +57,11 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedLink(true);
+      toast("LINK_COPIED", "success");
       setTimeout(() => setCopiedLink(false), 2000);
       setActiveMenu(null);
     } catch (e) {
-      alert("Clipboard access denied.");
+      toast("CLIPBOARD_ACCESS_DENIED", "error");
     }
   };
 
@@ -66,9 +69,10 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
     try {
       await navigator.clipboard.writeText(content);
       setCopiedMd(true);
+      toast("MARKDOWN_COPIED", "success");
       setTimeout(() => setCopiedMd(false), 2000);
     } catch (e) {
-      alert("Clipboard access denied.");
+      toast("CLIPBOARD_ACCESS_DENIED", "error");
     }
   };
 
@@ -233,9 +237,7 @@ export const BlogActions = ({ title, slug, content }: BlogActionsProps) => {
       pdf.save(`${slug}.pdf`);
     } catch (error) {
       console.error("PDF generation failed", error);
-      alert(
-        "PDF generation failed. This is likely due to security restrictions on modern CSS parsers. Please use the 'HTML' export option for a high-fidelity archive.",
-      );
+      toast("PDF_GENERATION_FAILED: USE_HTML_FALLBACK", "error");
     } finally {
       if (document.body.contains(iframe)) {
         document.body.removeChild(iframe);

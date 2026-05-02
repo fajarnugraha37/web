@@ -41,7 +41,7 @@ export function EducationCard({ edu }: EducationCardProps) {
             <Globe className="w-3 h-3" /> {edu.location}
           </div>
           <p className="text-xs md:text-sm font-mono text-foreground/70 leading-relaxed italic border-l-2 border-accent-tertiary/20 pl-4 py-1">
-            // {edu.description}
+            <span className="opacity-50">//</span> {edu.description}
           </p>
         </div>
       </div>

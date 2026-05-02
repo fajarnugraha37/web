@@ -34,7 +34,7 @@ export function PresetSelector({ activeMode, onModeChange, className }: PresetSe
             key={p.id}
             onClick={() => onModeChange(p.id)}
             className={cn(
-              "relative flex flex-col items-center justify-center p-4 border transition-all cyber-chamfer-sm group",
+              "relative flex flex-col items-center justify-center p-4 border transition-all group",
               isActive 
                 ? "border-accent bg-accent/10 shadow-neon" 
                 : "border-border/40 bg-card/40 hover:border-accent/30 hover:bg-accent/5"

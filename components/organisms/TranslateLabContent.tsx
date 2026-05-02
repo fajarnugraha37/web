@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslationWorker } from "@/hooks/useTranslationWorker";
 import { useTranslationParams } from "@/hooks/useTranslationParams";
+import { useTranslationStore } from "@/lib/store/useTranslationStore";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PageHeader } from "@/components/molecules/PageHeader";
 import { LanguageSelect } from "@/components/molecules/LanguageSelect";
@@ -19,49 +20,46 @@ import { ArrowRightLeft, Download, Play, AlertTriangle, Loader2 } from "lucide-r
 export function TranslateLabContent() {
   const router = useRouter();
   const isMobile = useIsMobile();
+  
+  // Zustand Store
+  const status = useTranslationStore(state => state.status);
+  const progressItems = useTranslationStore(state => state.progressItems);
+  const logs = useTranslationStore(state => state.logs);
+  const lastResult = useTranslationStore(state => state.lastResult);
+  const clearLogs = useTranslationStore(state => state.clearLogs);
+  const setResult = useTranslationStore(state => state.setResult);
+
   const {
-    status,
-    progressItems,
-    logs,
     initWorker,
     translate,
     dispose,
     addLog,
-    clearLogs
+    hasAgreed,
+    confirmAgreement
   } = useTranslationWorker();
   
   const { src, tgt, setSrc, setTgt, swap, isRtl } = useTranslationParams();
 
   const [inputText, setInputText] = useState("");
-  const [outputText, setOutputText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [memoryLimit, setMemoryLimit] = useState(300);
   const [isOffline, setIsOffline] = useState(false);
 
   // Warning Modal State
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [hasAgreed, setHasAgreed] = useState(false);
 
   // Streaming simulation state
-  const [displayedOutput, setDisplayedOutput] = useState("");
+  const [displayedOutput, setDisplayedOutput] = useState(lastResult || "");
   const streamIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check agreement on mount
+  // Initial agreement check and auto-init
   useEffect(() => {
-    const agreed = localStorage.getItem("translate_lab_agreed");
-    if (agreed === "true") {
-      setHasAgreed(true);
-    } else {
+    if (!hasAgreed) {
       setShowWarningModal(true);
-    }
-  }, []);
-
-  // Auto-initialize engine on mount (only if agreed)
-  useEffect(() => {
-    if (!isOffline && status === 'idle' && hasAgreed) {
+    } else if (!isOffline && status === 'idle') {
       initWorker();
     }
-  }, [isOffline, status, initWorker, hasAgreed]);
+  }, [hasAgreed, isOffline, status, initWorker]);
 
   // Handle fatal errors (e.g., OOM during initialization)
   useEffect(() => {
@@ -73,11 +71,11 @@ export function TranslateLabContent() {
 
   // Memory & Offline Guards on Mount
   useEffect(() => {
-    const memory = navigator.deviceMemory || 4;
+    const memory = (navigator as any).deviceMemory || 4;
     if (memory < 4) {
       setMemoryLimit(200);
       toast("Device RAM detected as low. Character limit reduced.", "warning");
-      addLog('WARN', `memory: ${memory}GB - Setting limit to 200`);
+      addLog('warn', `memory: ${memory}GB - Setting limit to 200`);
     }
 
     const handleOffline = () => setIsOffline(true);
@@ -88,7 +86,6 @@ export function TranslateLabContent() {
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
 
-    // Request persistent storage to protect the 600MB model from browser eviction
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then(isPersisted => {
         if (isPersisted) {
@@ -107,15 +104,7 @@ export function TranslateLabContent() {
 
   // Strict Lifecycle Management
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        // In a real app, maybe a timeout here to dispose if hidden for > 60s
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       dispose();
     };
   }, [dispose]);
@@ -125,23 +114,9 @@ export function TranslateLabContent() {
     setDisplayedOutput("");
     if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
     
-    // Safety check in case undefined or object slips through
     const safeText = typeof fullText === 'string' ? fullText : String(fullText);
     const words = safeText.split(/(\s+)/);
-    setDisplayedOutput(words.join('')); // Show full text immediately for now, can implement token-by-token if desired
-
-    let currentIndex = 0;
-    // streamIntervalRef.current = setInterval(() => {
-    //   if (currentIndex < words.length) {
-    //     setDisplayedOutput((prev) => {
-    //       console.log(`Streaming token: "${words[currentIndex]}"`, words, prev, words[currentIndex]); // Debug log for each token
-    //       return prev + (words[currentIndex] ?? '');
-    //     });
-    //     currentIndex++;
-    //   } else {
-    //     if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-    //   }
-    // }, 50); // 50ms per token
+    setDisplayedOutput(words.join('')); 
   };
 
   const handleTranslate = async (force: boolean = false, overrideSrc?: string, overrideTgt?: string) => {
@@ -159,32 +134,22 @@ export function TranslateLabContent() {
     }
 
     if (force) {
-      addLog('WARN', `[OVERRIDE: ${inputText.length} chars]`);
+      addLog('warn', `[OVERRIDE: ${inputText.length} chars]`);
     }
 
     try {
       setDisplayedOutput("");
-      setOutputText("");
-      const result = await translate({ text: inputText, src: activeSrc, tgt: activeTgt });
-      console.log('Translation result received in component:', result);
-      setOutputText(result);
+      setResult("");
+      const result = await translate(inputText, activeSrc, activeTgt);
+      setResult(result);
       simulateStreaming(result);
     } catch (error: any) {
       toast(error.message || "Process halted. Reduce text or refresh.", "error");
     }
   };
 
-  const handleInit = () => {
-    if (isOffline) {
-      toast("No internet connection for initial download.", "error");
-      return;
-    }
-    initWorker();
-  };
-
   const handleAgree = () => {
-    localStorage.setItem("translate_lab_agreed", "true");
-    setHasAgreed(true);
+    confirmAgreement();
     setShowWarningModal(false);
   };
 
@@ -194,7 +159,7 @@ export function TranslateLabContent() {
   };
 
   // Convert structured logs to strings for the Terminal Viewer
-  const logStrings = logs.map(l => `[${l.timestamp}] [${l.level}] ${l.message}`);
+  const logStrings = logs.map(l => `[${new Date(l.timestamp).toLocaleTimeString()}] [${l.level.toUpperCase()}] ${l.message}`);
 
   return (
     <PageTransition>

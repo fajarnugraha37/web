@@ -7,6 +7,8 @@ import { toast } from "@/components/atoms/Toast";
 import jsPDF from "jspdf";
 import DOMPurify from "isomorphic-dompurify";
 import { LabFile } from "@/types";
+import { useMarkdownUIStore } from "@/lib/store/useMarkdownUIStore";
+import { useGithubMarkdownMutation } from "./queries/useMarkdownQuery";
 
 interface UseMarkdownActionsProps {
   activeFile: LabFile | undefined;
@@ -15,15 +17,19 @@ interface UseMarkdownActionsProps {
   previewRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function useMarkdownActions({ 
-  activeFile, 
-  activeContent, 
+export function useMarkdownActions({
+  activeFile,
+  activeContent,
   addFile,
-  previewRef 
+  previewRef
 }: UseMarkdownActionsProps) {
-  const [modal, setModal] = useState<"import" | "export" | "github" | null>(null);
+  const modal = useMarkdownUIStore((state) => state.activeModal);
+  const setModal = useMarkdownUIStore((state) => state.openModal);
+  const closeModal = useMarkdownUIStore((state) => state.closeModal);
   const [githubUrl, setGithubUrl] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const githubMutation = useGithubMarkdownMutation();
 
   const handleCopy = useCallback(() => {
     if (!activeContent) return;
@@ -47,30 +53,24 @@ export function useMarkdownActions({
         reader.readAsText(file);
       }
     });
-    setModal(null);
-  }, [addFile]);
+    closeModal();
+  }, [addFile, closeModal]);
 
   const fetchFromGithub = useCallback(async () => {
     if (!githubUrl) return;
-    try {
-      let rawUrl = githubUrl;
-      if (githubUrl.includes("github.com") && !githubUrl.includes("raw.githubusercontent.com")) {
-        rawUrl = githubUrl
-          .replace("github.com", "raw.githubusercontent.com")
-          .replace("/blob/", "/");
+    
+    githubMutation.mutate(githubUrl, {
+      onSuccess: ({ name, text }) => {
+        addFile(name, text);
+        toast(`HANDSHAKE_SUCCESS: ${name}`, "success");
+        closeModal();
+        setGithubUrl("");
+      },
+      onError: () => {
+        toast("GITHUB_HANDSHAKE_FAILED", "error");
       }
-      const res = await fetch(rawUrl);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const text = await res.text();
-      const name = rawUrl.split("/").pop() || "github_import.md";
-      addFile(name, text);
-      toast(`HANDSHAKE_SUCCESS: ${name}`, "success");
-      setModal(null);
-      setGithubUrl("");
-    } catch (e) {
-      toast("GITHUB_HANDSHAKE_FAILED", "error");
-    }
-  }, [githubUrl, addFile]);
+    });
+  }, [githubUrl, addFile, closeModal, githubMutation]);
 
   const generateExportHtml = (articleHtml: string, isForPdf = false) => {
     const sanitized = DOMPurify.sanitize(articleHtml);
@@ -100,21 +100,21 @@ export function useMarkdownActions({
 
     const previewHtml = previewRef.current.querySelector(".prose")?.innerHTML || previewRef.current.innerHTML;
     const sanitizedHtml = previewHtml.replace(/okl(ab|ch)\([^)]+\)/g, "#888");
-    
+
     iframeDoc.open();
     iframeDoc.write(generateExportHtml(sanitizedHtml, true));
     iframeDoc.close();
-    
+
     await new Promise((resolve) => setTimeout(resolve, 2000));
     iframe.style.width = "900px";
     iframe.style.height = `${iframeDoc.body.scrollHeight}px`;
 
     try {
-      const canvas = await html2canvas(iframeDoc.body, { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: "#0a0a0f", 
-        width: 900 
+      const canvas = await html2canvas(iframeDoc.body, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#0a0a0f",
+        width: 900
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -127,7 +127,7 @@ export function useMarkdownActions({
       toast("PDF_EXPORT_FAILED", "error");
     } finally {
       document.body.removeChild(iframe);
-      setModal(null);
+      closeModal();
     }
   };
 
@@ -141,7 +141,7 @@ export function useMarkdownActions({
     link.download = (activeFile?.name || "document").replace(".md", ".html");
     link.click();
     toast("HTML_EXPORT_COMPLETE", "success");
-    setModal(null);
+    closeModal();
   };
 
   const downloadMd = () => {
@@ -153,7 +153,7 @@ export function useMarkdownActions({
     link.download = activeFile?.name || "document.md";
     link.click();
     toast("MARKDOWN_EXPORT_COMPLETE", "success");
-    setModal(null);
+    closeModal();
   };
 
   return {

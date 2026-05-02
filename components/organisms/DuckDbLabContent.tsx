@@ -78,6 +78,7 @@ export function DuckDbLabContent() {
           exec={exec} 
           status={status} 
           error={error} 
+          engine="duckdb"
           accentColor="accent-secondary"
           onExportFull={handleExportFull}
         />

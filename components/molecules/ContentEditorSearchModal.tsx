@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, X, Loader2, FileText, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
+import { useRemoteBlogs, useMarkdownPostQuery } from "@/hooks/queries/useMarkdownQuery";
 
 interface ContentEditorSearchModalProps {
   isOpen: boolean;
@@ -15,50 +16,43 @@ interface ContentEditorSearchModalProps {
 
 export function ContentEditorSearchModal({ isOpen, mode = 'open', onClose, onSelect }: ContentEditorSearchModalProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [deleteConfirmSlug, setDeleteConfirmSlug] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
-  const fetchResults = useCallback(async (searchQuery: string, pageNum: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/labs/markdown?q=${encodeURIComponent(searchQuery)}&page=${pageNum}`);
-      const json = await res.json();
-      if (res.ok) {
-        setResults(json.data || []);
-        setTotalPages(json.meta?.totalPages || 1);
-        setPage(json.meta?.page || 1);
-      }
-    } catch (err) {
-      console.error("Search failed:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Throttle search typing
+  // Debounce search query
   useEffect(() => {
-    if (!isOpen) return;
     const timer = setTimeout(() => {
-      fetchResults(query, 1);
+      setDebouncedQuery(query);
+      setPage(1); // Reset page on new search
     }, 500);
     return () => clearTimeout(timer);
-  }, [query, isOpen, fetchResults]);
+  }, [query]);
 
-  // Refetch results if opened again
+  const { data, isLoading, isFetching } = useRemoteBlogs({
+    query: debouncedQuery,
+    page,
+    limit: 10,
+  });
+
+  const { data: postData } = useMarkdownPostQuery(selectedSlug);
+
   useEffect(() => {
-    if (isOpen) {
-      fetchResults(query, page);
+    if (postData && selectedSlug) {
+      onSelect(selectedSlug, postData);
+      setSelectedSlug(null);
+      onClose();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [postData, selectedSlug, onSelect, onClose]);
+
+  const results = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
-    fetchResults(query, newPage);
+    setPage(newPage);
   };
 
   const handleSelect = async (slug: string) => {
@@ -66,33 +60,20 @@ export function ContentEditorSearchModal({ isOpen, mode = 'open', onClose, onSel
       setDeleteConfirmSlug(slug);
       return;
     }
-
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/labs/markdown/${slug}`);
-      const json = await res.json();
-      if (res.ok && json.data) {
-        onSelect(slug, json.data);
-        onClose();
-      }
-    } catch (err) {
-      console.error("Failed to load blog", err);
-    } finally {
-      setLoading(false);
-    }
+    setSelectedSlug(slug);
   };
 
   const confirmDelete = async () => {
     if (deleteConfirmSlug) {
       setIsDeleting(true);
       await onSelect(deleteConfirmSlug);
-      // Remove from local list manually or refetch
-      setResults(prev => prev.filter(r => r.slug !== deleteConfirmSlug));
       setIsDeleting(false);
       setDeleteConfirmSlug(null);
       onClose();
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -139,7 +120,7 @@ export function ContentEditorSearchModal({ isOpen, mode = 'open', onClose, onSel
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-2 relative z-10 min-h-[300px]">
-                {loading && results.length === 0 ? (
+                {(isLoading || isFetching) && results.length === 0 ? (
                   <div className="flex justify-center items-center h-full text-accent py-10">
                     <Loader2 className="animate-spin" size={24} />
                   </div>
@@ -148,7 +129,7 @@ export function ContentEditorSearchModal({ isOpen, mode = 'open', onClose, onSel
                     No records found
                   </div>
                 ) : (
-                  results.map((blog) => (
+                  results.map((blog: any) => (
                     <button
                       key={blog.slug}
                       onClick={() => handleSelect(blog.slug)}

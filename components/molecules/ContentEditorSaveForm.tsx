@@ -5,6 +5,7 @@ import { Save, AlertTriangle, Plus, X, PenTool } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { LabFile } from "@/types";
 import { motion, AnimatePresence } from "motion/react";
+import { useSaveBlogMutation } from "@/hooks/queries/useMarkdownQuery";
 
 interface ContentEditorSaveFormProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export function ContentEditorSaveForm({
   updateFileMetadata,
   onSaveSuccess
 }: ContentEditorSaveFormProps) {
-  const [isSaving, setIsSaving] = useState(false);
+  const saveMutation = useSaveBlogMutation();
   const [error, setError] = useState<string | null>(null);
   
   const [isAddingTag, setIsAddingTag] = useState(false);
@@ -32,11 +33,11 @@ export function ContentEditorSaveForm({
   const tagPopoverRef = useRef<HTMLDivElement>(null);
 
   // Derive initial values from file metadata or default
-  const metadata = activeFile?.metadata || {
-    slug: activeFile?.name.replace(".mdx", "").replace(".md", "") || "",
-    title: "",
-    description: "",
-    tags: [] as string[]
+  const metadata = {
+    slug: activeFile?.metadata?.slug || activeFile?.name.replace(".mdx", "").replace(".md", "") || "",
+    title: activeFile?.metadata?.title || "",
+    description: activeFile?.metadata?.description || "",
+    tags: activeFile?.metadata?.tags || [] as string[]
   };
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export function ContentEditorSaveForm({
 
   const handleRemoveTag = (tagToRemove: string) => {
     if (activeFile) {
-      updateFileMetadata(activeFile.id, { tags: metadata.tags.filter(t => t !== tagToRemove) });
+      updateFileMetadata(activeFile.id, { tags: metadata.tags.filter((t: string) => t !== tagToRemove) });
     }
   };
 
@@ -93,7 +94,7 @@ export function ContentEditorSaveForm({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!activeFile) return;
     setError(null);
     
@@ -107,30 +108,24 @@ export function ContentEditorSaveForm({
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const res = await fetch("/api/labs/markdown", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug: metadata.slug,
-          title: metadata.title,
-          description: metadata.description,
-          tags: metadata.tags,
-          content: activeContent
-        })
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save");
-      
-      if (onSaveSuccess) onSaveSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    saveMutation.mutate(
+      {
+        slug: metadata.slug,
+        title: metadata.title,
+        description: metadata.description,
+        tags: metadata.tags,
+        content: activeContent,
+      },
+      {
+        onSuccess: () => {
+          if (onSaveSuccess) onSaveSuccess();
+          onClose();
+        },
+        onError: (err: any) => {
+          setError(err.message || "Failed to save post");
+        },
+      }
+    );
   };
 
   return (
@@ -196,7 +191,7 @@ export function ContentEditorSaveForm({
                 <div className="flex flex-col gap-2 md:col-span-2">
                   <label className="text-[10px] text-accent/80 uppercase tracking-widest font-bold">Tags</label>
                   <div className="flex flex-wrap items-center gap-2 p-3 bg-black/50 border border-accent/30 min-h-[50px]">
-                    {metadata.tags.map((tag) => (
+                    {metadata.tags.map((tag: string) => (
                       <span key={tag} className="flex items-center gap-2 bg-accent/10 text-accent border border-accent/30 px-3 py-1.5 text-xs uppercase tracking-widest rounded-sm">
                         {tag}
                         <button 
@@ -258,8 +253,8 @@ export function ContentEditorSaveForm({
               <Button variant="outline" onClick={onClose} className="px-6">
                 CANCEL
               </Button>
-              <Button onClick={handleSave} disabled={isSaving} className="gap-2 px-8">
-                {isSaving ? "SAVING..." : "SAVE POST"} <Save size={14} />
+              <Button onClick={handleSave} disabled={saveMutation.isPending} className="gap-2 px-8">
+                {saveMutation.isPending ? "SAVING..." : "SAVE POST"} <Save size={14} />
               </Button>
             </div>
           </motion.div>

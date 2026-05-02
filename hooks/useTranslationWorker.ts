@@ -1,200 +1,148 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from 'react';
+import { useTranslationStore } from '@/lib/store/useTranslationStore';
 
-export type TranslationStatus = 'idle' | 'downloading' | 'loading' | 'ready' | 'translating' | 'error';
-
-export interface TranslationProgress {
-  file: string;
-  status: string;
-  name: string;
-  progress: number;
-  loaded: number;
-  total: number;
-}
-
-export interface LogEntry {
-  id: string;
-  timestamp: string;
-  level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
-  message: string;
-}
-
-interface TranslateOptions {
-  text: string;
-  src: string;
-  tgt: string;
-}
-
+/**
+ * Hook: useTranslationWorker
+ * Orchestrates the machine translation Web Worker and its lifecycle.
+ */
 export function useTranslationWorker() {
-  const [status, setStatus] = useState<TranslationStatus>('idle');
-  const [progressItems, setProgressItems] = useState<Record<string, TranslationProgress>>({});
-  const [logs, setLogs] = useState<LogEntry[]>([]);
   const workerRef = useRef<Worker | null>(null);
-  const resolveRef = useRef<((value: string) => void) | null>(null);
-  const rejectRef = useRef<((reason?: any) => void) | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const addLog = useCallback((level: LogEntry['level'], message: string) => {
-    setLogs((prev) => {
-      const newLogs = [
-        ...prev,
-        {
-          id: Math.random().toString(36).substring(7),
-          timestamp: new Date().toLocaleTimeString(),
-          level,
-          message,
-        },
-      ];
-      // Limit to 100 logs to prevent memory bloat and UI lag
-      if (newLogs.length > 100) {
-        return newLogs.slice(newLogs.length - 100);
-      }
-      return newLogs;
-    });
+  const status = useTranslationStore((state) => state.status);
+  const setStatus = useTranslationStore((state) => state.setStatus);
+  const updateProgress = useTranslationStore((state) => state.updateProgress);
+  const addLog = useTranslationStore((state) => state.addLog);
+  const clearLogs = useTranslationStore((state) => state.clearLogs);
+
+  const progressItems = useTranslationStore((state) => state.progressItems);
+  const logs = useTranslationStore((state) => state.logs);
+
+  const [hasAgreed, setHasAgreed] = useState(false);
+
+  useEffect(() => {
+    const agreed = localStorage.getItem("translate_lab_agreed");
+    if (agreed === "true") setHasAgreed(true);
+  }, []);
+
+  const confirmAgreement = useCallback(() => {
+    localStorage.setItem("translate_lab_agreed", "true");
+    setHasAgreed(true);
   }, []);
 
   const initWorker = useCallback(() => {
-    if (workerRef.current) return;
-
-    try {
-      addLog('INFO', 'Initializing Web Worker...');
-      workerRef.current = new Worker(new URL('@/lib/workers/translate.worker.ts', import.meta.url), {
-        type: 'module'
-      });
-      
-      workerRef.current.addEventListener('message', (event) => {
-        const { type, payload } = event.data;
-        
-        switch (type) {
-          case 'INIT_PROGRESS':
-            addLog('INFO', 'Initializeion progress: ' + JSON.stringify(payload));
-            setStatus('downloading');
-            if (payload.status === 'progress' || payload.status === 'initiate') {
-              addLog('INFO', `Downloading ${payload.file}: ${payload.progress}% (${payload.loaded}/${payload.total} bytes)`);
-              setProgressItems(prev => ({
-                ...prev,
-                [payload.file]: payload
-              }));
-            } else if (payload.status === 'done') {
-              addLog('INFO', `Finished downloading ${payload.file}`);
-              setProgressItems(prev => {
-                const next = { ...prev };
-                delete next[payload.file];
-                return next;
-              });
-            } else {
-              addLog('INFO', `Status update for ${payload.file}: ${payload.status}`);
-            }
-            break;
-          case 'READY':
-            setStatus('ready');
-            addLog('INFO', 'Pipeline ready');
-            break;
-          case 'RESULT':
-            addLog('INFO', 'Received translation result: ' + JSON.stringify(payload));
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setStatus('ready');
-            if (resolveRef.current) {
-              resolveRef.current(payload);
-              resolveRef.current = null;
-              rejectRef.current = null;
-            }
-            break;
-          case 'ERROR':
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            addLog('ERROR', `Worker error: ${payload}`);
-            if (rejectRef.current) {
-              setStatus('ready'); // Pipeline is still functional, just this inference failed
-              rejectRef.current(new Error(payload));
-              resolveRef.current = null;
-              rejectRef.current = null;
-            } else {
-              console.error('[workerRef.current.addEventListener->message] Worker error without pending inference:', payload);
-              setStatus('error');
-            }
-            break;
-          case 'DISPOSED':
-            addLog('INFO', 'Pipeline disposed');
-            setStatus('idle');
-            break;
-          default:
-            addLog('WARN', `Unknown message type from worker: ${type}`);
-            break;
-        }
-      });
-      
-      workerRef.current.addEventListener('error', (err) => {
-        addLog('ERROR', `Worker global error: ${err.message || JSON.stringify(err || 'unknown error')}`);
-        console.error('Worker initialization error:', status, err);
-        if (!rejectRef.current) {
-          console.error('[workerRef.current.addEventListener->error] Worker initialization failed without pending inference:', err);
-          setStatus('error');
-        }
-      });
-
-      setStatus('loading');
-      addLog('INFO', 'Sending INIT command to worker...');
-      workerRef.current.postMessage({ type: 'INIT' });
-    } catch (e: any) {
-      console.error('[initWorker] Worker creation error:', e);
-      addLog('ERROR', `Failed to create worker: ${e.message}`);
-      setStatus('error');
-    }
-  }, [addLog]);
-
-  const translate = useCallback(async ({ text, src, tgt }: TranslateOptions): Promise<string> => {
-    if (!workerRef.current || status === 'idle' || status === 'downloading' || status === 'loading') {
-      addLog('WARN', 'Cannot translate: Pipeline not ready');
-      throw new Error('Pipeline not ready');
-    }
-
-    if (status === 'translating') {
-      addLog('WARN', 'Cannot translate: Already translating');
-      throw new Error('Translation in progress');
-    }
-
-    setStatus('translating');
-    addLog('INFO', `Translating ${text.length} chars from ${src} to ${tgt}...`);
+    if (workerRef.current || !hasAgreed) return;
     
-    return new Promise((resolve, reject) => {
-      resolveRef.current = resolve;
-      rejectRef.current = reject;
-      
-      const id = Math.random().toString(36).substring(7);
-      
-      // 60-second timeout guard
-      timeoutRef.current = setTimeout(() => {
-        console.error('[timeoutRef.current] Inference timeout:', { text, src, tgt });
-        addLog('ERROR', 'Inference timeout (8s)');
-        setStatus('error');
-        reject(new Error('Inference timeout'));
-      }, 60000);
+    addLog('info', 'Initializing Translation Pipeline...');
+    setStatus('loading');
 
-      workerRef.current!.postMessage({
+    // Create worker
+    const worker = new Worker(
+      new URL('@/lib/workers/translate.worker.ts', import.meta.url),
+      { type: 'module' }
+    );
+    workerRef.current = worker;
+
+    // Set up message listener
+    worker.addEventListener('message', (e) => {
+      const { type, payload } = e.data;
+
+      switch (type) {
+        case 'INIT_PROGRESS':
+          // Xenova progress callback data
+          if (payload.status === 'initiate') {
+            setStatus('downloading');
+            addLog('info', `Downloading Model: ${payload.file}...`);
+          } else if (payload.status === 'progress') {
+            updateProgress({
+              file: payload.file,
+              progress: payload.progress,
+              loaded: payload.loaded,
+              total: payload.total
+            });
+          } else if (payload.status === 'done') {
+            addLog('info', `Resource cached: ${payload.file}`);
+          }
+          break;
+          
+        case 'READY':
+          setStatus('ready');
+          addLog('info', 'Neural network loaded and ready.');
+          break;
+
+        case 'ERROR':
+          // Initialization errors are fatal
+          if (status === 'downloading' || status === 'loading') {
+             setStatus('error');
+             addLog('error', `Hardware Fault: ${payload}`);
+          } else {
+             // Inference error
+             addLog('error', `Inference Fault: ${payload}`);
+             setStatus('ready'); 
+          }
+          break;
+      }
+    });
+
+    // START INITIALIZATION
+    worker.postMessage({ type: 'INIT' });
+
+  }, [addLog, setStatus, updateProgress, status, hasAgreed]);
+
+  const translate = useCallback((text: string, src: string, tgt: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        reject(new Error("Worker not initialized"));
+        return;
+      }
+
+      setStatus('translating');
+      addLog('info', `Translating from ${src} to ${tgt}...`);
+      
+      const id = Date.now().toString();
+
+      const handleMessage = (e: MessageEvent) => {
+        const { type, id: msgId, payload } = e.data;
+        
+        if (msgId === id) {
+          if (type === 'RESULT') {
+            workerRef.current?.removeEventListener('message', handleMessage);
+            setStatus('ready');
+            addLog('info', 'Translation complete.');
+            resolve(payload);
+          } else if (type === 'ERROR') {
+            workerRef.current?.removeEventListener('message', handleMessage);
+            setStatus('ready');
+            addLog('error', `Translation failed: ${payload}`);
+            reject(new Error(payload));
+          }
+        }
+      };
+
+      workerRef.current.addEventListener('message', handleMessage);
+
+      workerRef.current.postMessage({
         type: 'TRANSLATE',
         id,
         payload: { text, src, tgt }
       });
     });
-  }, [status, addLog]);
+  }, [addLog, setStatus]);
 
   const dispose = useCallback(() => {
     if (workerRef.current) {
-      addLog('DEBUG', 'Sending DISPOSE command...');
-      workerRef.current.postMessage({ type: 'DISPOSE' });
       workerRef.current.terminate();
       workerRef.current = null;
       setStatus('idle');
+      addLog('warn', 'Pipeline terminated. Memory cleared.');
     }
-  }, [addLog]);
-
-  const clearLogs = useCallback(() => {
-    setLogs([]);
-  }, []);
+  }, [addLog, setStatus]);
 
   return {
     status,
     progressItems,
     logs,
+    hasAgreed,
+    confirmAgreement,
     initWorker,
     translate,
     dispose,

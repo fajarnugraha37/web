@@ -46,7 +46,7 @@ export function VolumeDatasetManager({
             {registeredFiles.length > 0 ? (
               <ul className="space-y-1">
                 {registeredFiles.map((f) => (
-                  <li key={f} className="text-accent/80 ml-2 before:content-['>_'] before:mr-2">'{f}'</li>
+                  <li key={f} className="text-accent/80 ml-2 before:content-['>_'] before:mr-2">&apos;{f}&apos;</li>
                 ))}
               </ul>
             ) : (
@@ -71,7 +71,7 @@ export function VolumeDatasetManager({
           <div className="p-2 border-t border-border/20 max-h-48 overflow-y-auto">
             <ul className="space-y-2">
               {availableDatasets.map((dataset) => {
-                const queryStr = `SELECT * FROM 'https://fajarnugraha37.github.io/datasets/${dataset}';`;
+                const queryStr = `SELECT * FROM '${typeof window !== 'undefined' ? window.location.origin : ''}/datasets/${dataset}';`;
                 return (
                   <li key={dataset} className="flex flex-col gap-1 p-2 bg-muted/10 border border-border/30 group">
                     <div className="flex justify-between items-start gap-2">

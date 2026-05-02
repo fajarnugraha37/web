@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, X, Loader2, Image as ImageIcon, Film, Music, FileText, UploadCloud, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
@@ -8,6 +8,11 @@ import { ConfirmationModal } from "@/components/atoms/ConfirmationModal";
 import { toast } from "@/components/atoms/Toast";
 import { ENV } from "@/lib/env";
 import { AssetItem, AssetCategory } from "@/types";
+import {
+  useAssetsQuery,
+  useUploadAssetMutation,
+  useDeleteAssetMutation,
+} from "@/hooks/queries/useAssetsQuery";
 
 interface AssetsPickerModalProps {
   isOpen: boolean;
@@ -15,42 +20,36 @@ interface AssetsPickerModalProps {
   onSelect: (injectionText: string) => void;
 }
 
+const TABS: { id: AssetCategory | "all"; label: string; icon: React.ReactNode }[] = [
+  { id: "all", label: "ALL", icon: <FileText size={14} /> },
+  { id: "img", label: "IMAGES", icon: <ImageIcon size={14} /> },
+  { id: "video", label: "VIDEO", icon: <Film size={14} /> },
+  { id: "audio", label: "AUDIO", icon: <Music size={14} /> },
+  { id: "doc", label: "DOCS", icon: <FileText size={14} /> },
+];
+
 export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerModalProps) {
   const [activeTab, setActiveTab] = useState<"gallery" | "upload">("gallery");
-  const [assets, setAssets] = useState<AssetItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteItem, setDeleteItem] = useState<AssetItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const fetchAssets = useCallback(async () => {
-    setLoading(true);
-    try {
-      const fetchUrl = ENV.IS_WRITE_MODE ? '/api/labs/assets' : '/assets-index.json';
-      const res = await fetch(fetchUrl);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const json = await res.json();
-      const items = Array.isArray(json) ? json : json.data;
-      setAssets(items || []);
-    } catch (err) {
-      console.error("Failed to load assets:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: assets = [], isLoading, isError, refetch } = useAssetsQuery();
+  const uploadMutation = useUploadAssetMutation();
+  const deleteMutation = useDeleteAssetMutation();
 
   useEffect(() => {
     if (isOpen) {
-      fetchAssets();
+      refetch();
       setActiveTab("gallery");
     }
-  }, [isOpen, fetchAssets]);
+  }, [isOpen, refetch]);
 
-  const filteredAssets = assets.filter(a => 
-    a.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAssets = useMemo(() => {
+    return assets.filter((asset) =>
+      asset.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [assets, searchQuery]);
 
   const handleSelect = (item: AssetItem) => {
     let text = "";
@@ -67,49 +66,41 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
     onClose();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteItem) return;
-    setIsDeleting(true);
-    try {
-      const res = await fetch('/api/labs/assets', {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: deleteItem.url })
-      });
-      if (!res.ok) throw new Error("Delete failed");
-      toast("Asset deleted successfully", "success");
-      setAssets(prev => prev.filter(a => a.url !== deleteItem.url));
-    } catch (err: any) {
-      toast(err.message, "error");
-    } finally {
-      setIsDeleting(false);
-      setDeleteItem(null);
-    }
+    deleteMutation.mutate(deleteItem.url, {
+      onSuccess: () => {
+        toast("Asset deleted successfully", "success");
+        setDeleteItem(null);
+      },
+      onError: (err: any) => {
+        toast(err.message || "Delete failed", "error");
+        setDeleteItem(null);
+      },
+    });
   };
 
-  const handleUpload = async (files: FileList | null) => {
+  const handleUpload = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setIsUploading(true);
-    
-    // Upload sequentially for simplicity and safety
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const formData = new FormData();
-        formData.append("file", files[i]);
-        
-        const res = await fetch('/api/labs/assets', {
-          method: "POST",
-          body: formData
-        });
-        if (!res.ok) throw new Error(`Failed to upload ${files[i].name}`);
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size > 10 * 1024 * 1024) {
+        toast(`FILE_TOO_LARGE: ${file.name} (Max 10MB)`, "error");
+        continue;
       }
-      toast("Assets uploaded successfully", "success");
-      await fetchAssets();
-      setActiveTab("gallery");
-    } catch (err: any) {
-      toast(err.message, "error");
-    } finally {
-      setIsUploading(false);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      uploadMutation.mutate(formData, {
+        onSuccess: (data) => {
+          toast(`UPLOADED: ${data.data.name}`, "success");
+          setActiveTab("gallery");
+        },
+        onError: (err: any) => {
+          toast(err.message || "UPLOAD_FAILED", "error");
+        },
+      });
     }
   };
 
@@ -122,26 +113,28 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={onClose}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
-            <motion.div 
-              initial={{ opacity: 0, y: 20, scale: 0.95 }} 
-              animate={{ opacity: 1, y: 0, scale: 1 }} 
-              exit={{ opacity: 0, y: 20, scale: 0.95 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
               className="relative w-full max-w-4xl bg-[#0a0a0f] border border-accent/40 rounded-lg shadow-[0_0_30px_rgba(0,255,136,0.15)] overflow-hidden flex flex-col max-h-[85vh] h-[600px]"
             >
               <div className="absolute inset-0 cyber-grid-bg opacity-10 pointer-events-none" />
-              
+
               <div className="flex items-center justify-between p-4 border-b border-accent/20 relative z-10 bg-[#0a0a0f]">
                 <h2 className="text-xs font-bold text-accent uppercase tracking-[0.2em] flex items-center gap-2">
                   <ImageIcon size={14} /> ASSETS_PICKER.EXE
@@ -178,7 +171,7 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                   <div className="p-4 relative z-10">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                      <input 
+                      <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -189,9 +182,16 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 relative z-10 bg-[#0a0a0f]">
-                    {loading ? (
-                      <div className="flex justify-center items-center h-full text-accent">
-                        <Loader2 className="animate-spin" size={24} />
+                    {isLoading ? (
+                      <div className="flex flex-col items-center justify-center h-full text-accent space-y-4">
+                        <Loader2 className="animate-spin" size={32} />
+                        <div className="text-xs font-mono animate-pulse tracking-widest">SCANNING_REPOSITORY...</div>
+                      </div>
+                    ) : isError ? (
+                      <div className="flex flex-col items-center justify-center h-full text-destructive space-y-4">
+                        <X size={32} />
+                        <div className="text-xs font-mono tracking-widest">ERROR_FETCHING_ASSETS</div>
+                        <Button variant="outline" size="sm" onClick={() => refetch()}>RETRY</Button>
                       </div>
                     ) : filteredAssets.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs uppercase tracking-widest gap-2">
@@ -202,7 +202,7 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredAssets.map(asset => (
                           <div key={asset.url} className="group relative bg-black border border-border/40 hover:border-accent/50 rounded overflow-hidden flex flex-col aspect-square transition-all hover:shadow-[0_0_15px_rgba(0,255,136,0.15)]">
-                            <button 
+                            <button
                               onClick={() => handleSelect(asset)}
                               className="flex-1 flex items-center justify-center bg-[#111] p-2 relative overflow-hidden"
                             >
@@ -224,7 +224,7 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                               </div>
                             </div>
                             {ENV.IS_WRITE_MODE && (
-                              <button 
+                              <button
                                 onClick={(e) => { e.stopPropagation(); setDeleteItem(asset); }}
                                 className="absolute top-2 right-2 bg-red-500/80 text-white p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all z-20"
                                 title="Delete Asset"
@@ -242,7 +242,7 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
 
               {activeTab === "upload" && (
                 <div className="flex-1 p-6 relative z-10 flex flex-col h-full bg-[#0a0a0f]">
-                  <div 
+                  <div
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
                     onDrop={(e) => { e.preventDefault(); setDragOver(false); handleUpload(e.dataTransfer.files); }}
@@ -251,8 +251,8 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                     }`}
                   >
                     <div className="absolute inset-0 cyber-grid-bg opacity-5 pointer-events-none" />
-                    
-                    {isUploading ? (
+
+                    {uploadMutation.isPending ? (
                       <div className="flex flex-col items-center gap-3 text-accent">
                         <Loader2 className="animate-spin" size={32} />
                         <span className="text-xs uppercase tracking-widest font-bold">Uploading to Server...</span>
@@ -272,11 +272,11 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
                             <span className="px-6 py-2 bg-accent/10 border border-accent/50 text-accent hover:bg-accent hover:text-black cursor-pointer transition-colors text-xs font-bold uppercase tracking-widest rounded-sm shadow-[0_0_10px_rgba(0,255,136,0.2)]">
                               Browse Files
                             </span>
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              multiple 
-                              onChange={(e) => handleUpload(e.target.files)} 
+                            <input
+                              type="file"
+                              className="hidden"
+                              multiple
+                              onChange={(e) => handleUpload(e.target.files)}
                             />
                           </label>
                         </div>
@@ -290,9 +290,9 @@ export function AssetsPickerModal({ isOpen, onClose, onSelect }: AssetsPickerMod
         )}
       </AnimatePresence>
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={!!deleteItem}
-        isLoading={isDeleting}
+        isLoading={deleteMutation.isPending}
         onClose={() => setDeleteItem(null)}
         onConfirm={handleDelete}
         title="Purge Asset"

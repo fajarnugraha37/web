@@ -11,6 +11,7 @@ import {
 import { LabFile } from "@/types";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "@/components/atoms/Toast";
+import { createPortal } from "react-dom";
 
 interface FileTabsProps {
   files: LabFile[];
@@ -40,7 +41,7 @@ export function FileTabs({
   // Handle click outside for tab menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (activeMenu && !(event.target as HTMLElement).closest(".tab-menu-trigger")) {
+      if (activeMenu && !(event.target as HTMLElement).closest(".tab-menu-trigger") && !(event.target as HTMLElement).closest(".tab-action-popover")) {
         setActiveMenu(null);
       }
     };
@@ -48,11 +49,15 @@ export function FileTabs({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeMenu]);
 
-  // Handle scroll to close menu (prevent floating menu disconnect)
+  // Handle scroll/resize to close menu
   useEffect(() => {
-    const handleScroll = () => setActiveMenu(null);
-    window.addEventListener("scroll", handleScroll, true);
-    return () => window.removeEventListener("scroll", handleScroll, true);
+    const handleReset = () => setActiveMenu(null);
+    window.addEventListener("scroll", handleReset, true);
+    window.addEventListener("resize", handleReset);
+    return () => {
+      window.removeEventListener("scroll", handleReset, true);
+      window.removeEventListener("resize", handleReset);
+    };
   }, []);
 
   return (
@@ -82,14 +87,18 @@ export function FileTabs({
             <MoreHorizontal size={14} />
           </button>
           
-          <AnimatePresence>
-            {activeMenu?.id === f.id && (
+          {/* Portal the popover to body for absolute overflow freedom */}
+          {activeMenu?.id === f.id && typeof document !== 'undefined' && createPortal(
+            <AnimatePresence>
               <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="fixed bg-card border border-accent p-2 z-[9999] flex flex-col gap-1 w-36 shadow-[0_10px_40px_rgba(0,0,0,0.8)] cyber-chamfer-sm"
-                style={{ top: `${activeMenu.rect.bottom + 8}px`, left: `${activeMenu.rect.left}px` }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="fixed bg-card border border-accent p-2 z-[9999] flex flex-col gap-1 w-36 shadow-[0_10px_40px_rgba(0,0,0,0.8)] cyber-chamfer-sm tab-action-popover"
+                style={{ 
+                  top: `${activeMenu.rect.bottom + 8}px`, 
+                  left: `${activeMenu.rect.left}px` 
+                }}
               >
                 <button 
                   className="text-[10px] text-left text-accent hover:bg-accent/10 px-3 py-2 flex items-center gap-2 transition-colors uppercase font-bold" 
@@ -111,8 +120,9 @@ export function FileTabs({
                   <Trash2 size={12} /> Delete
                 </button>
               </motion.div>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>,
+            document.body
+          )}
         </div>
       ))}
       <button 

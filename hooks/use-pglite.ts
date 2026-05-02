@@ -1,74 +1,59 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { PGlite } from "@electric-sql/pglite";
-import { SEED_SQL } from "@/lib/pg-seed";
-import { DbStatus } from "@/types";
+import { getPGliteInstance } from "@/lib/db/pglite-client";
+import { useSqlStore, SqlEngineState } from "@/lib/store/useSqlStore";
 
 export interface PGliteHook {
   db: PGlite | null;
-  status: DbStatus;
+  status: SqlEngineState['status'];
   error: string | null;
   exec: (sql: string) => Promise<any>;
 }
 
 export function usePglite(): PGliteHook {
-  const [db, setDb] = useState<PGlite | null>(null);
-  const [status, setStatus] = useState<DbStatus>("initializing");
-  const [error, setError] = useState<string | null>(null);
-  const initRef = useRef(false);
+  const status = useSqlStore((state) => state.status);
+  const error = useSqlStore((state) => state.lastError);
+  const setStatus = useSqlStore((state) => state.setStatus);
+  const setExecuting = useSqlStore((state) => state.setExecuting);
+  const setTotalRecords = useSqlStore((state) => state.setTotalRecords);
 
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    // Only initialize if we haven't tried yet
+    if (status !== "initializing") return;
 
-    async function initDb() {
-      let pg: PGlite | null = null;
+    async function init() {
       try {
-        try {
-          pg = new PGlite("idb://sysop-db");
-          await pg.waitReady;
-          setStatus("ready");
-        } catch (storageErr: any) {
-          console.warn("Storage restricted, falling back to memory:", storageErr);
-          pg = new PGlite(); 
-          await pg.waitReady;
-          setStatus("volatile");
-        }
-
-        if (!pg) throw new Error("Failed to initialize database engine");
-
-        try {
-          const check = await pg.query(
-            "SELECT 1 FROM information_schema.tables WHERE table_name = 'system_control';"
-          );
-          
-          if (check.rows.length === 0) {
-            console.log("System initializing... applying seed logs.");
-            await pg.exec(SEED_SQL);
-          }
-        } catch (seedErr) {
-          console.error("Seed failure:", seedErr);
-        }
-
-        setDb(pg);
+        const { status: dbStatus } = await getPGliteInstance();
+        setStatus(dbStatus);
       } catch (err: any) {
         console.error("Critical DB failure:", err);
-        setError(err.message || "Unknown hardware failure");
-        setStatus("error");
+        setStatus("error", err.message || "Unknown hardware failure");
       }
     }
 
-    initDb();
-  }, []);
+    init();
+  }, [status, setStatus]);
 
   const exec = useCallback(
     async (sql: string) => {
+      const { db } = await getPGliteInstance();
       if (!db) throw new Error("Database engine offline");
-      return await db.query(sql);
+      
+      setExecuting(true);
+      try {
+        const res = await db.query(sql);
+        setTotalRecords(res.rows.length);
+        return res;
+      } catch (err) {
+        throw err;
+      } finally {
+        setExecuting(false);
+      }
     },
-    [db]
+    [setExecuting, setTotalRecords]
   );
 
-  return { db, status, error, exec };
+  return { db: null, status, error, exec };
 }

@@ -1,60 +1,104 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { fetchFile } from "@ffmpeg/util";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/components/atoms/Toast";
+import { useFfmpegStore } from "@/lib/store/useFfmpegStore";
 
 export type FFmpegMode = 'GIF' | 'COMPRESS' | 'TRIM' | 'AUDIO' | 'CUSTOM';
 export type VideoResolution = 'ORIGINAL' | '1080P' | '720P' | '480P';
 export type EncoderPreset = 'ultrafast' | 'faster' | 'medium' | 'slower';
 
-interface FFmpegActionsProps {
-  status: string;
-  writeFile: (name: string, data: Uint8Array) => Promise<any>;
-  readFile: (name: string) => Promise<any>;
-  exec: (args: string[]) => Promise<any>;
-  deleteFile: (name: string) => Promise<any>;
+interface UseFFmpegLabActionsProps {
+  status: "initializing" | "ready" | "processing" | "error" | "volatile" | "idle";
+  writeFile: (name: string, data: Uint8Array) => Promise<void>;
+  readFile: (name: string) => Promise<Uint8Array>;
+  deleteFile: (name: string) => Promise<void>;
+  exec: (args: string[]) => Promise<boolean>;
   addLog: (msg: string) => void;
 }
 
-/**
- * Headless Hook: useFFmpegLabActions
- * Maps UI presets to exact FFmpeg string templates.
- */
 export function useFFmpegLabActions({
   status,
   writeFile,
   readFile,
-  exec,
   deleteFile,
+  exec,
   addLog
-}: FFmpegActionsProps) {
+}: UseFFmpegLabActionsProps) {
   const isMobile = useIsMobile();
-  const [inputFile, setInputFile] = useState<File | null>(null);
   
-  // Advanced Settings State
-  const [resolution, setResolution] = useState<VideoResolution>('ORIGINAL');
-  const [preset, setPreset] = useState<EncoderPreset>('faster');
-  const [gifQuality, setGifQuality] = useState<'HIGH' | 'PERFORMANCE'>('PERFORMANCE');
-
-  const [outputUrls, setOutputUrls] = useState<Record<FFmpegMode, string | null>>({
+  // Non-serializable state kept local
+  const [inputFile, setInputFile] = useState<File | null>(null);
+  const [inputUrl, setInputUrl] = useState<string | null>(null);
+  const [outputUrls, setOutputUrls] = useState<Record<string, string | null>>({
     GIF: null,
     COMPRESS: null,
     TRIM: null,
     AUDIO: null,
     CUSTOM: null,
   });
-  const [outputNames, setOutputNames] = useState<Record<FFmpegMode, string | null>>({
+  const [outputNames, setOutputNames] = useState<Record<string, string | null>>({
     GIF: null,
     COMPRESS: null,
     TRIM: null,
     AUDIO: null,
     CUSTOM: null,
   });
-  const [mode, setMode] = useState<FFmpegMode>('COMPRESS');
 
-  // Helper to map resolution to FFmpeg scale filter
+  // Serializable settings from Zustand
+  const mode = useFfmpegStore(state => state.mode) as FFmpegMode;
+  const setMode = useFfmpegStore(state => state.setMode);
+  const resolution = useFfmpegStore(state => state.resolution) as VideoResolution;
+  const setResolution = useFfmpegStore(state => state.setResolution);
+  const gifQuality = useFfmpegStore(state => state.gifQuality);
+  const setGifQuality = useFfmpegStore(state => state.setGifQuality);
+  const preset = useFfmpegStore(state => state.preset) as EncoderPreset;
+  const setPreset = useFfmpegStore(state => state.setPreset);
+  const trimStart = useFfmpegStore(state => state.trimStart);
+  const setTrimStart = useFfmpegStore(state => state.setTrimStart);
+  const trimDuration = useFfmpegStore(state => state.trimDuration);
+  const setTrimDuration = useFfmpegStore(state => state.setTrimDuration);
+  const duration = useFfmpegStore(state => state.duration);
+  const setDuration = useFfmpegStore(state => state.setDuration);
+
+  // Manage Input URL Lifecycle
+  useEffect(() => {
+    if (!inputFile) {
+      if (inputUrl) URL.revokeObjectURL(inputUrl);
+      setInputUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(inputFile);
+    setInputUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [inputFile]);
+
+  const reset = useCallback(() => {
+    setInputFile(null);
+    setOutputUrls({
+      GIF: null,
+      COMPRESS: null,
+      TRIM: null,
+      AUDIO: null,
+      CUSTOM: null,
+    });
+    setOutputNames({
+      GIF: null,
+      COMPRESS: null,
+      TRIM: null,
+      AUDIO: null,
+      CUSTOM: null,
+    });
+    setDuration(0);
+    toast("BUFFER_FLUSHED", "success");
+  }, [setDuration]);
+
   const getScaleFilter = useCallback(() => {
     switch (resolution) {
       case '1080P': return "scale=1920:-2";
@@ -64,17 +108,11 @@ export function useFFmpegLabActions({
     }
   }, [resolution]);
 
-  // Trimming & Metadata state
-  const [duration, setDuration] = useState(0);
-  const [trimStart, setTrimStart] = useState("00:00:00");
-  const [trimDuration, setTrimDuration] = useState("10");
-
   const handleModeChange = useCallback((newMode: FFmpegMode) => {
-    setMode(newMode);
-  }, []);
+    setMode(newMode as any);
+  }, [setMode]);
 
   const handleFileSelect = useCallback(async (file: File) => {
-    // Mobile Limit: 100MB
     const limit = isMobile ? 100 * 1024 * 1024 : 500 * 1024 * 1024;
     if (file.size > limit) {
       toast(`FILE_TOO_LARGE: MAX ${isMobile ? '100MB' : '500MB'}`, "error");
@@ -98,16 +136,15 @@ export function useFFmpegLabActions({
     });
     toast("FILE_LOADED", "success");
 
-    // Extract Metadata (Duration)
     const video = document.createElement('video');
     video.preload = 'metadata';
     video.onloadedmetadata = () => {
-      setDuration(Math.floor(video.duration));
-      setTrimDuration(Math.floor(video.duration).toString());
-      URL.revokeObjectURL(video.src);
+      const dur = Math.floor(video.duration);
+      setDuration(dur);
+      setTrimDuration(dur);
     };
     video.src = URL.createObjectURL(file);
-  }, [isMobile]);
+  }, [isMobile, setTrimDuration, setDuration]);
 
   const process = useCallback(async () => {
     if (!inputFile || (status !== "ready" && status !== "idle")) {
@@ -119,90 +156,80 @@ export function useFFmpegLabActions({
     const timestamp = new Date().getTime();
     const sanitizedBaseName = inputFile.name.split('.')[0].replace(/\s+/g, '_');
     const operationName = mode.toLowerCase();
-    
+
     let extension = "mp4";
     if (mode === 'GIF') extension = "gif";
     if (mode === 'AUDIO') extension = "mp3";
-    
+
     const outputFileName = `${sanitizedBaseName}_${operationName}_${timestamp}.${extension}`;
     const virtualOutputName = `output.${extension}`;
 
     try {
-      // 1. Write input file
       await writeFile(inputName, await fetchFile(inputFile));
 
-      // Determine optimal threads based on hardware concurrency (max 4 to avoid resource starvation)
-      const maxThreads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency 
-        ? Math.min(4, navigator.hardwareConcurrency).toString() 
+      const maxThreads = typeof navigator !== 'undefined' && navigator.hardwareConcurrency
+        ? Math.min(4, navigator.hardwareConcurrency).toString()
         : "2";
 
       const scaleFilter = getScaleFilter();
 
       let success = false;
+      
+      const tStartStr = trimStart.toString();
+      const tDurStr = trimDuration.toString();
+
       switch (mode) {
         case 'GIF':
           if (gifQuality === 'HIGH') {
-            // High-Quality Sequential 2-Pass GIF (480p, 15fps)
             const paletteName = `palette_${timestamp}.png`;
-
-            // Pass 1: Generate palette
             const pass1Args = [
               "-loglevel", "debug",
-              "-ss", trimStart,
-              "-t", trimDuration,
+              "-ss", tStartStr,
+              "-t", tDurStr,
               "-i", inputName,
-              "-vf", "fps=15,scale=480:-1:flags=lanczos,palettegen", 
+              "-vf", "fps=15,scale=480:-1:flags=lanczos,palettegen",
               "-frames:v", "1",
               "-update", "1",
               "-threads", maxThreads,
               "-y", paletteName
             ];
-            
-            console.log("[DEBUG] Pass 1 Args:", pass1Args.join(" "));
-            addLog(`[EXEC] FFmpeg Pass 1 (Palettegen): ${pass1Args.join(" ")}`);
+            addLog(`[EXEC] FFmpeg Pass 1: ${pass1Args.join(" ")}`);
             const pass1Success = await exec(pass1Args);
-            
+
             if (pass1Success) {
-              // Pass 2: Generate GIF using the palette
               const pass2Args = [
-                "-ss", trimStart, 
-                "-t", trimDuration, 
-                "-i", inputName, 
-                "-i", paletteName, 
-                "-filter_complex", "[0:v]fps=15,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse", 
-              "-f", "gif",
-              "-threads", "1",
+                "-ss", tStartStr,
+                "-t", tDurStr,
+                "-i", inputName,
+                "-i", paletteName,
+                "-filter_complex", "[0:v]fps=15,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
+                "-f", "gif",
+                "-threads", "1",
                 "-y", virtualOutputName
-            ];
-              console.log("[DEBUG] Pass 2 Args:", pass2Args.join(" "));
-              addLog(`[EXEC] FFmpeg Pass 2 (Paletteuse): ${pass2Args.join(" ")}`);
-            success = await exec(pass2Args);
+              ];
+              addLog(`[EXEC] FFmpeg Pass 2: ${pass2Args.join(" ")}`);
+              success = await exec(pass2Args);
             }
-            
-            // Cleanup palette
             await deleteFile(paletteName).catch(() => {});
           } else {
-            // High-Efficiency Single-Pass GIF (240p, 8fps)
             const gifArgs = [
               "-loglevel", "debug",
-              "-ss", trimStart, 
-              "-t", trimDuration, 
-              "-i", inputName, 
-              "-vf", "fps=8,scale=240:-1:flags=lanczos", 
+              "-ss", tStartStr,
+              "-t", tDurStr,
+              "-i", inputName,
+              "-vf", "fps=8,scale=240:-1:flags=lanczos",
               "-f", "gif",
               "-threads", maxThreads,
               "-y",
               virtualOutputName
             ];
-            console.log("[DEBUG] Single-Pass GIF Args:", gifArgs.join(" "));
             addLog(`[EXEC] FFmpeg Single-Pass GIF: ${gifArgs.join(" ")}`);
             success = await exec(gifArgs);
           }
           break;
 
         case 'AUDIO':
-          const audioArgs = ["-loglevel", "debug", "-ss", trimStart, "-t", trimDuration, "-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", maxThreads, "-y", virtualOutputName];
-          console.log("[DEBUG] Audio Args:", audioArgs.join(" "));
+          const audioArgs = ["-loglevel", "debug", "-ss", tStartStr, "-t", tDurStr, "-i", inputName, "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-threads", maxThreads, "-y", virtualOutputName];
           addLog(`[EXEC] FFmpeg Audio: ${audioArgs.join(" ")}`);
           success = await exec(audioArgs);
           break;
@@ -211,17 +238,16 @@ export function useFFmpegLabActions({
           const trimVf = scaleFilter ? [scaleFilter] : [];
           const trimArgs = [
             "-loglevel", "debug",
-            "-i", inputName, 
-            "-ss", trimStart, 
-            "-t", trimDuration, 
+            "-i", inputName,
+            "-ss", tStartStr,
+            "-t", tDurStr,
             ...(trimVf.length ? ["-vf", trimVf.join(",")] : []),
-            "-c:v", "libx264", 
+            "-c:v", "libx264",
             "-crf", "23",
             "-preset", preset,
-            "-threads", maxThreads, 
+            "-threads", maxThreads,
             "-y", virtualOutputName
           ];
-          console.log("[DEBUG] Trim Args:", trimArgs.join(" "));
           addLog(`[EXEC] FFmpeg Trim: ${trimArgs.join(" ")}`);
           success = await exec(trimArgs);
           break;
@@ -231,28 +257,23 @@ export function useFFmpegLabActions({
           const compVf = scaleFilter ? [scaleFilter] : [];
           const compArgs = [
             "-loglevel", "debug",
-            "-i", inputName, 
+            "-i", inputName,
             ...(compVf.length ? ["-vf", compVf.join(",")] : []),
-            "-vcodec", "libx264", 
-            "-crf", "28", 
-            "-preset", preset, 
-            "-threads", maxThreads, 
+            "-vcodec", "libx264",
+            "-crf", "28",
+            "-preset", preset,
+            "-threads", maxThreads,
             "-y", virtualOutputName
           ];
-          console.log("[DEBUG] Compress Args:", compArgs.join(" "));
           addLog(`[EXEC] FFmpeg Compress: ${compArgs.join(" ")}`);
           success = await exec(compArgs);
           break;
       }
-      
+
       if (success) {
-        console.log('[FFMPEG] execution success: ', success);
-        // [STRATEGY: CLEAN SLATE] 
-        // Delete input file IMMEDIATELY after execution to free up WASM Heap for the readFile operation.
         await deleteFile(inputName).catch(() => {});
 
         try {
-          // 3. Read output
           const data = await readFile(virtualOutputName);
           if (data) {
             const blobType = mode === 'GIF' ? 'image/gif' : mode === 'AUDIO' ? 'audio/mpeg' : 'video/mp4';
@@ -267,33 +288,31 @@ export function useFFmpegLabActions({
           toast("OUTPUT_READ_ERROR", "error");
         }
       } else {
-        console.log('[FFMPEG] execution failed: ', success);
+        toast("TRANSCODE_FAILED", "error");
       }
     } catch (err) {
       console.error("Transcoding pipeline failed:", err);
       toast("TRANSCODE_FAILED", "error");
     } finally {
-      // 4. Defensive Cleanup of output only (input was handled above)
       try {
         await deleteFile(virtualOutputName).catch(() => {});
       } catch (e) {
-        // Silently ignore cleanup errors
         console.error('[FFMPEG] CLEANUP FILE FAILED: ', e);
       }
     }
-    console.log('[FFMPEG] process done');
-  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality, resolution, preset, getScaleFilter]);
+  }, [inputFile, mode, trimStart, trimDuration, status, writeFile, readFile, exec, deleteFile, gifQuality, resolution, preset, getScaleFilter, addLog]);
 
   return {
     inputFile,
+    inputUrl,
     outputUrl: outputUrls[mode],
     outputName: outputNames[mode],
     mode,
     setMode: handleModeChange,
     duration,
-    trimStart,
+    trimStart: trimStart.toString(),
     setTrimStart,
-    trimDuration,
+    trimDuration: trimDuration.toString(),
     setTrimDuration,
     gifQuality,
     setGifQuality,
@@ -303,5 +322,6 @@ export function useFFmpegLabActions({
     setPreset,
     handleFileSelect,
     process,
+    reset,
   };
 }

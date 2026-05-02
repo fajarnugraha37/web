@@ -5,6 +5,7 @@ import { SqlEditor } from "@/components/molecules/SqlEditor";
 import { ResultMatrix } from "@/components/molecules/ResultMatrix";
 import { Square, Columns2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSqlStore } from "@/lib/store/useSqlStore";
 
 interface SqlTerminalSectionProps {
   exec: (query: string) => Promise<any>;
@@ -12,6 +13,7 @@ interface SqlTerminalSectionProps {
   error: string | null;
   onExportFull?: (query: string) => Promise<void>;
   accentColor?: "accent" | "accent-secondary" | "accent-tertiary";
+  engine?: "pg" | "duckdb";
 }
 
 export function SqlTerminalSection({
@@ -20,28 +22,40 @@ export function SqlTerminalSection({
   error,
   onExportFull,
   accentColor = "accent",
+  engine = "pg",
 }: SqlTerminalSectionProps) {
+  // Zustand state
+  const history = useSqlStore((state) => engine === "pg" ? state.pgHistory : state.duckDbHistory);
+  const addPgHistory = useSqlStore((state) => state.addPgHistory);
+  const addDuckDbHistory = useSqlStore((state) => state.addDuckDbHistory);
+  const clearHistory = useSqlStore((state) => state.clearHistory);
+
+  // Local UI-only state
   const [results, setResults] = useState<any[] | null>(null);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
   const [layoutMode, setLayoutMode] = useState<"stack" | "wide">("stack");
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
   const [lastQuery, setLastQuery] = useState<string | null>(null);
+  const [localIsExecuting, setLocalIsExecuting] = useState(false);
+  const [localTotalRecords, setLocalTotalRecords] = useState(0);
 
   const handleExecute = useCallback(
     async (query: string, page = 1, size = pageSize) => {
-      setIsExecuting(true);
       setQueryError(null);
       setLastQuery(query);
       setCurrentPage(page);
+      setLocalIsExecuting(true);
 
       const start = performance.now();
       let trimmedQuery = query.trim();
+
+      // Only add to history if it's the initial execution (page 1) and not empty
+      if (page === 1 && trimmedQuery.length > 0) {
+        if (engine === 'pg') addPgHistory(trimmedQuery);
+        else addDuckDbHistory(trimmedQuery);
+      }
 
       if (trimmedQuery.endsWith(";")) {
         trimmedQuery = trimmedQuery.slice(0, -1);
@@ -55,7 +69,7 @@ export function SqlTerminalSection({
           const countQuery = `SELECT COUNT(*) as total FROM (${trimmedQuery}) AS sub`;
           const countRes = await exec(countQuery);
           const total = parseInt(countRes.rows?.[0]?.total || countRes.rows?.[0]?.count || 0);
-          setTotalRecords(total);
+          setLocalTotalRecords(total);
 
           // 2. Fetch Page
           const offset = (page - 1) * size;
@@ -65,18 +79,18 @@ export function SqlTerminalSection({
         } else {
           const res = await exec(trimmedQuery);
           setResults(res.rows || []);
-          setTotalRecords(res.rows?.length || 0);
+          setLocalTotalRecords(res.rows?.length || 0);
         }
         setExecutionTime(performance.now() - start);
       } catch (err: any) {
         setQueryError(err.message || "Unknown execution error");
         setResults(null);
-        setTotalRecords(0);
+        setLocalTotalRecords(0);
       } finally {
-        setIsExecuting(false);
+        setLocalIsExecuting(false);
       }
     },
-    [exec, pageSize]
+    [exec, pageSize, engine, addPgHistory, addDuckDbHistory]
   );
 
   const onPageChange = (page: number) => {
@@ -103,7 +117,7 @@ export function SqlTerminalSection({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-end">
-        <div className="flex bg-muted/20 p-1 border border-border cyber-chamfer-sm">
+        <div className="bg-muted/20 p-1 border border-border cyber-chamfer-sm hidden md:flex">
           <button
             onClick={() => setLayoutMode("stack")}
             className={cn(
@@ -145,8 +159,10 @@ export function SqlTerminalSection({
         >
           <SqlEditor
             onExecute={handleExecute}
-            isLoading={isExecuting}
+            isLoading={localIsExecuting}
             disabled={status === "initializing" || status === "error"}
+            history={history}
+            onClearHistory={() => clearHistory(engine)}
           />
         </div>
 
@@ -164,7 +180,7 @@ export function SqlTerminalSection({
             pagination={{
               currentPage,
               pageSize,
-              totalRecords,
+              totalRecords: localTotalRecords,
               onPageChange,
               onPageSizeChange,
             }}

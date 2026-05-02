@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,6 +12,8 @@ import { BlogCard } from "@/components/molecules/BlogCard";
 import { PaginationControls } from "@/components/molecules/PaginationControls";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
+import { useBlogUrlSync } from "@/hooks/queries/useBlogUrlSync";
+
 interface BlogListSectionProps {
   blogs: BlogMetadata[];
 }
@@ -19,8 +21,6 @@ interface BlogListSectionProps {
 const PAGE_SIZE = 5;
 
 export function BlogListSection({ blogs }: BlogListSectionProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // Initialize state from URL
@@ -54,34 +54,8 @@ export function BlogListSection({ blogs }: BlogListSectionProps) {
 
   const pagedBlogs = filteredBlogs.slice(startIndex, endIndex);
 
-  // Sync state to URL
-  const updateUrl = useCallback(
-    (query: string, tags: string[], page: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      
-      if (query) params.set("q", query);
-      else params.delete("q");
-
-      if (tags.length > 0) params.set("t", tags.join(","));
-      else params.delete("t");
-
-      if (page > 1) params.set("p", page.toString());
-      else params.delete("p");
-
-      const search = params.toString();
-      const queryStr = search ? `?${search}` : "";
-      router.replace(`${pathname}${queryStr}`, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
-
-  // Debounce search query updates to URL
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      updateUrl(searchQuery, selectedTags, safePage);
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedTags, safePage, updateUrl]);
+  // Sync state to URL via headless hook
+  useBlogUrlSync({ searchQuery, selectedTags, page: safePage });
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);

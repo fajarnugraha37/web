@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFFmpegCore } from "@/hooks/useFFmpegCore";
-import { useFFmpegLabActions } from "@/hooks/useFFmpegLabActions";
+import { useFFmpegLabActions, FFmpegMode } from "@/hooks/useFFmpegLabActions";
+import { useFfmpegStore } from "@/lib/store/useFfmpegStore";
 import { PageTransition } from "@/components/atoms/PageTransition";
 import { StatusCard } from "@/components/atoms/StatusCard";
 import { VideoPreview } from "@/components/atoms/VideoPreview";
@@ -20,7 +21,23 @@ import { Film, Cpu, HardDrive, ShieldAlert, Table as TableIcon } from "lucide-re
  * The master orchestrator for the FFmpeg-WASM Media Lab.
  */
 export function FFmpegLabContent() {
-  const [isFlushModalOpen, setIsFlushModalOpen] = React.useState(false);
+  const [isFlushModalOpen, setIsFlushModalOpen] = useState(false);
+  
+  // Zustand Store Selectors
+  const mode = useFfmpegStore(state => state.mode);
+  const resolution = useFfmpegStore(state => state.resolution);
+  const gifQuality = useFfmpegStore(state => state.gifQuality);
+  const preset = useFfmpegStore(state => state.preset);
+  const trimStart = useFfmpegStore(state => state.trimStart);
+  const trimDuration = useFfmpegStore(state => state.trimDuration);
+  
+  const setMode = useFfmpegStore(state => state.setMode);
+  const setResolution = useFfmpegStore(state => state.setResolution);
+  const setGifQuality = useFfmpegStore(state => state.setGifQuality);
+  const setPreset = useFfmpegStore(state => state.setPreset);
+  const setTrimStart = useFfmpegStore(state => state.setTrimStart);
+  const setTrimDuration = useFfmpegStore(state => state.setTrimDuration);
+
   const {
     status,
     progress,
@@ -36,23 +53,13 @@ export function FFmpegLabContent() {
 
   const {
     inputFile,
+    inputUrl,
     outputUrl,
     outputName,
-    mode,
-    setMode,
     duration,
-    trimStart,
-    setTrimStart,
-    trimDuration,
-    setTrimDuration,
-    gifQuality,
-    setGifQuality,
-    resolution,
-    setResolution,
-    preset,
-    setPreset,
     handleFileSelect,
     process,
+    reset,
   } = useFFmpegLabActions({
     status,
     writeFile,
@@ -68,25 +75,18 @@ export function FFmpegLabContent() {
   }, [load]);
 
   const handleTrimChange = (val: [number, number]) => {
-    const startSec = val[0];
-    const dur = val[1] - val[0];
-    
-    const formatTime = (s: number) => {
-      const hrs = Math.floor(s / 3600).toString().padStart(2, '0');
-      const mins = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
-      const secs = Math.floor(s % 60).toString().padStart(2, '0');
-      return `${hrs}:${mins}:${secs}`;
-    };
-
-    setTrimStart(formatTime(startSec));
-    setTrimDuration(dur.toString());
+    setTrimStart(val[0]);
+    setTrimDuration(val[1] - val[0]);
   };
 
   const getTrimValue = (): [number, number] => {
-    const parts = trimStart.split(':').map(Number);
-    const start = parts[0] * 3600 + parts[1] * 60 + parts[2];
-    const durVal = parseInt(trimDuration);
-    return [start, start + durVal];
+    return [trimStart, trimStart + trimDuration];
+  };
+
+  const handleFlush = () => {
+    reset();
+    clearLogs();
+    setIsFlushModalOpen(false);
   };
 
   const isError = status === "error";
@@ -107,9 +107,9 @@ export function FFmpegLabContent() {
           <StatusCard
             icon={<Cpu className="w-4 h-4" />}
             label="STATUS"
-            value={status === "loading" ? "BOOTING..." : status.toUpperCase()}
+            value={status === "initializing" ? "BOOTING..." : status.toUpperCase()}
             color={isError ? "text-destructive" : "text-accent-secondary"}
-            loading={status === "loading"}
+            loading={status === "initializing"}
           />
           <StatusCard
             icon={<HardDrive className="w-4 h-4" />}
@@ -143,12 +143,12 @@ export function FFmpegLabContent() {
                 <FfmpegDropzone onFileSelect={handleFileSelect} />
               ) : (
                 <div className="space-y-4">
-                  <VideoPreview src={URL.createObjectURL(inputFile)} label="INPUT SOURCE PREVIEW" />
+                  {inputUrl && <VideoPreview src={inputUrl} label="INPUT SOURCE PREVIEW" />}
                   <button 
                     onClick={() => setIsFlushModalOpen(true)} 
                     className="text-[9px] font-mono text-destructive hover:underline uppercase"
                   >
-                    [!] FLUSH BUFFER AND RELOAD
+                    [!] FLUSH MEMORY BUFFER
                   </button>
                 </div>
               )}
@@ -192,11 +192,11 @@ export function FFmpegLabContent() {
                   <span className="text-[10px] font-mono font-black tracking-widest text-accent uppercase">
                     # OUTPUT SIGNAL VERIFIED
                   </span>
-                  <div className="border border-accent/20 bg-accent/5 p-4 cyber-chamfer">
+                  <div className="border border-accent/20 bg-accent/5 p-4">
                     {mode === 'AUDIO' ? (
                       <audio src={outputUrl} controls className="w-full" />
                     ) : mode === 'GIF' ? (
-                      <img src={outputUrl} alt="Output" className="w-full h-auto border border-accent/30 cyber-chamfer" />
+                      <img src={outputUrl} alt="Output" className="w-full h-auto border border-accent/30" />
                     ) : (
                       <VideoPreview src={outputUrl} label="OUTPUT RESULT" />
                     )}
@@ -225,10 +225,10 @@ export function FFmpegLabContent() {
       <ConfirmationModal
         isOpen={isFlushModalOpen}
         onClose={() => setIsFlushModalOpen(false)}
-        onConfirm={() => window.location.reload()}
+        onConfirm={handleFlush}
         title="CRITICAL_BUFFER_FLUSH"
-        message="This operation will purge the current memory buffer and reset the engine. Any unsaved output will be lost. Proceed?"
-        confirmLabel="FLUSH_MEMORY"
+        message="This operation will purge the current file buffer and logs. The processing engine will remain active. Proceed?"
+        confirmLabel="FLUSH_BUFFER"
         variant="destructive"
       />
     </PageTransition>

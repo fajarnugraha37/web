@@ -11,7 +11,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
-  Html,
+  Html as ThreeHtml,
   MeshWobbleMaterial,
   Grid,
 } from "@react-three/drei";
@@ -24,7 +24,6 @@ import {
   forceCenter,
 } from "d3-force-3d";
 import { GraphData, GraphNode, GraphLink } from "@/lib/graph-utils";
-import { useRouter } from "next/navigation";
 import { ExternalLink, X, Zap } from "lucide-react";
 
 const CP_YELLOW = "#fcee0a";
@@ -92,7 +91,7 @@ const Node = ({
       </mesh>
 
       {active && (
-        <Html distanceFactor={15} position={[0, 2, 0]} zIndexRange={[100, 0]}>
+        <ThreeHtml distanceFactor={15} position={[0, 2, 0]} zIndexRange={[100, 0]}>
           <div
             className={`bg-[#050505]/95 backdrop-blur-xl border-t-4 ${isSelected ? "border-t-[#00f0ff] shadow-[0_0_40px_rgba(0,240,255,0.4)]" : "border-t-[#fcee0a] shadow-[0_0_30px_rgba(252,238,10,0.3)]"} p-6 min-w-[300px] pointer-events-auto select-none transition-all duration-300 transform scale-110 relative overflow-hidden`}
             onClick={(e) => e.stopPropagation()}
@@ -161,7 +160,7 @@ const Node = ({
               </a>
             </div>
           </div>
-        </Html>
+        </ThreeHtml>
       )}
     </group>
   );
@@ -173,10 +172,11 @@ const Link = ({ link }: { link: GraphLink }) => {
   const geoRef = useRef<THREE_LIB.BufferGeometry>(null);
   const pulseRef = useRef<THREE_LIB.Mesh>(null);
 
-  const [pulseData] = useState(() => ({
+  // Use Ref for high-frequency animation data instead of state
+  const pulseDataRef = useRef({
     progress: Math.random(),
     speed: 0.005 + Math.random() * 0.015,
-  }));
+  });
 
   useFrame(() => {
     const source = link.source as any as GraphNode;
@@ -184,14 +184,12 @@ const Link = ({ link }: { link: GraphLink }) => {
 
     if (!source.x || !target.x) return;
 
-    // Use performance.now() to avoid state.clock/THREE.Clock deprecation
     const time = performance.now() / 1000;
 
     if (lineRef.current && geoRef.current) {
       const posAttr = geoRef.current.attributes.position;
       const pa = posAttr.array as Float32Array;
 
-      // High-frequency jitter for "electro" feel
       const jitter = Math.sin(time * 30 + Number(link.value)) * 0.05;
 
       pa[0] = source.x;
@@ -205,14 +203,14 @@ const Link = ({ link }: { link: GraphLink }) => {
     }
 
     if (pulseRef.current) {
-      pulseData.progress = (pulseData.progress + pulseData.speed) % 1;
+      const data = pulseDataRef.current;
+      data.progress = (data.progress + data.speed) % 1;
       pulseRef.current.position.set(
-        source.x + (target.x - source.x) * pulseData.progress,
-        source.y + (target.y - source.y) * pulseData.progress,
-        source.z + (target.z - source.z) * pulseData.progress,
+        source.x + (target.x - source.x) * data.progress,
+        source.y + (target.y - source.y) * data.progress,
+        source.z + (target.z - source.z) * data.progress,
       );
 
-      // Pulse brightness oscillation
       const s = 0.5 + Math.sin(time * 10) * 0.2;
       pulseRef.current.scale.set(s, s, s);
     }
@@ -352,7 +350,9 @@ const Scene = ({ data }: { data: GraphData }) => {
 
 export const KnowledgeGraphCanvas = ({ data }: { data: GraphData }) => {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!mounted)
     return (

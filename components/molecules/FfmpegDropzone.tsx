@@ -28,7 +28,7 @@ export function FfmpegDropzone({ onFileSelect, className }: FfmpegDropzoneProps)
     <div 
       {...getRootProps()} 
       className={cn(
-        "group relative flex flex-col items-center justify-center py-12 px-6 border-2 border-dashed transition-all cursor-pointer cyber-chamfer",
+        "group relative flex flex-col items-center justify-center py-12 px-6 border-2 border-dashed transition-all cursor-pointer",
         isDragActive 
           ? "border-accent bg-accent/10 shadow-neon scale-[1.01]" 
           : "border-border/50 bg-card/20 hover:border-accent/50 hover:bg-accent/5",

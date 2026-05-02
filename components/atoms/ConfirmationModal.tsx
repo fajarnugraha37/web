@@ -89,7 +89,7 @@ export function ConfirmationModal({
             </div>
 
             <p className="font-mono text-xs uppercase tracking-widest leading-loose mb-8 text-foreground/70">
-              // {message}
+              <span className="opacity-50">//</span> {message}
             </p>
 
             <div className="flex justify-end gap-4 relative z-10">

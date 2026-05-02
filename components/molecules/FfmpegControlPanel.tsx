@@ -38,7 +38,7 @@ export function FfmpegControlPanel({
   };
 
   return (
-    <div className={cn("space-y-6 p-6 border border-border/30 bg-card/20 cyber-chamfer", className)}>
+    <div className={cn("space-y-6 p-6 border border-border/30 bg-card/20", className)}>
       {/* Action Header */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex flex-col">

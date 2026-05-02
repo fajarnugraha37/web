@@ -78,6 +78,7 @@ export function PostgresLabContent() {
           exec={exec} 
           status={status} 
           error={error} 
+          engine="pg"
           accentColor="accent"
           onExportFull={handleExportFull}
         />

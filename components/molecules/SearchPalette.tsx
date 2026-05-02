@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { Search, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { useSearchIndex } from "@/hooks/useSearchIndex";
+import { useSearchIndex } from "@/hooks/queries/useSearchIndex";
 
 interface SearchPaletteProps {
   isOpen: boolean;

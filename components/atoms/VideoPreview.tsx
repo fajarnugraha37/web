@@ -23,7 +23,7 @@ export function VideoPreview({ src, label, className }: VideoPreviewProps) {
           {label}
         </span>
       )}
-      <div className="relative group cyber-chamfer border border-border/50 bg-black overflow-hidden">
+      <div className="relative group border border-border/50 bg-black overflow-hidden">
         <video 
           src={src} 
           controls 

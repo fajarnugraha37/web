@@ -1,21 +1,19 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useMemo } from "react";
 import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages as lezerLanguages } from "@codemirror/language-data";
 import { vim, Vim, getCM } from "@replit/codemirror-vim";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import { Image as ImageIcon } from "lucide-react";
-import { LabFile } from "@/types";
+import { useMarkdownDocStore } from "@/lib/store/useMarkdownDocStore";
 
 export interface MarkdownEditorRef {
   insertTextAtCursor: (text: string) => void;
 }
 
 interface MarkdownEditorPaneProps {
-  activeFile: LabFile | undefined;
-  updateFileContent: (content: string) => void;
   editorParentRef: React.RefObject<HTMLDivElement | null>;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   width: string;
@@ -24,11 +22,20 @@ interface MarkdownEditorPaneProps {
 
 /**
  * Molecule: MarkdownEditorPane
- * Wraps the CodeMirror editor with VIM mode and terminal aesthetics.
+ * Refactored for performance: Directly subscribes to Store to isolate re-renders.
  */
 export const MarkdownEditorPane = forwardRef<MarkdownEditorRef, MarkdownEditorPaneProps>(
-  ({ activeFile, updateFileContent, editorParentRef, onScroll, width, onOpenAssets }, ref) => {
+  ({ editorParentRef, onScroll, width, onOpenAssets }, ref) => {
     const cmRef = useRef<ReactCodeMirrorRef>(null);
+    
+    // Subscribe to content ONLY for initial value or when activeFileId changes
+    const activeFileId = useMarkdownDocStore(state => state.activeFileId);
+    const updateContent = useMarkdownDocStore(state => state.updateContent);
+    
+    // Use get() to fetch value once without continuous subscription in this component
+    const initialValue = useMemo(() => {
+      return useMarkdownDocStore.getState().activeContent;
+    }, [activeFileId]);
 
     useImperativeHandle(ref, () => ({
       insertTextAtCursor: (text: string) => {
@@ -53,7 +60,7 @@ export const MarkdownEditorPane = forwardRef<MarkdownEditorRef, MarkdownEditorPa
       >
         <CodeMirror
           ref={cmRef}
-          value={activeFile?.content || ""}
+          value={initialValue}
           height="100%"
           theme={vscodeDark}
           extensions={[
@@ -66,7 +73,7 @@ export const MarkdownEditorPane = forwardRef<MarkdownEditorRef, MarkdownEditorPa
               Vim.handleKey(cm, 'i', 'user');
             }
           }}
-          onChange={updateFileContent}
+          onChange={updateContent}
           className="text-sm font-mono flex-1 overflow-hidden"
           autoFocus={true}
           basicSetup={{ 

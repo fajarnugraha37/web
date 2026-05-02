@@ -11,10 +11,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { MarkdownIcon, HtmlIcon, PdfIcon } from "@/components/atoms/Icons";
+import { ModalType } from "@/lib/store/useMarkdownUIStore";
 
 interface MarkdownModalsProps {
-  modal: "import" | "export" | "github" | null;
-  setModal: (val: any) => void;
+  modal: ModalType;
+  setModal: (val: ModalType | null) => void;
   githubUrl: string;
   setGithubUrl: (val: string) => void;
   onGithubFetch: () => void;
@@ -98,7 +99,7 @@ export function MarkdownModals({
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-background/80 backdrop-blur-md" onClick={() => setModal("import")} />
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-md bg-card border border-accent-secondary p-6 cyber-chamfer shadow-[0_0_50px_rgba(255,0,255,0.1)]">
              <h2 className="text-lg font-bold text-accent-secondary mb-4 uppercase tracking-widest flex items-center gap-2"><Github size={18} /> GitHub Handshake</h2>
-             <p className="text-[10px] font-mono text-muted-foreground mb-4 lowercase">// INPUT_RAW_CONTENT_URL_OR_BLOB_PATH</p>
+             <p className="text-[10px] font-mono text-muted-foreground mb-4 lowercase"><span className="opacity-50">//</span> INPUT_RAW_CONTENT_URL_OR_BLOB_PATH</p>
              <input 
                autoFocus
                className="w-full bg-black/50 border border-accent-secondary/30 p-3 text-xs font-mono outline-none focus:border-accent-secondary mb-6 text-accent-secondary"

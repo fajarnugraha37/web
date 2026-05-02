@@ -1,74 +1,41 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import * as duckdb from "@duckdb/duckdb-wasm";
-import { DbStatus, QueryResult } from "@/types";
+import { getDuckDbInstance } from "@/lib/db/duckdb-client";
+import { useSqlStore } from "@/lib/store/useSqlStore";
+import { QueryResult } from "@/types";
 
 export function useDuckDb() {
-  const [status, setStatus] = useState<DbStatus>("initializing");
-  const [error, setError] = useState<string | null>(null);
-  const dbRef = useRef<duckdb.AsyncDuckDB | null>(null);
-  const connRef = useRef<duckdb.AsyncDuckDBConnection | null>(null);
+  const status = useSqlStore((state) => state.status);
+  const error = useSqlStore((state) => state.lastError);
+  const setStatus = useSqlStore((state) => state.setStatus);
+  const setExecuting = useSqlStore((state) => state.setExecuting);
+  const setTotalRecords = useSqlStore((state) => state.setTotalRecords);
 
   useEffect(() => {
-    let isMounted = true;
-    let proxyUrl: string | null = null;
+    if (typeof window === "undefined" || status !== "initializing") return;
 
     async function init() {
       try {
-        const origin = window.location.origin;
-        const basePath = "/duckdb"; 
-        
-        const bundle = {
-          mainModule: `${origin}${basePath}/duckdb-eh.wasm`,
-          mainWorker: `${origin}${basePath}/duckdb-browser-eh.worker.js`,
-        };
-        
-        const workerResponse = await fetch(bundle.mainWorker);
-        let workerScript = await workerResponse.text();
-        
-        workerScript = workerScript.replace(/\/\/# sourceMappingURL=.*/, "");
-        
-        proxyUrl = URL.createObjectURL(
-          new Blob([workerScript], { type: "application/javascript" })
-        );
-
-        const logger = new duckdb.ConsoleLogger();
-        const worker = new Worker(proxyUrl);
-        const db = new duckdb.AsyncDuckDB(logger, worker);
-        
-        await db.instantiate(bundle.mainModule, bundle.mainWorker);
-        const conn = await db.connect();
-        
-        if (isMounted) {
-          dbRef.current = db;
-          connRef.current = conn;
-          setStatus("ready");
-        }
+        await getDuckDbInstance();
+        setStatus("ready");
       } catch (err: any) {
         console.error("DuckDB initialization failed:", err);
-        if (isMounted) {
-          setError(err.message || "Failed to initialize DuckDB engine");
-          setStatus("error");
-        }
+        setStatus("error", err.message || "Failed to initialize DuckDB engine");
       }
     }
 
-    if (!dbRef.current && typeof window !== "undefined") {
-      init();
-    }
-
-    return () => {
-      isMounted = false;
-      if (proxyUrl) URL.revokeObjectURL(proxyUrl);
-    };
-  }, []);
+    init();
+  }, [status, setStatus]);
 
   const exec = useCallback(async (query: string): Promise<QueryResult> => {
-    if (!connRef.current) throw new Error("DuckDB not initialized");
-    setStatus("executing");
+    const { conn } = await getDuckDbInstance();
+    if (!conn) throw new Error("DuckDB not initialized");
+    
+    setExecuting(true);
     try {
-      const result = await connRef.current.query(query);
+      const result = await conn.query(query);
       
       const columns = result.schema.fields.map(f => f.name);
       const rowCount = result.numRows;
@@ -93,21 +60,23 @@ export function useDuckDb() {
         rows.push(obj);
       }
 
-      setStatus("ready");
+      setTotalRecords(rowCount);
       return { rows, result };
     } catch (err: any) {
-      setStatus("ready");
       throw new Error(err.message || "Query failed");
+    } finally {
+      setExecuting(false);
     }
-  }, []);
+  }, [setExecuting, setTotalRecords]);
 
   const registerFile = useCallback(async (file: File) => {
-    if (!dbRef.current) throw new Error("DuckDB not initialized");
+    const { db } = await getDuckDbInstance();
+    if (!db) throw new Error("DuckDB not initialized");
     
     const safeName = file.name.replace(/[^a-zA-Z0-9._]/g, '_');
     
     try {
-      await dbRef.current.registerFileHandle(
+      await db.registerFileHandle(
         safeName,
         file,
         duckdb.DuckDBDataProtocol.BROWSER_FILEREADER,

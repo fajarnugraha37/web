@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronDown, ChevronRight, Sliders, Info } from "lucide-react";
 import { RangeSlider } from "@/components/atoms/RangeSlider";
 import { FFmpegMode, VideoResolution, EncoderPreset } from "@/hooks/useFFmpegLabActions";
@@ -39,13 +39,6 @@ export function AdvancedSettingsForm({
 }: AdvancedSettingsFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const showTrim = mode === 'TRIM' || mode === 'GIF' || mode === 'AUDIO';
-
-  // Auto-open when a file with a duration is loaded
-  useEffect(() => {
-    if (duration > 0) {
-      setIsOpen(true);
-    }
-  }, [duration]);
 
   return (
     <div className={cn("border border-border/20 bg-black/20 overflow-hidden", className)}>
@@ -86,7 +79,7 @@ export function AdvancedSettingsForm({
             <div className="space-y-1.5 group">
               <label className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest px-1 flex justify-between">
                 <span>GIF_RENDER_QUALITY</span>
-                <span className="text-accent-secondary opacity-0 group-hover:opacity-100 transition-opacity">// HIGH_FIDELITY</span>
+                <span className="text-accent-secondary opacity-0 group-hover:opacity-100 transition-opacity"><span className="opacity-50">//</span> HIGH_FIDELITY</span>
               </label>
               <div className="relative">
                 <select 

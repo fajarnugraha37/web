@@ -1,0 +1,98 @@
+
+Every service has a capacity limit. Every. Single. One. The question is not whether your service will break under sufficient load — it's whether you know the number before your users discover it for you.
+
+Load testing answers two questions: at what load does the system degrade, and how does it degrade? Graceful degradation (increased latency, then rejection) is acceptable. Cascading failure is not.
+
+## 1. The Three Metrics That Matter Under Load
+
+- **Throughput** (RPS): How many requests per second are you handling?
+- **Latency** (p50, p90, p99): What does response time look like at the percentiles? The mean is a lie; the p99 is what your worst users experience.
+- **Error rate**: Percentage of requests returning 5xx or timing out.
+
+Establish baseline values at low load. The deviation from baseline as load increases tells you where headroom ends.
+
+## 2. k6 for Load Tests That Aren't Painful to Write
+
+k6 scripts are JavaScript. They run outside your application. They simulate real user scenarios.
+
+```javascript
+import http from "k6/http";
+import { check, sleep } from "k6";
+
+export const options = {
+  stages: [
+    { duration: "2m", target: 100 }, // Ramp up to 100 users
+    { duration: "5m", target: 100 }, // Hold at 100 users
+    { duration: "2m", target: 500 }, // Ramp to 500 users
+    { duration: "5m", target: 500 }, // Hold at 500 users (stress zone)
+    { duration: "2m", target: 0 }, // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ["p95<500"], // 95% of requests under 500ms
+    http_req_failed: ["rate<0.01"], // Error rate under 1%
+  },
+};
+
+export default function () {
+  const res = http.get("https://api.example.com/orders", {
+    headers: { Authorization: `Bearer ${__ENV.API_TOKEN}` },
+  });
+
+  check(res, {
+    "status is 200": (r) => r.status === 200,
+    "response time < 500ms": (r) => r.timings.duration < 500,
+  });
+
+  sleep(1);
+}
+```
+
+Run it. Watch the p99 latency curve. Find the inflection point where latency starts climbing faster than throughput. That's your capacity boundary.
+
+## 3. Understand What Breaks First
+
+Load tests find bottlenecks. The first bottleneck is rarely the application code. It's usually:
+
+**Database connection pool exhaustion:**
+
+```
+# Connection pool size: 20
+# 500 concurrent requests each holding a connection for 200ms
+# 500 * 0.2s = 100 connection-seconds/second needed
+# Pool supplies: 20 connections → approximately 100 RPS max
+```
+
+This is math, not magic. Size your connection pool based on your concurrency requirements and your database's per-connection overhead.
+
+**Downstream service timeouts cascading upstream:**
+Service A calls Service B. Service B is slow. Service A queues requests waiting on Service B. Service A's threads/goroutines exhaust. Service A is now also slow. Every caller of Service A is now also slow. This is a cascade and it started with Service B having no circuit breaker.
+
+## 4. Circuit Breakers: The Avalanche Prevention Device
+
+A circuit breaker monitors calls to a downstream service and trips open after a failure threshold, short-circuiting calls fast instead of letting them queue and timeout:
+
+```go
+cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
+    Name:        "inventory-service",
+    MaxRequests: 3,
+    Interval:    10 * time.Second,
+    Timeout:     30 * time.Second,
+    ReadyToTrip: func(counts gobreaker.Counts) bool {
+        return counts.ConsecutiveFailures > 5
+    },
+})
+
+result, err := cb.Execute(func() (interface{}, error) {
+    return inventoryClient.CheckStock(ctx, itemID)
+})
+```
+
+When the breaker is open, calls fail fast with a known error — not after a 30-second timeout. Your upstream can then serve a degraded response instead of waiting for a timeout that never comes.
+
+## Conclusion
+
+Load test before launch. Load test after significant changes. Set throughput and latency thresholds as part of your definition of done. Know your limits before your users become your load test.
+
+Production is not a load test environment. It just gets used as one by teams that don't have a better option.
+
+Be the team that has a better option.

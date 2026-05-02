@@ -39,7 +39,7 @@ export function PageHeader({
         </h1>
         <div className="flex items-center gap-4 mt-4">
           <p className="text-muted-foreground font-mono text-sm uppercase tracking-[0.3em]">
-            // {subtitle}
+            <span className="opacity-50">//</span> {subtitle}
           </p>
           <div className="h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
         </div>
