@@ -35,7 +35,7 @@ export function HomeContent({ recentBlogs, jsonLd }: HomeContentProps) {
         />
         
         {/* Background Overlays */}
-        <div className="fixed inset-0 bg-background -z-50 pointer-events-none" />
+        <div className="cyber-grid-bg fixed inset-0 bg-background -z-50 pointer-events-none" />
         <div className={cn(
           "fixed inset-0 pointer-events-none z-[-40] transition-opacity duration-1000",
           !isBooted 

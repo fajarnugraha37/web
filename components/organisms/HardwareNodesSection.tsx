@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/atoms/ScrollReveal";
 export function HardwareNodesSection() {
   return (
     <section className="py-16 md:py-24 border-t border-border relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/5 to-background -z-10 pointer-events-none opacity-25" />
+      {/* <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/5 to-background -z-10 pointer-events-none opacity-25" /> */}
 
       <ScrollReveal direction="up">
         <div className="flex items-center justify-between mb-8 md:mb-12 px-4">

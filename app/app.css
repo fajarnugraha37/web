@@ -36,6 +36,22 @@
   --animate-glitch-1: glitch-anim-1 2s infinite linear alternate-reverse;
   --animate-glitch-2: glitch-anim-2 3s infinite linear alternate-reverse;
 
+  /* Custom Z-Index Scale (Positive values, negate in utility if needed) */
+  --z-hidden: -10;
+  --z-below: -1;
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-dropdown: 20;
+  --z-popover: 30;
+  --z-drawer: 40;
+  --z-modal-backdrop: 50;
+  --z-modal: 60;
+  --z-dragging: 70;
+  --z-fullscreen: 80;
+  --z-transition: 90;
+  --z-toast: 100;
+  --z-scanlines: 110;
+
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
@@ -73,8 +89,10 @@
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #000 4px);
-    opacity: 0.07; pointer-events: none; z-index: 50;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #fff 4px);
+    opacity: 0.07; 
+    pointer-events: none; 
+    z-index: var(--z-scanlines);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
