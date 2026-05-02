@@ -9,6 +9,24 @@ A high-tech, low-life portfolio and laboratory environment. Built with the "bori
 
 ---
 
+## HYBRID_ARCHITECTURE (READ/WRITE)
+
+The system operates in two distinct logical modes controlled by the `NEXT_PUBLIC_APP_MODE` environment variable.
+
+### 1. READ_MODE (Static / Production)
+- **Engine:** SSG (Static Site Generation).
+- **Deployment:** Optimized for GitHub Pages (`/out` export).
+- **Data:** Consumes static indices (`assets-index.json`, `search-index.json`) and pre-rendered MDX.
+- **Security:** Immutable. All write-based APIs are disabled and UI components are sanitized/locked.
+
+### 2. WRITE_MODE (Dynamic / CMS)
+- **Engine:** SSR (Server-Side Rendering) + API Routes.
+- **Deployment:** Localhost / Docker environment.
+- **Data:** Direct access to the local filesystem via Node.js API routes.
+- **Features:** Full CRUD enabled. Create, edit, and delete blogs or assets directly from the UI. Changes persist to the `/content` and `/public/assets` directories.
+
+---
+
 ## THE_TECH_STACK
 
 Running on the latest stable firmware:
@@ -78,6 +96,7 @@ Adheres to strict **Atomic Design** principles for UI scalability:
 /labs         # Experimental Chambers (SQL, MD, DuckDB, FFmpeg)
 /lib          # Core Utilities & Static Data
 /public       # Static Assets, Datasets & Web Workers (coi-serviceworker)
+/scripts      # Build-time automation (pre-build/post-build)
 /types        # Global API Contracts (Strongly Typed)
 ```
 
@@ -105,11 +124,10 @@ bun dev
 ### 3. Build_Production_Artifacts
 
 ```bash
-bun run pre-build
 bun run build
 ```
 
-*Note: `pre-build` generates search indices and metadata. Don't skip it. The system will know.*
+*Note: The `build` script automatically triggers `pre-build` to generate search indices and asset manifests.*
 
 ---
 
